@@ -29,8 +29,7 @@ extern const double inf = std::numeric_limits<double>::infinity();
 extern const int image_width = 2000;
 extern const int image_height = 2000;
 
-//matrix_4x4 m(vec4(0.7524, -0.3568, 0.5537, -0.0), vec4(0.6587, 0.4076, -0.6325, 0.0), vec4(-0.0000, 0.8406, 0.5417, -0.0), vec4(0.5533, 1.1565, -0.8142, 1.0));
-//std::vector<vec3> frame{ vec3(0.5, 0.28125, -1.3888888359069824), vec3(0.5, -0.28125, -1.3888888359069824), vec3(-0.5, -0.28125, -1.3888888359069824) };
+
 
 
 void rays_arealigth(std::vector<std::vector<color>>& c, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays, int depth);
