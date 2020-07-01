@@ -42,12 +42,10 @@ void ray_fill_color(std::vector<vec3>& hits, hittable_list& world, ray& r, int d
 	}
 	hit_rec rec;
 	ray scattered_ray;
-	//bool was_refracted = false;
 	if (world.hit(r, 0.000001, inf, rec))
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
-			//scattered_ray.was_refracted = true;
 			return ray_fill_color(hits, world, scattered_ray, depth - 1);
 		}
 		else

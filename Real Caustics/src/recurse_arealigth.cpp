@@ -64,7 +64,6 @@ void calculate_influence(hittable_list& world, ray& r, hit_rec& rec, bool& was_r
 
 void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays,  int depth)
 {
-	//std::vector<ray>& rays,
 	if (number_of_rays == 0)
 	{
 		return;
@@ -74,7 +73,6 @@ void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, v
 		int width_rays_number;
 		int height_rays_number;
 		get_x_y_rays(width, height, number_of_rays, width_rays_number, height_rays_number);
-		//if (width_rays_number == 0 || height_rays_number == 0) return;
 		for (double j = height_rays_number - 0.5; j > 0; --j)
 		{
 			for (double i = 0.5; i < width_rays_number; ++i)
@@ -82,11 +80,6 @@ void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, v
 				auto u = i / (double(width_rays_number) );
 				auto v = j / (double(height_rays_number) );
 				ray r = ray(bottom_left_corner + u * width + v * height, vec3(0, 0, -1));
-	
-				//if (rays[)
-				//rays.push_back(r);
-				
-				
 				ray_fill_color(hits, world, r, 2);
 			}
 		}
@@ -97,7 +90,6 @@ void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, v
 		int width_rays_number;
 		int height_rays_number;
 		get_x_y_rays(width, height, number_of_rays, width_rays_number, height_rays_number);
-		//if (width_rays_number == 0 || height_rays_number == 0) return;
 		for (double j = height_rays_number - 0.5; j > 0; --j)
 		{
 
@@ -116,12 +108,10 @@ void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, v
 					visible_by_camera = true;
 				}
 				double weight = was_refracted && caugth_by_cather && visible_by_camera ? 1. : 0.;
-				//weight = weight * random_double(0.05, 1.);
 				vec3 width_new = width / (width_rays_number ) ;
 				vec3 height_new = height / (height_rays_number) ;
 				vec3 bottom_left_corner_new = r.origin - width_new / 2. - height_new / 2.;
 				rays_arealigth(hits, world, width_new, height_new, bottom_left_corner_new, weight * 25, depth - 1);
-				//, std::vector<ray>& rays
 			}
 		}
 	}

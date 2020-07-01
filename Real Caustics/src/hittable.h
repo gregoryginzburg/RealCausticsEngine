@@ -9,8 +9,8 @@ class aabb;
 struct hit_rec
 {
 	vec3 normal;
-	double t = 0;
 	vec3 p;
+	double t = 0;	
 	bool front_face = false;
 	double u = 0;
 	double v = 0;
