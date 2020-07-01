@@ -19,7 +19,6 @@ struct hit_rec
 	vec2 tex_coord_v2;
 
 	std::shared_ptr<Material> mat_ptr;
-	bool first_t = true;
 
 	inline void set_normal(const ray& r, vec3 outward_normal)
 	{

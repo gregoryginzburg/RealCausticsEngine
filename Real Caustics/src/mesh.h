@@ -46,39 +46,6 @@ public:
 		
 		if (t > tmin && t < tmax)
 		{
-			/*if (hit_inf.first_t)
-			{
-				hit_inf.t = t;
-				hit_inf.u = u;
-				hit_inf.v = v;
-				hit_inf.normal = vertex_normal0 * (1 - u - v) + vertex_normal1 * u + vertex_normal2 * v;
-				hit_inf.front_face = dot(hit_inf.normal, r.direction) < 0 ? 1 : 0;
-				hit_inf.p = r.origin + r.direction * hit_inf.t;
-				hit_inf.mat_ptr = mat_ptr;
-				hit_inf.tex_coord_v0 = texture_vert0;
-				hit_inf.tex_coord_v1 = texture_vert1;
-				hit_inf.tex_coord_v2 = texture_vert2;
-
-				hit_inf.first_t = false;		
-				return true;
-			}
-			else
-			{
-				if (t < hit_inf.t)
-				{
-					hit_inf.t = t;
-					hit_inf.u = u;
-					hit_inf.v = v;
-					hit_inf.normal = vertex_normal0 * (1 - u - v) + vertex_normal1 * u + vertex_normal2 * v;
-					hit_inf.front_face = dot(hit_inf.normal, r.direction) < 0 ? 1 : 0;
-					hit_inf.p = r.origin + r.direction * hit_inf.t;
-					hit_inf.mat_ptr = mat_ptr;
-					hit_inf.tex_coord_v0 = texture_vert0;
-					hit_inf.tex_coord_v1 = texture_vert1;
-					hit_inf.tex_coord_v2 = texture_vert2;
-					return true;
-				}
-			}	*/
 			hit_inf.t = t;
 			hit_inf.u = u;
 			hit_inf.v = v;
@@ -90,18 +57,17 @@ public:
 			hit_inf.tex_coord_v1 = texture_vert1;
 			hit_inf.tex_coord_v2 = texture_vert2;
 			return true;
-
-
 		}
 		else
 			return false;
 
 	}
+
 	virtual bool bounding_box(aabb& output_box) const
 	{
 		output_box = aabb(point3(std::fmin(std::fmin(vertice0.x, vertice1.x), vertice2.x),
-			std::fmin(std::fmin(vertice0.y, vertice1.y), vertice2.y),
-			std::fmin(std::fmin(vertice0.z, vertice1.z), vertice2.z)),
+				std::fmin(std::fmin(vertice0.y, vertice1.y), vertice2.y),
+				std::fmin(std::fmin(vertice0.z, vertice1.z), vertice2.z)),
 
 			point3(std::fmax(std::fmax(vertice0.x, vertice1.x), vertice2.x),
 				std::fmax(std::fmax(vertice0.y, vertice1.y), vertice2.y),
