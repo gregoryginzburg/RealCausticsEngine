@@ -25,6 +25,7 @@
 #define MULTI_THREADED
 
 extern const double inf = std::numeric_limits<double>::infinity();
+extern const double PI = 3.14159265359;
 
 extern const int image_width = 2000;
 extern const int image_height = 2000;

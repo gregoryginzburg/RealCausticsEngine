@@ -8,6 +8,7 @@
 #include "Color.h"
 #include "materials.h"
 #include "utils.h"
+#include "matrix.h"
 extern const int image_width;
 extern const int image_height;
 extern const double inf;

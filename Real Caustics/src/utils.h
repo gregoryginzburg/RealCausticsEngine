@@ -6,6 +6,7 @@
 #include <random>
 #include <cmath>
 #include "Color.h"
+#include "vec3.h"
 #include "matrix.h"
 
 
