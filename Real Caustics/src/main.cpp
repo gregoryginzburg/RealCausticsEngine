@@ -11,7 +11,6 @@
 #include "hittable_list.h"
 #include "utils.h"
 #include "Color.h"
-#include "draw_circles.h"
 #include "parser.h"
 #include "bvh.h"
 #include <mutex>

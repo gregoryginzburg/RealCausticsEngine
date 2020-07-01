@@ -156,7 +156,6 @@
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\bvh.h" />
     <ClInclude Include="src\Color.h" />
-    <ClInclude Include="src\draw_circles.h" />
     <ClInclude Include="src\hittable.h" />
     <ClInclude Include="src\hittable_list.h" />
     <ClInclude Include="src\Lights.h" />
