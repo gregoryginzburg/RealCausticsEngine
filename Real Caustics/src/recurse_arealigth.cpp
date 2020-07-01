@@ -14,7 +14,7 @@ extern const double inf;
 
 matrix_4x4 m(vec4(0.7524, -0.3568, 0.5537, -0.0), vec4(0.6587, 0.4076, -0.6325, 0.0), vec4(-0.0000, 0.8406, 0.5417, -0.0), vec4(0.5533, 1.1565, -0.8142, 1.0));
 std::vector<vec3> frame{ vec3(0.5, 0.28125, -1.3888888359069824), vec3(0.5, -0.28125, -1.3888888359069824), vec3(-0.5, -0.28125, -1.3888888359069824) };
-void ray_fill_color(std::vector<std::vector<color>>& c, hittable_list& world, ray& r, int depth);
+void ray_fill_color(std::vector<vec3>& hits, hittable_list& world, ray& r, int depth);
 
 void get_x_y_rays(vec3& width, vec3& height, int number_of_rays, int& width_rays_number, int& height_rays_number)
 {
@@ -62,7 +62,7 @@ void calculate_influence(hittable_list& world, ray& r, hit_rec& rec, bool& was_r
 	}
 }
 
-void rays_arealigth(std::vector<std::vector<color>>& c, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays,  int depth)
+void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays,  int depth)
 {
 	//std::vector<ray>& rays,
 	if (number_of_rays == 0)
@@ -87,7 +87,7 @@ void rays_arealigth(std::vector<std::vector<color>>& c, hittable_list& world, ve
 				//rays.push_back(r);
 				
 				
-				ray_fill_color(c, world, r, 2);
+				ray_fill_color(hits, world, r, 2);
 			}
 		}
 		return;
@@ -120,7 +120,7 @@ void rays_arealigth(std::vector<std::vector<color>>& c, hittable_list& world, ve
 				vec3 width_new = width / (width_rays_number ) ;
 				vec3 height_new = height / (height_rays_number) ;
 				vec3 bottom_left_corner_new = r.origin - width_new / 2. - height_new / 2.;
-				rays_arealigth(c, world, width_new, height_new, bottom_left_corner_new, weight * 25, depth - 1);
+				rays_arealigth(hits, world, width_new, height_new, bottom_left_corner_new, weight * 25, depth - 1);
 				//, std::vector<ray>& rays
 			}
 		}

@@ -32,9 +32,9 @@ extern const int image_height = 2000;
 
 
 
-void rays_arealigth(std::vector<std::vector<color>>& c, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays, int depth);
+void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays, int depth);
 
-void ray_fill_color(std::vector<std::vector<color>>& c, hittable_list& world, ray& r, int depth)
+void ray_fill_color(std::vector<vec3>& hits, hittable_list& world, ray& r, int depth)
 {
 	if (depth == 0)
 	{
@@ -48,21 +48,11 @@ void ray_fill_color(std::vector<std::vector<color>>& c, hittable_list& world, ra
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
 			//scattered_ray.was_refracted = true;
-			return ray_fill_color(c, world, scattered_ray, depth - 1);
+			return ray_fill_color(hits, world, scattered_ray, depth - 1);
 		}
 		else
 		{
-			//if (r.was_refracted)
-			//{
-				vec2 point_p = vec2(rec.tex_coord_v0 * (1 - rec.u - rec.v) + rec.tex_coord_v1 * rec.u + rec.tex_coord_v2 * rec.v);
-				int pixel_x = static_cast<int>(point_p.x * (double)(image_width - 1));
-				int pixel_y = static_cast<int>(point_p.y * (double)(image_height - 1));
-				//draw_square(c, pixel_x, pixel_y, width, height);
-				draw_circle1(c, pixel_x, pixel_y, image_width, image_height);
-				//draw_circle2(c, max, pixel_x, pixel_y, width, height);
-				//c[pixel_y][pixel_x] += color(50);
-				//if (c[pixel_y][pixel_x].r > max) max = c[pixel_y][pixel_x].r;
-			//}
+			hits.push_back(rec.p);
 			return;
 		}
 	}
@@ -91,7 +81,7 @@ int main()
 	std::cout << "Parsing Started" << std::endl;
 	#endif
 	parse("floor.obj", plane, std::make_shared<Catcher>());
-	parse("8millions.obj", ocean, std::make_shared<Glass>(1.4));
+	parse("poool.obj", ocean, std::make_shared<Glass>(1.4));
 	#ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
 	#endif
@@ -173,8 +163,9 @@ int main()
 		ray_fill_color(colors, world, r, 2);
 	}
 	#endif
-	
-	rays_arealigth(colors, world, vec3(4, 0, 0), vec3(0, 4, 0), vec3(-2, -2, 4), 4000, 2);
+	std::vector<vec3> hits;
+	hits.reserve((unsigned int)height * width);
+	rays_arealigth(hits, world, vec3(4, 0, 0), vec3(0, 4, 0), vec3(-2, -2, 4), 4000, 2);
 	
 	#ifdef REPORT_PROGRESS
 	std::cout << "\n";
