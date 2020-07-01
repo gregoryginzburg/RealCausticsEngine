@@ -160,6 +160,10 @@ inline double distance(const vec3& u, const vec3& v)
 {
 	return (u - v).length();
 }
+inline void rotate_vec(vec3& v, vec3 rotation)
+{
+	
+}
 
 
 #endif

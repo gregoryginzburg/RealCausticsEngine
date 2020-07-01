@@ -12,7 +12,6 @@ public:
 	vec3 k;
 public:
 	matrix_3x3(vec3 ii, vec3 jj, vec3 kk) : i(ii), j(jj), k(kk) {}
-
 };
 class matrix_4x4
 {

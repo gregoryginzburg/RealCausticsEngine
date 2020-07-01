@@ -80,5 +80,8 @@
     <ClInclude Include="src\photon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lights.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

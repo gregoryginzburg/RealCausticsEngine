@@ -159,6 +159,7 @@
     <ClInclude Include="src\draw_circles.h" />
     <ClInclude Include="src\hittable.h" />
     <ClInclude Include="src\hittable_list.h" />
+    <ClInclude Include="src\Lights.h" />
     <ClInclude Include="src\materials.h" />
     <ClInclude Include="src\matrix.h" />
     <ClInclude Include="src\mesh.h" />
