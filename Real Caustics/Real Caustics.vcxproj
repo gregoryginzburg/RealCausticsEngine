@@ -150,7 +150,7 @@
     <ClCompile Include="src\aabb.cpp" />
     <ClCompile Include="src\parser.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\recurse_arealigth.cpp" />
+    <ClCompile Include="src\trace_photon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\aabb.h" />

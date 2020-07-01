@@ -27,7 +27,6 @@ public:
 		vertical = vec3(0., h, 0.);
 	}
 public:
-
 	virtual ray get_ray(size_t j, size_t i) const
 	{
 		return ray(bottom_left_corner + halton_sequnce(i, 2) * horizontal + halton_sequnce(j, 3), normal*spread*random_in_hemisphere());

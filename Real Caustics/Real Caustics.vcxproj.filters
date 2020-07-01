@@ -24,7 +24,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\recurse_arealigth.cpp">
+    <ClCompile Include="src\trace_photon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

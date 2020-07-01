@@ -19,8 +19,8 @@
 #define REPORT_PROGRESS
 
 //#define UNIFORM_GRID
-//#define HALTON_SEQUENCE
-//#define SOBOL_SEQUENCE
+#define HALTON_SEQUENCE
+
 #define MULTI_THREADED
 
 extern const double inf = std::numeric_limits<double>::infinity();
@@ -30,41 +30,7 @@ extern const int image_width = 2000;
 extern const int image_height = 2000;
 
 
-
-
-void rays_arealigth(std::vector<vec3>& hits, hittable_list& world, vec3 width, vec3 height, vec3 bottom_left_corner, int number_of_rays, int depth);
-
-void ray_fill_color(std::vector<vec3>& hits, hittable_list& world, ray& r, int depth)
-{
-	if (depth == 0)
-	{
-		return;
-	}
-	hit_rec rec;
-	ray scattered_ray;
-	if (world.hit(r, 0.000001, inf, rec))
-	{
-		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
-		{
-			return ray_fill_color(hits, world, scattered_ray, depth - 1);
-		}
-		else
-		{
-			hits.push_back(rec.p);
-			return;
-		}
-	}
-	return;
-
-}
-
-ray get_ray(double u, double v)
-{
-	vec3 bottom_left_corner = vec3(-2, -2, 4);
-	vec3 vertical = vec3(0, 4, 0);
-	vec3 horizontal = vec3(4, 0, 0);
-	return ray(bottom_left_corner + u * horizontal + v * vertical, vec3(0, 0, -1));
-}
+void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, int depth)
 
 
 int main()
@@ -115,12 +81,13 @@ int main()
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
 
-	std::vector<std::vector<color>> colors(image_height, std::vector<color>(image_width));
 	Timer rendering;
 	
 	int height = 1000;
 	int width = 1000;
-
+	
+	std::vector<vec3> hits;
+	hits.reserve((unsigned int)height * width);
 
 	#ifdef UNIFORM_GRID
 	for (int j = height - 1; j >= 0; --j)
@@ -143,27 +110,14 @@ int main()
 	#ifdef HALTON_SEQUENCE
 	for (int i = height * width; i > 0; --i)
 	{
-		double u = halton_sequnce(i, 2);
-		double v = halton_sequnce(i, 3);
 		ray r = get_ray(u, v);
-		ray_fill_color(colors, world, r, 2);
+
 	}
 	#endif
 
-	#ifdef SOBOL_SEQUENCE
-	std::vector<vec2> points(height * width);
-	TestSobol2D(points);
-	for (int i = height * width; i > 0; --i)
-	{
-		double u = points[i].x;
-		double v = points[i].y;
-		ray r = get_ray(u, v);
-		ray_fill_color(colors, world, r, 2);
-	}
-	#endif
-	std::vector<vec3> hits;
-	hits.reserve((unsigned int)height * width);
-	rays_arealigth(hits, world, vec3(4, 0, 0), vec3(0, 4, 0), vec3(-2, -2, 4), 4000, 2);
+	
+	
+	
 	
 	#ifdef REPORT_PROGRESS
 	std::cout << "\n";
