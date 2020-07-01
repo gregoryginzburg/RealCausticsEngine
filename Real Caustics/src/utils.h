@@ -10,22 +10,6 @@
 #include "matrix.h"
 
 
-
-
-inline double random_double(double min, double max)
-{
-	static std::random_device rd;
-	static std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(min, max);
-	return dist(mt);
-}
-inline int random_int(int min, int max)
-{
-	static std::random_device rd;
-	static std::mt19937 mt(rd());
-	std::uniform_int_distribution<int> dist(min, max);
-	return dist(mt);
-}
 inline int maprange(double value, double low1, double high1, double low2, double high2)
 {
 	return static_cast<int>(low2 + ((value - low1) * (high2 - low2)) / (high1 - low1));

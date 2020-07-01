@@ -54,6 +54,7 @@ inline vec3 operator*(const matrix_3x3& m, const vec3& v)
 {
 	return v * m;
 }
+//rotation in degrees
 inline void rotate_vec(vec3& v, vec3& rotation)
 {
 	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.), rotation.y * PI / 180., rotation.z * PI / 180.);

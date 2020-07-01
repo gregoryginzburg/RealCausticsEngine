@@ -3,6 +3,10 @@
 
 #include <cmath>
 #include <iostream>
+#include "random_generators.h"
+
+extern const double PI;
+
 class vec3
 {
 public:
@@ -159,6 +163,13 @@ inline vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
 inline double distance(const vec3& u, const vec3& v)
 {
 	return (u - v).length();
+}
+inline vec3 random_in_hemisphere() 
+{
+	auto a = random_double(0, 2. * PI);
+	auto z = random_double(0., 1.);
+	auto r = sqrt(1 - z * z);
+	return vec3(r * cos(a), r * sin(a), z);
 }
 
 

@@ -80,5 +80,8 @@
     <ClInclude Include="src\Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\random_generators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

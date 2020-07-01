@@ -164,6 +164,7 @@
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\parser.h" />
     <ClInclude Include="src\photon.h" />
+    <ClInclude Include="src\random_generators.h" />
     <ClInclude Include="src\ray.h" />
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\utils.h" />
