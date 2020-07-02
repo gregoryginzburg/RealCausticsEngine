@@ -3,6 +3,7 @@
 #include "vec3.h"
 #include "ray.h"
 #include "utils.h"
+#include "random_generators.h"
 class Light
 {
 public:

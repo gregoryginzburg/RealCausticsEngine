@@ -124,11 +124,6 @@ void parse(std::string path, Mesh& object, std::shared_ptr<Material> material)
 			object.add(std::make_shared<Triangle>(vertice0, vertice1, vertice2, t_vert0, t_vert1, t_vert2, material, v_n0, v_n1, v_n2));
 		}
 	}
-	face_indices.clear();
-	face_indices.shrink_to_fit();
-	texture_coordinate_indices.clear();
-	texture_coordinate_indices.shrink_to_fit();
-	vertex_normals_indices.clear();
-	vertex_normals_indices.shrink_to_fit();
+
 
 }

@@ -13,6 +13,8 @@
 #include "Color.h"
 #include "parser.h"
 #include "bvh.h"
+#include "photon.h"
+#include "Lights.h"
 #include <mutex>
 #include <future>
 
@@ -30,7 +32,7 @@ extern const int image_width = 2000;
 extern const int image_height = 2000;
 
 
-void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, int depth)
+void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, int depth);
 
 
 int main()
@@ -40,6 +42,8 @@ int main()
 	hittable_list world;
 	Mesh ocean;
 	Mesh plane;
+	Area_Light light(vec3(0., 0., 4.), 2., 2.);
+
 	#ifdef REPORT_PROGRESS
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
@@ -50,27 +54,10 @@ int main()
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
 	#endif
 	std::vector<aabb> work1;
-	for (int i = 0; i < plane.number_of_tris(); ++i)
-	{
-		aabb temp;
-		plane.triangles[i]->bounding_box(temp);
-		temp.triangle = plane.triangles[i];
-		temp.center = (temp.max + temp.min) * 0.5;
-		work1.push_back(temp);
-	}
 	std::vector<aabb> work2;
-	for (int i = 0; i < ocean.number_of_tris(); ++i)
-	{
-		aabb temp;
-		ocean.triangles[i]->bounding_box(temp);
-		temp.triangle = ocean.triangles[i];
-		temp.center = (temp.max + temp.min) * 0.5;
-		work2.push_back(temp);
-	}
-	ocean.triangles.clear();
-	ocean.triangles.shrink_to_fit();
-	plane.triangles.clear();
-	plane.triangles.shrink_to_fit();
+	make_list_for_bvh(plane, work1);
+	make_list_for_bvh(ocean, work2);
+	
 	#ifdef REPORT_PROGRESS
 	std::cout << "Building BVH" << std::endl;
 	Timer BVH_timer;
@@ -86,10 +73,9 @@ int main()
 	int height = 1000;
 	int width = 1000;
 	
-	std::vector<vec3> hits;
-	hits.reserve((unsigned int)height * width);
+	
 
-	#ifdef UNIFORM_GRID
+	
 	for (int j = height - 1; j >= 0; --j)
 	{
 		int progress = static_cast<int>(double((double(height) - 1 - j)) / (double(height) - 1) * 100);
@@ -99,24 +85,11 @@ int main()
 		#endif
 		for (int i = 0; i < width; ++i)
 		{
-			auto u = double(i) / (double(width) - 1);
-			auto v = double(j) / (double(height) - 1);
-			ray r = get_ray(u, v);
-			ray_fill_color(colors, world, r, 2);
+			ray r = light.get_ray(j, i);
 		}
 	}
-	#endif
-
-	#ifdef HALTON_SEQUENCE
-	for (int i = height * width; i > 0; --i)
-	{
-		ray r = get_ray(u, v);
-
-	}
-	#endif
-
 	
-	
+
 	
 	
 	#ifdef REPORT_PROGRESS
@@ -142,8 +115,8 @@ int main()
 
 			//maprange(colors[j][i].r, 0.0, max, 0.0, 255.0)
 			//out << colors[j][i].r << " " << colors[j][i].g << " " << colors[j][i].b << "\n";
-			color clamped = clamp(colors[j][i]);
-			out << clamped.r << " " << clamped.g << " " << clamped.b << "\n";
+			//color clamped = clamp(colors[j][i]);
+			//out << clamped.r << " " << clamped.g << " " << clamped.b << "\n";
 		}
 	}
 	

@@ -3,6 +3,7 @@
 #include "ray.h"
 #include "hittable.h"
 #include "hittable_list.h"
+#include "materials.h"
 #include <memory>
 
 extern const double inf;
@@ -19,11 +20,11 @@ void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, in
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
-			return ray_fill_color(hits, world, scattered_ray, depth - 1);
+			return trace_photon(photons, world, scattered_ray, depth - 1);
 		}
 		else
 		{
-			hits.push_back(rec.p);
+			//photons.push_back(rec.p);
 			return;
 		}
 	}

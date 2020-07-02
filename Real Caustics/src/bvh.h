@@ -10,12 +10,16 @@
 #include <cmath>
 #include <memory>
 #include "aabb.h"
+#include "mesh.h"
 
-#define WITH_LEAFS_4
+//#define WITH_LEAFS_4
 
 class Hittable;
 
 extern const double inf;
+
+void make_list_for_bvh(Mesh& mesh, std::vector<aabb>& working_list);
+
 class BVH_Leaf : public Hittable
 {
 public:
