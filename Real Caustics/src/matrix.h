@@ -4,8 +4,9 @@
 #include <cmath>
 #include "vec3.h"
 #include "vec4.h"
-usinfg std::sinf;
-usinfg std::cosf;
+
+using std::sinf;
+using std::cosf;
 
 extern const float PI;
 
@@ -69,7 +70,8 @@ inline void rotate_vec(vec3& v, vec3& rotation)
 	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.f), rotation.y * PI / 180.f, rotation.z * PI / 180.f);
 	v = v * rot_matrix;
 }
-inline void rotate_vec_around_axis(vec3& v, double angle, vec3 axis)
+//rotation in radians
+inline void rotate_vec(vec3& v, double angle, vec3 axis)
 {
 	matrix_3x3 rot_matrix(angle, axis);
 	v = v * rot_matrix;;
