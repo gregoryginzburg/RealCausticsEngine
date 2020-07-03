@@ -23,10 +23,10 @@ public:
 		j = vec3(cos(r.x) * sin(r.y) * sin(r.z) - sin(r.x) * cos(r.z), sin(r.x) * sin(r.y) * sin(r.z) + cos(r.x) * cos(r.z), cos(r.x) * sin(r.z));
 		k = vec3(cos(r.x) * sin(r.y) * cos(r.z) + sin(r.x) * sin(r.z), sin(r.x) * sin(r.y) * cos(r.z) - cos(r.x) * sin(r.z), cos(r.y) * cos(r.z));
 	}
-	matrix_3x3(float r, vec3 u)
+	matrix_3x3(float a, vec3 u)
 	{
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = cos(a);
+		float s = sin(a);
 		float t = 1 - c;
 	}
 };
@@ -63,7 +63,7 @@ inline vec3 operator*(const matrix_3x3& m, const vec3& v)
 //rotation in degrees
 inline void rotate_vec(vec3& v, vec3& rotation)
 {
-	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.), rotation.y * PI / 180., rotation.z * PI / 180.);
+	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.f), rotation.y * PI / 180.f, rotation.z * PI / 180.f);
 	v = v * rot_matrix;
 }
 

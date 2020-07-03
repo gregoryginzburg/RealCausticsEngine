@@ -26,7 +26,7 @@
 #define MULTI_THREADED
 
 extern const float inf = std::numeric_limits<float>::infinity();
-extern const float PI = 3.14159265359;
+extern const float PI = 3.14159265359f;
 
 extern const int image_width = 2000;
 extern const int image_height = 2000;
@@ -42,7 +42,7 @@ int main()
 	hittable_list world;
 	Mesh ocean;
 	Mesh plane;
-	Area_Light light(vec3(0., 0., 4.), 2., 2.);
+	Area_Light light(vec3(0., 0., 4.), 2., 2., 0);
 
 	#ifdef REPORT_PROGRESS
 	Timer parser;

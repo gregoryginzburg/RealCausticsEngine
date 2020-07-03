@@ -7,7 +7,7 @@
 class Light
 {
 public:
-	virtual ray get_ray() const = 0;
+	virtual ray get_ray(size_t j, size_t i) const = 0;
 };
 class Area_Light : public Light
 {
@@ -16,18 +16,19 @@ public:
 	vec3 bottom_left_corner;
 	vec3 horizontal;
 	vec3 vertical;
-	vec3 normal(0., 0., -1.);
+	vec3 normal = vec3(0, 0, -1);
 	float spread;
 
 public:
 	Area_Light(vec3 p, float w, float h, float spr)  : spread(spr)
 	{
 		position = p;
-		bottom_left_corner = position - vec3(w / 2., h / 2., 0.);
+		bottom_left_corner = position - vec3(w / 2.f, h / 2.f, 0.f);
 		horizontal = vec3(w, 0., 0.);
 		vertical = vec3(0., h, 0.);
+		
 	}
-	Area_Light()
+	
 public:
 	virtual ray get_ray(size_t j, size_t i) const
 	{
@@ -36,12 +37,12 @@ public:
 	//rotation in degrees
 	void rotate(vec3 rotation)
 	{
-		vec3 top_left_corner = bottom_left_corner + vec3(0., h, 0.);
-		vec3 bottom_rigth_corner - bottom_left_corner + vec3(w, 0., 0.);
+		vec3 top_left_corner = bottom_left_corner + vertical;
+		vec3 bottom_rigth_corner = bottom_left_corner + horizontal;
 		rotate_vec(bottom_left_corner, rotation);
 		rotate_vec(top_left_corner, rotation);
 		rotate_vec(bottom_rigth_corner, rotation);
-		rotate_vec(normal);
+		rotate_vec(normal, rotation);
 		horizontal = bottom_rigth_corner - bottom_left_corner;
 		vertical = top_left_corner - bottom_left_corner;
 	}

@@ -23,7 +23,7 @@ public:
 	{
 		objects.clear();
 	}
-	virtual bool hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const
+	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const
 	{
 		hit_rec temp_rec;
 		bool hit_anything = false;

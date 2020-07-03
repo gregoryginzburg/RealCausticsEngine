@@ -141,7 +141,7 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 		float side3 = bbox_temp.max.z - bbox_temp.min.z;
 
 		float max_side = std::fmax(std::fmax(side1, side2), side3);
-		float axis = max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
+		int axis = max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
 
 		float start;
 		float stop;
@@ -164,7 +164,7 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 			start = bbox_temp.min.z;
 			stop = bbox_temp.max.z;
 		}
-		float step = (stop - start) / 16.;
+		float step = (stop - start) / 16.f;
 
 		for (float testSplit = start + step; testSplit < stop - step; testSplit += step)
 		{

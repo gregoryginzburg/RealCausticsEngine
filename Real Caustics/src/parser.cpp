@@ -45,17 +45,17 @@ void parse(std::string path, Mesh& object, std::shared_ptr<Material> material)
 		std::string first_symbol = word[0];
 		if (first_symbol == "v")
 		{
-			point.x = std::stod(word[1]);
-			point.y = std::stod(word[2]);
-			point.z = std::stod(word[3]);
+			point.x = std::stof(word[1]);
+			point.y = std::stof(word[2]);
+			point.z = std::stof(word[3]);
 			vertices.push_back(point);
 			continue;
 
 		}
 		if (first_symbol == "vt")
 		{
-			texture_coordinate.x = std::stod(word[1]);
-			texture_coordinate.y = std::stod(word[2]);
+			texture_coordinate.x = std::stof(word[1]);
+			texture_coordinate.y = std::stof(word[2]);
 			texture_coordinates_verts.push_back(texture_coordinate);
 			continue;
 		}
@@ -73,9 +73,9 @@ void parse(std::string path, Mesh& object, std::shared_ptr<Material> material)
 		}
 		if (first_symbol == "vn")
 		{
-			vertex_normal.x = std::stod(word[1]);
-			vertex_normal.y = std::stod(word[2]);
-			vertex_normal.z = std::stod(word[3]);
+			vertex_normal.x = std::stof(word[1]);
+			vertex_normal.y = std::stof(word[2]);
+			vertex_normal.z = std::stof(word[3]);
 			vertex_normals.push_back(vertex_normal);
 			continue;
 		}

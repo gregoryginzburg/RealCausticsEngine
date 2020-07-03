@@ -30,17 +30,17 @@ public:
 		float v;
 		float t;
 		float det = dot(v0v1, pvec);
-		if (std::fabs(det) < 0.0000001) return false;
+		if (std::fabs(det) < 0.0000001f) return false;
 
-		float invDet = 1.0 / det;
+		float invDet = 1.0f / det;
 
 		vec3 tvec = r.origin - vertice0;
 		u = dot(tvec, pvec) * invDet;
-		if (u < 0.0 || u > 1.0) return false;
+		if (u < 0.0f || u > 1.0f) return false;
 
 		vec3 qvec = cross(tvec, v0v1);
 		v = dot(r.direction, qvec) * invDet;
-		if (v < 0.0 || u + v > 1.0) return false;
+		if (v < 0.0f || u + v > 1.0f) return false;
 
 		t = dot(v0v2, qvec) * invDet;
 		
