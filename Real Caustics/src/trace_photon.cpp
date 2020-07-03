@@ -6,7 +6,7 @@
 #include "materials.h"
 #include <memory>
 
-extern const double inf;
+extern const float inf;
 
 void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, int depth)
 {

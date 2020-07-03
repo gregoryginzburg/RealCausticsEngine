@@ -25,8 +25,8 @@
 
 #define MULTI_THREADED
 
-extern const double inf = std::numeric_limits<double>::infinity();
-extern const double PI = 3.14159265359;
+extern const float inf = std::numeric_limits<float>::infinity();
+extern const float PI = 3.14159265359;
 
 extern const int image_width = 2000;
 extern const int image_height = 2000;
@@ -78,7 +78,7 @@ int main()
 	
 	for (int j = height - 1; j >= 0; --j)
 	{
-		int progress = static_cast<int>(double((double(height) - 1 - j)) / (double(height) - 1) * 100);
+		int progress = static_cast<int>(float((float(height) - 1 - j)) / (float(height) - 1) * 100);
 		#ifdef REPORT_PROGRESS
 		std::cout << "Progress rendering: ";
 		std::cout << progress << "%" << "\r" << std::flush;
@@ -104,7 +104,7 @@ int main()
 
 	for (int j = image_height - 1; j >= 0; --j)
 	{
-		int progress = static_cast<int>(double((double(image_height) - 1 - j)) / (double(image_height) - 1) * 100);
+		int progress = static_cast<int>(float((float(image_height) - 1 - j)) / (float(image_height) - 1) * 100);
 		#ifdef REPORT_PROGRESS
 		std::cout << "Progress writing to image: ";
 		std::cout << progress << "%" << "\r" << std::flush;

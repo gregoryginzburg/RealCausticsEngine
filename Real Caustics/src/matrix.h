@@ -7,7 +7,7 @@
 using std::sin;
 using std::cos;
 
-extern const double PI;
+extern const float PI;
 
 class matrix_3x3
 {
@@ -22,6 +22,12 @@ public:
 		i = vec3(cos(r.x) * cos(r.y), sin(r.x) * cos(r.y), -sin(r.y));
 		j = vec3(cos(r.x) * sin(r.y) * sin(r.z) - sin(r.x) * cos(r.z), sin(r.x) * sin(r.y) * sin(r.z) + cos(r.x) * cos(r.z), cos(r.x) * sin(r.z));
 		k = vec3(cos(r.x) * sin(r.y) * cos(r.z) + sin(r.x) * sin(r.z), sin(r.x) * sin(r.y) * cos(r.z) - cos(r.x) * sin(r.z), cos(r.y) * cos(r.z));
+	}
+	matrix_3x3(float r, vec3 u)
+	{
+		float c = cos(angle);
+		float s = sin(angle);
+		float t = 1 - c;
 	}
 };
 class matrix_4x4

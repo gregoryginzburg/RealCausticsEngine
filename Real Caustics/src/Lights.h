@@ -17,16 +17,17 @@ public:
 	vec3 horizontal;
 	vec3 vertical;
 	vec3 normal(0., 0., -1.);
-	double spread;
+	float spread;
 
 public:
-	Area_Light(vec3 p, double w, double h)  
+	Area_Light(vec3 p, float w, float h, float spr)  : spread(spr)
 	{
 		position = p;
 		bottom_left_corner = position - vec3(w / 2., h / 2., 0.);
 		horizontal = vec3(w, 0., 0.);
 		vertical = vec3(0., h, 0.);
 	}
+	Area_Light()
 public:
 	virtual ray get_ray(size_t j, size_t i) const
 	{

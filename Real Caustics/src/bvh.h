@@ -16,7 +16,7 @@
 
 class Hittable;
 
-extern const double inf;
+extern const float inf;
 
 void make_list_for_bvh(Mesh& mesh, std::vector<aabb>& working_list);
 
@@ -25,11 +25,11 @@ class BVH_Leaf : public Hittable
 public:
 	BVH_Leaf(std::vector<std::shared_ptr<Hittable>> tris) : triangles(tris) {}
 	std::vector<std::shared_ptr<Hittable>> triangles;
-	virtual bool hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const
+	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const
 	{
 		bool hit_anything = false;
 		hit_rec temp_rec;
-		double closest_so_far = tmax;
+		float closest_so_far = tmax;
 		for (size_t i = 0; i < triangles.size(); ++i)
 		{
 			if (triangles[i]->hit(r, tmin, closest_so_far, temp_rec))
@@ -62,7 +62,7 @@ public:
 	
 	BVH_node(std::vector<aabb>& objects);
 
-	virtual bool hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const;
+	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const;
 	virtual bool bounding_box(aabb& output_box) const;
 
 public:
@@ -72,7 +72,7 @@ public:
 
 };
 
-bool BVH_node::hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const
+bool BVH_node::hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const
 {
 	if (!box.hit(r, tmin, tmax))
 	{
@@ -125,8 +125,8 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 			bbox_temp = surrounding_box(bbox_temp, objects[i]);
 		}
 
-		double min_cost = inf;
-		double best_split = inf;
+		float min_cost = inf;
+		float best_split = inf;
 		//int best_axis;
 		bool is_better_split = false;
 		int count_left;
@@ -136,15 +136,15 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 
 		 
 
-		double side1 = bbox_temp.max.x - bbox_temp.min.x;
-		double side2 = bbox_temp.max.y - bbox_temp.min.y;
-		double side3 = bbox_temp.max.z - bbox_temp.min.z;
+		float side1 = bbox_temp.max.x - bbox_temp.min.x;
+		float side2 = bbox_temp.max.y - bbox_temp.min.y;
+		float side3 = bbox_temp.max.z - bbox_temp.min.z;
 
-		double max_side = std::fmax(std::fmax(side1, side2), side3);
-		double axis = max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
+		float max_side = std::fmax(std::fmax(side1, side2), side3);
+		float axis = max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
 
-		double start;
-		double stop;
+		float start;
+		float stop;
 	
 
 		if (axis == 0)
@@ -164,9 +164,9 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 			start = bbox_temp.min.z;
 			stop = bbox_temp.max.z;
 		}
-		double step = (stop - start) / 16.;
+		float step = (stop - start) / 16.;
 
-		for (double testSplit = start + step; testSplit < stop - step; testSplit += step)
+		for (float testSplit = start + step; testSplit < stop - step; testSplit += step)
 		{
 			aabb left(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
 			aabb right(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
@@ -177,7 +177,7 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 
 			for (unsigned int i = 0; i < objects.size(); ++i)
 			{
-				double bbox_center_axis;
+				float bbox_center_axis;
 				if (axis == 0) bbox_center_axis = objects[i].center.x;
 				else if (axis == 1) bbox_center_axis = objects[i].center.y;
 				else bbox_center_axis = objects[i].center.z;
@@ -197,18 +197,18 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 			{
 				continue;
 			}
-			double lside1 = left.max.x - left.min.x;
-			double lside2 = left.max.y - left.min.y;
-			double lside3 = left.max.z - left.min.z;
+			float lside1 = left.max.x - left.min.x;
+			float lside2 = left.max.y - left.min.y;
+			float lside3 = left.max.z - left.min.z;
 
-			double rside1 = right.max.x - right.min.x;
-			double rside2 = right.max.y - right.min.y;
-			double rside3 = right.max.z - right.min.z;
+			float rside1 = right.max.x - right.min.x;
+			float rside2 = right.max.y - right.min.y;
+			float rside3 = right.max.z - right.min.z;
 
-			double lsurface_area = lside1 * lside2 + lside2 * lside3 + lside3 * lside1;
-			double rsurface_area = rside1 * rside2 + rside2 * rside3 + rside3 * rside1;
+			float lsurface_area = lside1 * lside2 + lside2 * lside3 + lside3 * lside1;
+			float rsurface_area = rside1 * rside2 + rside2 * rside3 + rside3 * rside1;
 
-			double total_cost = lsurface_area * count_left + rsurface_area * count_right;
+			float total_cost = lsurface_area * count_left + rsurface_area * count_right;
 
 			if (total_cost < min_cost)
 			{
@@ -243,7 +243,7 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 
 			for (size_t i = 0; i < objects.size(); ++i)
 			{
-				double bbox_center_axis;
+				float bbox_center_axis;
 				if (axis == 0) bbox_center_axis = objects[i].center.x;
 				else if (axis == 1) bbox_center_axis = objects[i].center.y;
 				else bbox_center_axis = objects[i].center.z;

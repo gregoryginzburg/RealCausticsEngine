@@ -10,7 +10,7 @@
 #include "matrix.h"
 
 
-inline int maprange(double value, double low1, double high1, double low2, double high2)
+inline int maprange(float value, float low1, float high1, float low2, float high2)
 {
 	return static_cast<int>(low2 + ((value - low1) * (high2 - low2)) / (high1 - low1));
 }
@@ -25,9 +25,9 @@ inline std::vector<std::string> split(const std::string& s, char delimiter)
 	}
 	return tokens;
 }
-inline double halton_sequnce(int n, int base)
+inline float halton_sequnce(int n, int base)
 {
-	double q = 0, bk = (double)1 / base;
+	float q = 0, bk = (float)1 / base;
 
 	while (n > 0) {
 		q += (n % base) * bk;
@@ -68,7 +68,7 @@ inline void TestSobol2D(std::vector<vec2>& points)
 
     // Direction numbers
     std::vector<size_t> V;
-    V.resize((size_t)std::ceil(std::log((double)points.size()) / std::log(2.0)));
+    V.resize((size_t)std::ceil(std::log((float)points.size()) / std::log(2.0)));
     V[0] = size_t(1) << size_t(31);
     for (size_t i = 1; i < V.size(); ++i)
         V[i] = V[i - 1] ^ (V[i - 1] >> 1);
@@ -83,7 +83,7 @@ inline void TestSobol2D(std::vector<vec2>& points)
     }
 
 }
-inline double clamp(double n, double min, double max)
+inline float clamp(float n, float min, float max)
 {
     if (n < min)
     {
@@ -96,10 +96,10 @@ inline double clamp(double n, double min, double max)
     return n;
 }
 //camera_matrix - obj.matrix_world.normalized().inverted()
-inline bool visible_in_frustum(const matrix_4x4& camera_matrix, std::vector<vec3>& frame, bool is_perspective, const vec3& point, double treshold)
+inline bool visible_in_frustum(const matrix_4x4& camera_matrix, std::vector<vec3>& frame, bool is_perspective, const vec3& point, float treshold)
 {
     vec3 co_local = camera_matrix * point;
-    double z = -co_local.z;
+    float z = -co_local.z;
     if (is_perspective)
     {
         if (z == 0.)
@@ -114,12 +114,12 @@ inline bool visible_in_frustum(const matrix_4x4& camera_matrix, std::vector<vec3
             }
         }
     }
-    double min_x = frame[2].x;
-    double max_x = frame[1].x;
-    double min_y = frame[1].y;
-    double max_y = frame[0].y;
-    double x = (co_local.x - min_x) / (max_x - min_x);
-    double y = (co_local.y - min_y) / (max_y - min_y);
+    float min_x = frame[2].x;
+    float max_x = frame[1].x;
+    float min_y = frame[1].y;
+    float max_y = frame[0].y;
+    float x = (co_local.x - min_x) / (max_x - min_x);
+    float y = (co_local.y - min_y) / (max_y - min_y);
     if (x < 0. + treshold or x > 1. - treshold or y < 0. + treshold or y > 1. - treshold)
     {
         return false;

@@ -9,7 +9,7 @@ public:
     ray(const point3& orig, const vec3& dir)
         : origin(orig), direction(dir) {}
        
-    inline point3 at(double t)
+    inline point3 at(float t)
     {
         return origin + direction * t;
     }

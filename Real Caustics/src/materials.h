@@ -22,10 +22,10 @@ public:
 class Glass : public Material
 {
 public:
-	double ior = 1.0;
+	float ior = 1.0;
 public:
 	Glass() {}
-	Glass(double ref_idx) : ior(ref_idx) {}
+	Glass(float ref_idx) : ior(ref_idx) {}
 public:
 	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered)
 	{

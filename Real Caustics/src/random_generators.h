@@ -1,11 +1,11 @@
 #ifndef RANDOM_GENERATORS_H
 #define RANDOM_GENERATORS_H
 #include <random>
-inline double random_double(double min, double max)
+inline float random_float(float min, float max)
 {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(min, max);
+	std::uniform_real_distribution<float> dist(min, max);
 	return dist(mt);
 }
 inline int random_int(int min, int max)

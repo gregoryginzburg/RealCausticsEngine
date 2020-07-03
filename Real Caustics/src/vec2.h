@@ -4,19 +4,19 @@
 class vec2
 {
 public:
-	double x;
-	double y;
+	float x;
+	float y;
 public:
 	vec2() : x(0.0), y(0.0) {}
-	vec2(double a) : x(a), y(a) {}
-	vec2(double a, double b) : x(a), y(b) {}
+	vec2(float a) : x(a), y(a) {}
+	vec2(float a, float b) : x(a), y(b) {}
 
 };
-inline vec2 operator*(const vec2& u, double t)
+inline vec2 operator*(const vec2& u, float t)
 {
 	return vec2(u.x * t, u.y * t);
 }
-inline vec2 operator*(double t, const vec2& u)
+inline vec2 operator*(float t, const vec2& u)
 {
 	return u * t;
 }

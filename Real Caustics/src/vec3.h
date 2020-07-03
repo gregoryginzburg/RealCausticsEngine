@@ -5,21 +5,21 @@
 #include <iostream>
 #include "random_generators.h"
 
-extern const double PI;
+extern const float PI;
 
 class vec3
 {
 public:
-	double x;
-	double y;
-	double z;
+	float x;
+	float y;
+	float z;
 public:
 	// без параметров - вектор (0,0,0)
 	vec3() : x(0), y(0), z(0) {};  
 	// с 1 параметром вектор с одинаковыми числами
-	vec3(double e0) : x(e0), y(e0), z(e0) {};
+	vec3(float e0) : x(e0), y(e0), z(e0) {};
 	// дефолт конструктор для вектора
-	vec3(double e0, double e1, double e2) : x(e0), y(e1), z(e2) {};
+	vec3(float e0, float e1, float e2) : x(e0), y(e1), z(e2) {};
 	
 	vec3& operator+=(const vec3& other)
 	{
@@ -35,7 +35,7 @@ public:
 		z -= other.z;
 		return *this;
 	}
-	vec3& operator*=(const double t)
+	vec3& operator*=(const float t)
 	{
 		x *= t;
 		y *= t;
@@ -57,7 +57,7 @@ public:
 		return *this;
 	}
 
-	vec3& operator/=(const double t)
+	vec3& operator/=(const float t)
 	{
 		x /= t;
 		y /= t;
@@ -68,11 +68,11 @@ public:
 	{
 		return vec3(-x, -y, -z);
 	}
-	double length_squared() const
+	float length_squared() const
 	{
 		return x * x + y * y + z * z;
 	}
-	double length() const
+	float length() const
 	{
 		return std::sqrt(length_squared());
 	}	
@@ -89,11 +89,11 @@ inline vec3 operator+(const vec3& u, const vec3& v)
 {
 	return vec3(u.x + v.x, u.y + v.y, u.z + v.z);
 }
-inline vec3 operator+(const vec3& u, const double t)
+inline vec3 operator+(const vec3& u, const float t)
 {
 	return vec3(u.x + t, u.y + t, u.z + t);
 }
-inline vec3 operator+(const double t, const vec3& v)
+inline vec3 operator+(const float t, const vec3& v)
 {
 	return v + t;
 }
@@ -102,7 +102,7 @@ inline vec3 operator-(const vec3& u, const vec3& v)
 {
 	return vec3(u.x - v.x, u.y - v.y, u.z - v.z);
 }
-inline vec3 operator-(const vec3& u, const double t)
+inline vec3 operator-(const vec3& u, const float t)
 {
 	return vec3(u.x - t, u.y - t, u.z - t);
 }
@@ -111,11 +111,11 @@ inline vec3 operator*(const vec3& u, const vec3& v)
 {
 	return vec3(u.x * v.x, u.y * v.y, u.z * v.z);
 }
-inline vec3 operator*(const vec3& u, const double t)
+inline vec3 operator*(const vec3& u, const float t)
 {
 	return vec3(u.x * t, u.y * t, u.z * t);
 }
-inline vec3 operator*(const double t, const vec3& v)
+inline vec3 operator*(const float t, const vec3& v)
 {
 	return v * t;
 }
@@ -124,7 +124,7 @@ inline vec3 operator/(const vec3& u, const vec3& v)
 {
 	return vec3(u.x / v.x, u.y / v.y, u.z / v.z);
 }
-inline vec3 operator/(const vec3& u, const double t)
+inline vec3 operator/(const vec3& u, const float t)
 {
 	return (1 / t) * u;
 }
@@ -136,7 +136,7 @@ inline bool operator==(const vec3& u, const vec3& v)
 
 
 //----------------------------------------
-inline double dot(const vec3& u, const vec3& v)
+inline float dot(const vec3& u, const vec3& v)
 {
 	return u.x * v.x + u.y * v.y + u.z * v.z;
 }
@@ -154,20 +154,20 @@ inline vec3 reflect(const vec3& v, const vec3& n)
 {
 	return v - 2 * dot(v, n) * n;
 }
-inline vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
+inline vec3 refract(const vec3& uv, const vec3& n, float etai_over_etat) {
 	auto cos_theta = dot(-uv, n);
 	vec3 r_out_parallel = etai_over_etat * (uv + cos_theta * n);
 	vec3 r_out_perp = -std::sqrt(1.0 - r_out_parallel.length_squared()) * n;
 	return r_out_parallel + r_out_perp;
 }
-inline double distance(const vec3& u, const vec3& v)
+inline float distance(const vec3& u, const vec3& v)
 {
 	return (u - v).length();
 }
 inline vec3 random_in_hemisphere() 
 {
-	auto a = random_double(0, 2. * PI);
-	auto z = random_double(0., 1.);
+	auto a = random_float(0, 2. * PI);
+	auto z = random_float(0., 1.);
 	auto r = sqrt(1 - z * z);
 	return vec3(r * cos(a), r * sin(a), z);
 }

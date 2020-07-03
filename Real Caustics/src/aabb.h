@@ -14,7 +14,7 @@ public:
 
 	aabb(const point3& a, const point3& b, std::shared_ptr<Hittable> tri, const point3 c) : min(a), max(b), triangle(tri), center(c)  {}
 
-	bool hit(const ray& r, double tmin, double tmax) const
+	bool hit(const ray& r, float tmin, float tmax) const
 	{
 		auto invD = 1 / r.direction.x;
 		auto t0 = (min.x - r.origin.x) * invD;

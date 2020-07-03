@@ -10,10 +10,10 @@ struct hit_rec
 {
 	vec3 normal;
 	vec3 p;
-	double t = 0;	
+	float t = 0;	
 	bool front_face = false;
-	double u = 0;
-	double v = 0;
+	float u = 0;
+	float v = 0;
 	vec2 tex_coord_v0;
 	vec2 tex_coord_v1;
 	vec2 tex_coord_v2;
@@ -31,7 +31,7 @@ struct hit_rec
 class Hittable
 {
 public:
-	virtual bool hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const = 0;
+	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const = 0;
 	virtual bool bounding_box(aabb& output_box) const = 0;
 };
 #endif

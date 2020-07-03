@@ -21,18 +21,18 @@ public:
 	{
 		return normalize(cross(vertice1 - vertice0, vertice2 - vertice0));
 	}
-	virtual bool hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const
+	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const
 	{
 		vec3 v0v1 = vertice1 - vertice0;
 		vec3 v0v2 = vertice2 - vertice0;
 		vec3 pvec = cross(r.direction, v0v2);
-		double u;
-		double v;
-		double t;
-		double det = dot(v0v1, pvec);
+		float u;
+		float v;
+		float t;
+		float det = dot(v0v1, pvec);
 		if (std::fabs(det) < 0.0000001) return false;
 
-		double invDet = 1.0 / det;
+		float invDet = 1.0 / det;
 
 		vec3 tvec = r.origin - vertice0;
 		u = dot(tvec, pvec) * invDet;
@@ -105,7 +105,7 @@ public:
 		triangles.push_back(object);
 	}
 
-	virtual bool hit(const ray& r, double tmin, double tmax, hit_rec& hit_inf) const
+	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const
 	{
 		return true;
 	}
