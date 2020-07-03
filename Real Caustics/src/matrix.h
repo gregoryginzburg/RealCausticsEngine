@@ -4,8 +4,8 @@
 #include <cmath>
 #include "vec3.h"
 #include "vec4.h"
-using std::sin;
-using std::cos;
+usinfg std::sinf;
+usinfg std::cosf;
 
 extern const float PI;
 
@@ -19,15 +19,18 @@ public:
 	matrix_3x3(vec3 ii, vec3 jj, vec3 kk) : i(ii), j(jj), k(kk) {}
 	matrix_3x3(vec3 r)
 	{
-		i = vec3(cos(r.x) * cos(r.y), sin(r.x) * cos(r.y), -sin(r.y));
-		j = vec3(cos(r.x) * sin(r.y) * sin(r.z) - sin(r.x) * cos(r.z), sin(r.x) * sin(r.y) * sin(r.z) + cos(r.x) * cos(r.z), cos(r.x) * sin(r.z));
-		k = vec3(cos(r.x) * sin(r.y) * cos(r.z) + sin(r.x) * sin(r.z), sin(r.x) * sin(r.y) * cos(r.z) - cos(r.x) * sin(r.z), cos(r.y) * cos(r.z));
+		i = vec3(cosf(r.x) * cosf(r.y), sinf(r.x) * cosf(r.y), -sinf(r.y));
+		j = vec3(cosf(r.x) * sinf(r.y) * sinf(r.z) - sinf(r.x) * cosf(r.z), sinf(r.x) * sinf(r.y) * sinf(r.z) + cosf(r.x) * cosf(r.z), cosf(r.x) * sinf(r.z));
+		k = vec3(cosf(r.x) * sinf(r.y) * cosf(r.z) + sinf(r.x) * sinf(r.z), sinf(r.x) * sinf(r.y) * cosf(r.z) - cosf(r.x) * sinf(r.z), cosf(r.y) * cosf(r.z));
 	}
 	matrix_3x3(float a, vec3 u)
 	{
-		float c = cos(a);
-		float s = sin(a);
+		float c = cosf(a);
+		float s = sinf(a);
 		float t = 1 - c;
+		i = vec3(c + u.x * u.x * t, u.x * u.y * t + u.z * s, u.x * u.z * t - u.y * s);
+		j = vec3(u.x * u.y * t - u.z * s, c + u.y * u.y * t, u.y * u.z * t + u.x * s);
+		k = vec3(u.x * u.z * t + u.y * s, u.y * u.z * t - u.x * s, c + u.z * u.z * t);
 	}
 };
 class matrix_4x4
@@ -65,6 +68,11 @@ inline void rotate_vec(vec3& v, vec3& rotation)
 {
 	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.f), rotation.y * PI / 180.f, rotation.z * PI / 180.f);
 	v = v * rot_matrix;
+}
+inline void rotate_vec_around_axis(vec3& v, double angle, vec3 axis)
+{
+	matrix_3x3 rot_matrix(angle, axis);
+	v = v * rot_matrix;;
 }
 
 
