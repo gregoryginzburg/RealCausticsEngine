@@ -27,6 +27,7 @@
 
 extern const float inf = std::numeric_limits<float>::infinity();
 extern const float PI = 3.14159265359f;
+extern const float PI2 = 6.28318530718f;
 
 extern const int image_width = 2000;
 extern const int image_height = 2000;
@@ -43,7 +44,7 @@ int main()
 	Mesh ocean;
 	Mesh plane;
 	Area_Light light(vec3(0., 0., 4.), 2., 2., 0);
-
+	
 	#ifdef REPORT_PROGRESS
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
@@ -70,28 +71,24 @@ int main()
 
 	Timer rendering;
 	
-	int height = 1000;
-	int width = 1000;
+	int photons = 10000;
+	
 	
 	
 
 	
-	for (int j = height - 1; j >= 0; --j)
+	for (int i = 0; i < photons ; ++i)
 	{
-		int progress = static_cast<int>(float((float(height) - 1 - j)) / (float(height) - 1) * 100);
 		#ifdef REPORT_PROGRESS
-		std::cout << "Progress rendering: ";
-		std::cout << progress << "%" << "\r" << std::flush;
+			int progress = static_cast<int>(i / (float)photons);
+			std::cout << "Progress rendering: ";
+			std::cout << progress << "%" << "\r" << std::flush;
 		#endif
-		for (int i = 0; i < width; ++i)
-		{
-			ray r = light.get_ray(j, i);
-		}
+
+		ray r = light.get_ray(i);
 	}
 	
 
-	
-	
 	#ifdef REPORT_PROGRESS
 	std::cout << "\n";
 	std::cout << "Done  :  " << rendering.elapsed() << std::endl;

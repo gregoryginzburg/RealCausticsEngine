@@ -96,7 +96,7 @@ public:
 	Mesh(std::vector<std::shared_ptr<Hittable>> tris) : triangles(tris) {}
 
 public:
-	int number_of_tris()
+	size_t number_of_tris()
 	{
 		return triangles.size();
 	}

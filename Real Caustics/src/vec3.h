@@ -6,6 +6,7 @@
 #include "random_generators.h"
 
 extern const float PI;
+extern const float PI2;
 
 class vec3
 {
@@ -166,11 +167,12 @@ inline float distance(const vec3& u, const vec3& v)
 }
 inline vec3 random_in_hemisphere() 
 {
-	auto a = random_float(0, 2.f * PI);
-	auto z = random_float(0., 1.);
+	auto a = random_float(0.f, PI2);
+	auto z = random_float(0.f, 1.f);
 	auto r = sqrt(1 - z * z);
 	return vec3(r * cos(a), r * sin(a), z);
 }
+
 
 
 

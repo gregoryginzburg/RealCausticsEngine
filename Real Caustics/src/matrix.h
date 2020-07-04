@@ -71,7 +71,7 @@ inline void rotate_vec(vec3& v, vec3& rotation)
 	v = v * rot_matrix;
 }
 //rotation in radians
-inline void rotate_vec(vec3& v, double angle, vec3 axis)
+inline void rotate_vec(vec3& v, float angle, vec3 axis)
 {
 	matrix_3x3 rot_matrix(angle, axis);
 	v = v * rot_matrix;;
