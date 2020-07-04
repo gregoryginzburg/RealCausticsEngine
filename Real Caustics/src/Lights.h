@@ -9,7 +9,7 @@
 class Light
 {
 public:
-	virtual ray get_ray(size_t i) const = 0;
+	virtual ray emit_photon(size_t i) const = 0;
 };
 class Area_Light : public Light
 {
@@ -43,7 +43,7 @@ public:
 		vertical = top_left_corner - bottom_left_corner;
 	}
 public:
-	virtual ray get_ray(size_t i) const
+	virtual ray emit_photon(size_t i) const
 	{
 		return ray(bottom_left_corner + r2(i) * horizontal + r2(i), normal*spread*random_in_hemisphere());
 	}
@@ -65,6 +65,7 @@ class Lights_list : public Light
 {
 public:
 	std::vector<std::shared_ptr<Light>> lights;
+	std::vector<float> weights;
 public:
 	Lights_list() {}
 
@@ -78,9 +79,19 @@ public:
 		lights.push_back(l);
 	}
 public:
-	virtual ray get_ray(size_t i)
+	virtual ray emit_photon(size_t i) const
 	{
-
+		static std::vector<int> photon_count(lights.size(), 0);
+		int rand_light = random_int(lights.size());
+		if (random_float(0.f, 1.f) < weights[rand_light])
+		{
+			photon_count[rand_light] += 1;
+			return lights[rand_light]->emit_photon(photon_count[rand_light]);
+		}
+		else
+		{
+			this->emit_photon(i);
+		}
 	}
 
 };

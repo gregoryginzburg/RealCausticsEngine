@@ -43,8 +43,14 @@ int main()
 	hittable_list world;
 	Mesh ocean;
 	Mesh plane;
-	Area_Light light(vec3(0., 0., 4.), 2., 2., 0);
-	
+	Lights_list ligths;
+	ligths.add(std::make_shared<Area_Light>(vec3(0., 0., 4.), 2., 2., 0));
+	ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0));
+
+	for (int i = 0; i < 10; ++i)
+	{
+		ligths.emit_photon(i);
+	}
 	#ifdef REPORT_PROGRESS
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
@@ -85,7 +91,7 @@ int main()
 			std::cout << progress << "%" << "\r" << std::flush;
 		#endif
 
-		ray r = light.get_ray(i);
+		//ray r = light.get_ray(i);
 	}
 	
 
