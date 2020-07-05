@@ -9,13 +9,13 @@
 	std::uniform_real_distribution<float> dist(min, max);
 	return dist(mt);
 }*/
-/*inline int random_int(int min, int max)
+inline int random_int11(int min, int max)
 {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	std::uniform_int_distribution<int> dist(min, max);
 	return dist(mt);
-}*/
+}
 struct xorshift32_state
 {
 	uint32_t a = 132141;

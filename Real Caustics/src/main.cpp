@@ -49,8 +49,7 @@ int main()
 	Lights_list ligths;
 	Area_Light daw(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
 	
-
-	ray n = daw.emit_photon(0);
+	/*
 	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
 	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));
 	ligths.calculate_weights();
@@ -129,7 +128,7 @@ int main()
 	std::cout << "\n";
 	std::cout << "Summary Time  :  " << Summary.elapsed();
 	#endif
-
+	*/
 	return 0;
 
 }

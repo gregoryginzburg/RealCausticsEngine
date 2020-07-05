@@ -5,9 +5,12 @@
 #include <sstream>
 #include <random>
 #include <cmath>
+#include <algorithm>
 #include "Color.h"
 #include "vec3.h"
 #include "matrix.h"
+#include "photon.h"
+#include <memory>
 
 
 inline int maprange(float value, float low1, float high1, float low2, float high2)

@@ -151,6 +151,7 @@
     <ClCompile Include="src\bvh.cpp" />
     <ClCompile Include="src\parser.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\photon_map.cpp" />
     <ClCompile Include="src\trace_photon.cpp" />
   </ItemGroup>
   <ItemGroup>
