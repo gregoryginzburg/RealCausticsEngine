@@ -3,6 +3,7 @@
 #include "ray.h"
 #include "vec3.h"
 #include "hittable.h"
+#include "Color.h"
 #include <cmath>
 class Material
 {
@@ -11,6 +12,10 @@ public:
 };
 class Metal : public Material
 {
+public:
+	colorf color;
+public:
+	Metal(colorf c) : color(c) {}
 public:
 	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered)
 	{
@@ -23,9 +28,10 @@ class Glass : public Material
 {
 public:
 	float ior = 1.0;
+	colorf color;
 public:
 	Glass() {}
-	Glass(float ref_idx) : ior(ref_idx) {}
+	Glass(float ref_idx, colorf c) : ior(ref_idx), color(c) {}
 public:
 	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered)
 	{

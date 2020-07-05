@@ -86,5 +86,8 @@
     <ClInclude Include="src\random_generators.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\photon_map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

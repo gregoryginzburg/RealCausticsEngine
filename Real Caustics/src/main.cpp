@@ -60,7 +60,7 @@ int main()
 	std::cout << "Parsing Started" << std::endl;
 	#endif
 	parse("floor.obj", plane, std::make_shared<Catcher>());
-	parse("poool.obj", ocean, std::make_shared<Glass>(1.4));
+	parse("poool.obj", ocean, std::make_shared<Glass>(1.4, colorf(1, 1, 1)));
 	#ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
 	#endif

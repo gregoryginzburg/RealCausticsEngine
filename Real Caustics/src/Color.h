@@ -21,6 +21,16 @@ public:
 	}
 
 };
+class colorf
+{
+public:
+	float r;
+	float g;
+	float b;
+public:
+	colorf() : r(0.f), g(0.f), b(0.f) {}
+	colorf(float red, float green, float blue) : r(red), g(green), b(blue) {}
+};
 inline color clamp(color& c)
 {
 	if (c.r > 255)

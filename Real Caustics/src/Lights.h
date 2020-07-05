@@ -35,12 +35,12 @@ public:
 		horizontal = vec3(w, 0., 0.);
 		vertical = vec3(0., h, 0.);	
 	}
+
 	Area_Light(vec3 p, vec3 rot, float w, float h, float spr, float pow) : Area_Light(p, w, h, spr, pow)
 	{
 		rotate(rot);
 	}
 	
-
 public:
 	virtual ray emit_photon(size_t i) const
 	{
