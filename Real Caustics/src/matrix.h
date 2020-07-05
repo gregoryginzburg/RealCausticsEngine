@@ -65,16 +65,16 @@ inline vec3 operator*(const matrix_3x3& m, const vec3& v)
 	return v * m;
 }
 //rotation in degrees
-inline void rotate_vec(vec3& v, vec3& rotation)
+inline void rotate_vec(vec3& v, vec3 p, vec3 rotation)
 {
-	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.f), rotation.y * PI / 180.f, rotation.z * PI / 180.f);
-	v = v * rot_matrix;
+	matrix_3x3 rot_matrix(vec3(rotation.x * PI / 180.f, rotation.y * PI / 180.f, rotation.z * PI / 180.f));
+	v = (v - p) * rot_matrix + p;
 }
 //rotation in radians
-inline void rotate_vec(vec3& v, float angle, vec3 axis)
+inline void rotate_vec(vec3& v, vec3& p, float angle, vec3 axis)
 {
 	matrix_3x3 rot_matrix(angle, axis);
-	v = v * rot_matrix;;
+	v = (v - p) * rot_matrix + p;
 }
 
 

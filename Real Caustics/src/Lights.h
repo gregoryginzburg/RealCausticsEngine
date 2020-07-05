@@ -6,10 +6,16 @@
 #include "ray.h"
 #include "utils.h"
 #include "random_generators.h"
+
+extern const float negative_inf;
+extern int number_of_photons;
+
 class Light
 {
 public:
 	virtual ray emit_photon(size_t i) const = 0;
+	virtual float get_power() const = 0;
+
 };
 class Area_Light : public Light
 {
@@ -20,15 +26,16 @@ public:
 	vec3 vertical;
 	vec3 normal = vec3(0, 0, -1);
 	float spread;
+	float power;
 
 public:
-	Area_Light(vec3 p, float w, float h, float spr)  : spread(spr), position(p)
+	Area_Light(vec3 p, float w, float h, float spr, float pow)  : spread(spr), position(p), power(pow)
 	{
 		bottom_left_corner = position - vec3(w / 2.f, h / 2.f, 0.f);
 		horizontal = vec3(w, 0., 0.);
 		vertical = vec3(0., h, 0.);	
 	}
-	Area_Light(vec3 p, vec3 n, float w, float h, float spr) : normal(n), spread(spr), position(p)
+	/*Area_Light(vec3 p, vec3 n, float w, float h, float spr, float pow) : normal(n), spread(spr), position(p), power(pow)
 	{
 		float angle = std::acos(dot(n, vec3(0, 0, -1)));
 		vec3 axis = cross(n, vec3(0, 0, -1));
@@ -41,27 +48,37 @@ public:
 		rotate_vec(normal, angle, axis);
 		horizontal = bottom_rigth_corner - bottom_left_corner;
 		vertical = top_left_corner - bottom_left_corner;
+	}*/
+	Area_Light(vec3 p, vec3 rot, float w, float h, float spr, float pow) : Area_Light(p, w, h, spr, pow)
+	{
+		rotate(rot);
 	}
+	
+
 public:
 	virtual ray emit_photon(size_t i) const
 	{
-		return ray(bottom_left_corner + r2(i) * horizontal + r2(i), normal*spread*random_in_hemisphere());
+		return ray(bottom_left_corner + r2(i).x * horizontal + r2(i).y * vertical, normal + spread*random_in_hemisphere());
+	}
+	virtual float get_power() const
+	{
+		return power;
 	}
 	//rotation in degrees
 	void rotate(vec3 rotation)
 	{
 		vec3 top_left_corner = bottom_left_corner + vertical;
 		vec3 bottom_rigth_corner = bottom_left_corner + horizontal;
-		rotate_vec(bottom_left_corner, rotation);
-		rotate_vec(top_left_corner, rotation);
-		rotate_vec(bottom_rigth_corner, rotation);
-		rotate_vec(normal, rotation);
+		rotate_vec(bottom_left_corner, position, rotation);
+		rotate_vec(top_left_corner, position, rotation);
+		rotate_vec(bottom_rigth_corner, position, rotation);
+		rotate_vec(normal, position, rotation);
 		horizontal = bottom_rigth_corner - bottom_left_corner;
 		vertical = top_left_corner - bottom_left_corner;
 	}
 };
 
-class Lights_list : public Light
+class Lights_list 
 {
 public:
 	std::vector<std::shared_ptr<Light>> lights;
@@ -79,18 +96,41 @@ public:
 		lights.push_back(l);
 	}
 public:
-	virtual ray emit_photon(size_t i) const
+	ray emit_photon() const
 	{
-		static std::vector<int> photon_count(lights.size(), 0);
-		int rand_light = random_int(lights.size());
-		if (random_float(0.f, 1.f) < weights[rand_light])
+		static int light = 0;
+		static int numbers_photons_light = (int)(weights[light] * number_of_photons);
+		static int ii = -1;
+		if (ii > numbers_photons_light - 2)
 		{
-			photon_count[rand_light] += 1;
-			return lights[rand_light]->emit_photon(photon_count[rand_light]);
+			light += 1;
+			if (light > lights.size() - 1)
+			{
+				return ray(vec3(0, 0, 0), vec3(0, 0, 0));
+			}
+			numbers_photons_light = static_cast<int>(weights[light] * number_of_photons);
+			ii = 0;
+			return lights[light]->emit_photon(ii);
 		}
-		else
+
+		ii += 1;
+		return lights[light]->emit_photon(ii);
+	}
+	void calculate_weights()
+	{
+		weights.reserve(lights.size());
+		float sum_power = 0.f;
+		for (int i = 0; i < lights.size(); ++i)
 		{
-			this->emit_photon(i);
+			if (lights[i]->get_power() > negative_inf)
+			{
+				sum_power += lights[i]->get_power();
+			}
+			weights.push_back(lights[i]->get_power());
+		}
+		for (int i = 0; i < weights.size(); ++i)
+		{
+			weights[i] /= sum_power;
 		}
 	}
 

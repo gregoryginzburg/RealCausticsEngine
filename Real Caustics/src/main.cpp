@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <mutex>
+#include <future>
 #include "vec3.h"
 #include "timer.h"
 #include "mesh.h"
@@ -15,8 +17,8 @@
 #include "bvh.h"
 #include "photon.h"
 #include "Lights.h"
-#include <mutex>
-#include <future>
+#include "matrix.h"
+
 
 #define REPORT_PROGRESS
 
@@ -26,8 +28,10 @@
 #define MULTI_THREADED
 
 extern const float inf = std::numeric_limits<float>::infinity();
+extern const float negative_inf = -inf;
 extern const float PI = 3.14159265359f;
 extern const float PI2 = 6.28318530718f;
+extern int number_of_photons = 1000000;
 
 extern const int image_width = 2000;
 extern const int image_height = 2000;
@@ -38,19 +42,19 @@ void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, in
 
 int main()
 {
-	
 	Timer Summary;
 	hittable_list world;
 	Mesh ocean;
 	Mesh plane;
 	Lights_list ligths;
-	ligths.add(std::make_shared<Area_Light>(vec3(0., 0., 4.), 2., 2., 0));
-	ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0));
+	Area_Light daw(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
+	
 
-	for (int i = 0; i < 10; ++i)
-	{
-		ligths.emit_photon(i);
-	}
+	ray n = daw.emit_photon(0);
+	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
+	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));
+	ligths.calculate_weights();
+
 	#ifdef REPORT_PROGRESS
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
@@ -74,26 +78,19 @@ int main()
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
-
+	
 	Timer rendering;
 	
-	int photons = 10000;
-	
-	
-	
-
-	
-	for (int i = 0; i < photons ; ++i)
+	for (int i = 0; i < number_of_photons; ++i)
 	{
 		#ifdef REPORT_PROGRESS
-			int progress = static_cast<int>(i / (float)photons);
+			int progress = static_cast<int>(i / (float)number_of_photons);
 			std::cout << "Progress rendering: ";
 			std::cout << progress << "%" << "\r" << std::flush;
 		#endif
 
-		//ray r = light.get_ray(i);
-	}
-	
+		ray r = ligths.emit_photon();
+	}	
 
 	#ifdef REPORT_PROGRESS
 	std::cout << "\n";
@@ -132,7 +129,7 @@ int main()
 	std::cout << "\n";
 	std::cout << "Summary Time  :  " << Summary.elapsed();
 	#endif
-	
+
 	return 0;
 
 }
