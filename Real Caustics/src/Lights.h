@@ -35,20 +35,6 @@ public:
 		horizontal = vec3(w, 0., 0.);
 		vertical = vec3(0., h, 0.);	
 	}
-	/*Area_Light(vec3 p, vec3 n, float w, float h, float spr, float pow) : normal(n), spread(spr), position(p), power(pow)
-	{
-		float angle = std::acos(dot(n, vec3(0, 0, -1)));
-		vec3 axis = cross(n, vec3(0, 0, -1));
-		bottom_left_corner = position - vec3(w / 2.f, h / 2.f, 0.f);
-		vec3 top_left_corner = bottom_left_corner + vec3(0., h, 0.);
-		vec3 bottom_rigth_corner = bottom_left_corner + vec3(w, 0., 0.);
-		rotate_vec(bottom_left_corner, angle, axis);
-		rotate_vec(top_left_corner, angle, axis);
-		rotate_vec(bottom_rigth_corner, angle, axis);
-		rotate_vec(normal, angle, axis);
-		horizontal = bottom_rigth_corner - bottom_left_corner;
-		vertical = top_left_corner - bottom_left_corner;
-	}*/
 	Area_Light(vec3 p, vec3 rot, float w, float h, float spr, float pow) : Area_Light(p, w, h, spr, pow)
 	{
 		rotate(rot);
