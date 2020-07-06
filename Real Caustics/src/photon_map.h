@@ -4,7 +4,7 @@
 #include <memory>
 #include "photon.h"
 
-float biggest_dimension(std::vector<std::shared_ptr<photon>>& points);
+int biggest_dimension(std::vector<std::shared_ptr<photon>>& points);
 int aproximate_median(std::vector<std::shared_ptr<photon>>& points, int axis, int& index);
 
 class Photon_map
@@ -18,17 +18,17 @@ public:
 	}
 	void balance(int element, std::vector<std::shared_ptr<photon>>& points)
 	{
-		static Photon_map balanced(this->photons.size());
+		static Photon_map balanced(photons.size());
 		if (points.size() < 2)
 		{
-			points[0]->splitting_plane = (short)0;
-			balanced.photons[element] = points[0];
+			balanced.photons[element - 1] = points[0];
+			return;
 		}
 		int axis = biggest_dimension(points);
 		int index;
 
 		std::shared_ptr<photon> best_split_photon = points[aproximate_median(points, axis, index)];
-		int best_split;
+		float best_split;
 		if (axis == 0) best_split = best_split_photon->position.x;
 		else if (axis == 1) best_split = best_split_photon->position.y;
 		else best_split = best_split_photon->position.z;
@@ -40,7 +40,11 @@ public:
 
 		for (int i = 0; i < points.size(); ++i)
 		{
-			int position_axis;
+			if (i == index)
+			{
+				continue;
+			}
+			float position_axis;
 			if (axis == 0) position_axis = points[i]->position.x;
 			else if (axis == 1) position_axis = points[i]->position.y;
 			else position_axis = points[i]->position.z;
@@ -57,7 +61,11 @@ public:
 		balance(2 * element, left);
 		balance(2 * element + 1, right);
 		points[index]->splitting_plane = (short)axis;
-		balanced.photons[element] = points[index];
+		balanced.photons[element - 1] = points[index];
+		if (element == 1)
+		{
+			*this = balanced;
+		}
 	
 	}
 };

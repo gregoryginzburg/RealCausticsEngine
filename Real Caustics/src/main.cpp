@@ -18,6 +18,7 @@
 #include "photon.h"
 #include "Lights.h"
 #include "matrix.h"
+#include "photon_map.h"
 
 
 #define REPORT_PROGRESS
@@ -48,7 +49,19 @@ int main()
 	Mesh plane;
 	Lights_list ligths;
 	Area_Light daw(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
-	
+	Photon_map map;
+	map.photons.push_back(std::make_shared<photon>(vec3(8, 5, 3)));
+	map.photons.push_back(std::make_shared<photon>(vec3(8, 1, 1)));
+	map.photons.push_back(std::make_shared<photon>(vec3(8, 2, -2)));
+	map.photons.push_back(std::make_shared<photon>(vec3(8, -3, 0)));
+	map.photons.push_back(std::make_shared<photon>(vec3(8, 3, 5)));
+	map.photons.push_back(std::make_shared<photon>(vec3(8, 0, 8)));
+	map.photons.push_back(std::make_shared<photon>(vec3(8, -2, -7)));
+	std::vector<std::shared_ptr<photon>> e;
+	map.balance(1, map.photons);
+
+
+	std::cout << 5;
 	/*
 	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
 	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));

@@ -11,7 +11,7 @@
 extern const float inf;
 
 
-float biggest_dimension(std::vector<std::shared_ptr<photon>>& points)
+int biggest_dimension(std::vector<std::shared_ptr<photon>>& points)
 {
 	vec3 bottom(inf, inf, inf);
 	vec3 top(-inf, -inf, -inf);
@@ -42,7 +42,13 @@ float biggest_dimension(std::vector<std::shared_ptr<photon>>& points)
 			top.z = points[i]->position.z;
 		}
 	}
-	return std::fmax(std::fmax(top.x - bottom.x, top.y - bottom.y), top.z - bottom.z);
+	float side1 = top.x - bottom.x;
+	float side2 = top.y - bottom.y;
+	float side3 = top.z - bottom.z;
+
+	
+	float max_side = std::fmax(std::fmax(top.x - bottom.x, top.y - bottom.y), top.z - bottom.z);
+	return max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
 }
 
 bool x_compare(sorting_photon& a, sorting_photon& b)
@@ -59,43 +65,29 @@ bool z_compare(sorting_photon& a, sorting_photon& b)
 }
 
 
-bool x_compare_1(std::shared_ptr<photon>& a, std::shared_ptr<photon>& b)
-{
-	return a->position.x < b->position.x;
-}
-bool y_compare_1(std::shared_ptr<photon>& a, std::shared_ptr<photon>& b)
-{
-	return a->position.y < b->position.y;
-}
-bool z_compare_1(std::shared_ptr<photon>& a, std::shared_ptr<photon>& b)
-{
-	return a->position.z < b->position.z;
-}
+
 
 
 int aproximate_median(std::vector<std::shared_ptr<photon>>& points, int axis, int& index)
 {
-	
+	auto comparator = (axis == 0) ? x_compare
+		: (axis == 1) ? y_compare
+		: z_compare;
 	if (points.size() < 500)
 	{
-		auto comparator = (axis == 0) ? x_compare_1
-			: (axis == 1) ? y_compare_1
-			: z_compare_1;
 		std::vector<sorting_photon> photons;
 		photons.reserve(points.size());
 		for (int i = 0; i < points.size(); ++i)
 		{
 			photons.emplace_back(sorting_photon(points[i], i));
 		}
-		std::sort(points.begin(), points.end(), comparator);
-		index = photons[points.size() / 2].index;
+		std::sort(photons.begin(), photons.end(), comparator);
+		index = photons[photons.size() / 2].index;
 		return index;
 	}
 	else
 	{
-		auto comparator = (axis == 0) ? x_compare
-			: (axis == 1) ? y_compare
-			: z_compare;
+		
 		std::vector<sorting_photon> random_photons;
 		random_photons.reserve(401);
 		for (int i = 0; i < 401; ++i)
