@@ -9,6 +9,7 @@ struct photon
 	colorf power;
 	//0 = x, 1 = y, 2 = z
 	short splitting_plane;
+	photon(vec3& p, short flag) : position(p), splitting_plane(flag) {}
 };
 
 
