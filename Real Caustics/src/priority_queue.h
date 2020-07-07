@@ -12,15 +12,33 @@ public:
 	//current size
 	int capacity = 0;
 	//max size
+	int size;
 public:
-	Priority_queue() {}
+	Priority_queue(int s) : size(s) 
+	{
+		photons.resize(s);
+		priorities.resize(s);
+	}
 public:
 	void insert_element(std::shared_ptr<photon> insertion_photon, float priority)
 	{
-		++capacity;
-		photons.push_back(insertion_photon);
-		priorities.push_back(priority);
-		increase_key(capacity - 1);		
+		if (capacity == size)
+		{
+			if (priority < priorities[0])
+			{
+				photons[0] = insertion_photon;
+				priorities[0] = priority;
+				heapify(1);
+			}
+		}
+		else
+		{
+			++capacity;
+			photons[capacity - 1] = insertion_photon;
+			priorities[capacity - 1] = priority;
+			increase_key(capacity - 1);
+		}
+			
 	}
 	void increase_key(int i)
 	{
@@ -30,10 +48,25 @@ public:
 			std::swap(photons[i / 2], photons[i]);
 			i /= 2;
 		}
-		
-
 	}
-
+	void heapify(int i)
+	{
+		int left = 2 * i;
+		int right = 2 * i + 1;
+		int largest;
+		if (left < (size + 1) && priorities[left - 1] > priorities[i - 1])
+			largest = left;
+		else
+			largest = i;
+		if (right < (size + 1) && priorities[right - 1] > priorities[i - 1])
+			largest = right;
+		if (largest != i)
+		{
+			std::swap(photons[i - 1], photons[largest - 1]);
+			std::swap(priorities[i - 1], priorities[largest - 1]);
+			heapify(largest);
+		}
+	}
 };
 
 

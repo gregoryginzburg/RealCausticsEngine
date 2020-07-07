@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "photon.h"
+#include "priority_queue.h"
 
 int biggest_dimension(std::vector<std::shared_ptr<photon>>& points);
 int aproximate_median(std::vector<std::shared_ptr<photon>>& points, int axis, int& index);
@@ -68,32 +69,41 @@ public:
 		}
 	
 	}
-	/*void find_photons(int element, vec3& point, float search_d, std::vector<std::shared_ptr<photon>>& closest_photons)
+	void find_photons(int element, vec3& point, float search_d, Priority_queue& closest_photons)
 	{
 		static float search_distance_squared = search_d;
 		static float dist_to_point_squared;
 		if (element * 2 + 1 < photons.size())
 		{
+			float dist_to_plane;
 			if (photons[element - 1]->splitting_plane == 0)
-				float dist_to_plane = point.x - photons[element - 1]->position.x;
-			if (photons[element - 1]->splitting_plane == 1)
-				float dist_to_plane = point.y - photons[element - 1]->position.y;
-			if (photons[element - 1]->splitting_plane == 2)
-				float dist_to_plane = point.z - photons[element - 1]->position.z;
+				dist_to_plane = point.x - photons[element - 1]->position.x;
+			else if (photons[element - 1]->splitting_plane == 1)
+				dist_to_plane = point.y - photons[element - 1]->position.y;
+			else
+				dist_to_plane = point.z - photons[element - 1]->position.z;
 			if (dist_to_plane < 0)
 			{
 				find_photons(2 * element, point, search_distance_squared, closest_photons);
+				if (dist_to_point_squared < search_distance_squared)
+					find_photons(2 * element + 1, point, search_distance_squared, closest_photons);
 			}
-
+			else
+			{
+				find_photons(2 * element + 1, point, search_distance_squared, closest_photons);
+				if (dist_to_point_squared < search_distance_squared)
+					find_photons(2 * element, point, search_distance_squared, closest_photons);
+			}
 		}
 
 		dist_to_point_squared = (point - photons[element - 1]->position).length_squared();
 		if (dist_to_point_squared < search_distance_squared)
 		{
-			//closest_photons.push_back(photons[element - 1]);
+			closest_photons.insert_element(photons[element - 1], dist_to_point_squared);
+			//search_distance_squared = (point - closest_photons.photons[0]->position).length_squared();
 		}
 
-	}*/
+	}
 };
 
 

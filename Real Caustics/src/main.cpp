@@ -52,17 +52,20 @@ int main()
 
 
 
-	Area_Light daw(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
+	Area_Light lamp(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
 	Photon_map map;
-	map.photons.push_back(std::make_shared<photon>(vec3(8, 5, 3)));
-	map.photons.push_back(std::make_shared<photon>(vec3(8, 1, 1)));
-	map.photons.push_back(std::make_shared<photon>(vec3(8, 2, -2)));
-	map.photons.push_back(std::make_shared<photon>(vec3(8, -3, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(8, 3, 5)));
-	map.photons.push_back(std::make_shared<photon>(vec3(8, 0, 8)));
-	map.photons.push_back(std::make_shared<photon>(vec3(8, -2, -7)));
+	map.photons.push_back(std::make_shared<photon>(vec3(0.63, 0.0, 0.18)));
+	map.photons.push_back(std::make_shared<photon>(vec3(-1.47, 0.36, 0.45)));
+	map.photons.push_back(std::make_shared<photon>(vec3(-0.93, 0.78, -0.6)));
+	map.photons.push_back(std::make_shared<photon>(vec3(0.36, -0.39, 0.24)));
+	map.photons.push_back(std::make_shared<photon>(vec3(1.68, 2.49, -0.18)));
+	map.photons.push_back(std::make_shared<photon>(vec3(-0.12, 0.51, -0.63)));
+	map.photons.push_back(std::make_shared<photon>(vec3(0.9, -0.42, 0.0)));
 	std::vector<std::shared_ptr<photon>> e;
 	map.balance(1, map.photons);
+	Priority_queue ad(6);	
+	vec3 daw(0, 0, 0);
+	map.find_photons(1, daw, 1.84, 3);
 
 
 	std::cout << 5;
