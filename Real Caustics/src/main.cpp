@@ -19,6 +19,7 @@
 #include "Lights.h"
 #include "matrix.h"
 #include "photon_map.h"
+#include "priority_queue.h"
 
 
 #define REPORT_PROGRESS
@@ -48,6 +49,9 @@ int main()
 	Mesh ocean;
 	Mesh plane;
 	Lights_list ligths;
+
+
+
 	Area_Light daw(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
 	Photon_map map;
 	map.photons.push_back(std::make_shared<photon>(vec3(8, 5, 3)));

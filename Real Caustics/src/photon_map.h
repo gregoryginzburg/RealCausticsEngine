@@ -68,6 +68,32 @@ public:
 		}
 	
 	}
+	/*void find_photons(int element, vec3& point, float search_d, std::vector<std::shared_ptr<photon>>& closest_photons)
+	{
+		static float search_distance_squared = search_d;
+		static float dist_to_point_squared;
+		if (element * 2 + 1 < photons.size())
+		{
+			if (photons[element - 1]->splitting_plane == 0)
+				float dist_to_plane = point.x - photons[element - 1]->position.x;
+			if (photons[element - 1]->splitting_plane == 1)
+				float dist_to_plane = point.y - photons[element - 1]->position.y;
+			if (photons[element - 1]->splitting_plane == 2)
+				float dist_to_plane = point.z - photons[element - 1]->position.z;
+			if (dist_to_plane < 0)
+			{
+				find_photons(2 * element, point, search_distance_squared, closest_photons);
+			}
+
+		}
+
+		dist_to_point_squared = (point - photons[element - 1]->position).length_squared();
+		if (dist_to_point_squared < search_distance_squared)
+		{
+			//closest_photons.push_back(photons[element - 1]);
+		}
+
+	}*/
 };
 
 
