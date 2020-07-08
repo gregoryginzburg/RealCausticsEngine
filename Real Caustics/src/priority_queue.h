@@ -16,8 +16,8 @@ public:
 public:
 	Priority_queue(int s) : size(s) 
 	{
-		photons.resize(s);
-		priorities.resize(s);
+		photons.reserve(s);
+		priorities.reserve(s);
 	}
 public:
 	void insert_element(std::shared_ptr<photon> insertion_photon, float priority)
@@ -34,8 +34,10 @@ public:
 		else
 		{
 			++capacity;
-			photons[capacity - 1] = insertion_photon;
-			priorities[capacity - 1] = priority;
+			photons.push_back(insertion_photon);
+			priorities.push_back(priority);
+			//photons[capacity - 1] = insertion_photon;
+			//priorities[capacity - 1] = priority;
 			increase_key(capacity - 1);
 		}
 			
