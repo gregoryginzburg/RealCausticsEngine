@@ -56,4 +56,5 @@ public:
 	point3 center;
 };
 aabb surrounding_box(aabb box_a, aabb box_b);
+void add_point(aabb& box, vec3& point);
 #endif

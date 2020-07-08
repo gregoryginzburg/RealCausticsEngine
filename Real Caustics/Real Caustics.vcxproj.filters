@@ -95,5 +95,8 @@
     <ClInclude Include="src\priority_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\trace_photon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

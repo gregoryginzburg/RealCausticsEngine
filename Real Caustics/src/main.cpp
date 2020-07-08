@@ -20,6 +20,7 @@
 #include "matrix.h"
 #include "photon_map.h"
 #include "priority_queue.h"
+#include "trace_photon.h"
 
 
 #define REPORT_PROGRESS
@@ -39,7 +40,7 @@ extern const int image_width = 2000;
 extern const int image_height = 2000;
 
 
-void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int depth);
+
 
 
 int main()
@@ -49,9 +50,7 @@ int main()
 	Mesh ocean;
 	Mesh plane;
 	Lights_list ligths;
-
-	Photon_map map(511);
-
+	Photon_map map(number_of_photons);
 	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
 	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));
 	ligths.calculate_weights();
@@ -79,7 +78,6 @@ int main()
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
-	
 	Timer rendering;
 	std::cout << "Tracing started";
 	
@@ -94,9 +92,9 @@ int main()
 	std::cout << "Done  :  " << rendering.elapsed() << std::endl;
 	#endif
 	Timer balacing;
-	map.balance(1, map.photons);
 	std::cout << "balalcning " << balacing.elapsed();
-
+	map.build_kd_tree();
+	std::cout << glea;
 	Timer writing;
 	std::ofstream out;																		//создать и открыть файл
 	out.open("D:\\hello.ppm");

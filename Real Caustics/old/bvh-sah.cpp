@@ -296,7 +296,7 @@ BVHNode* Recurse(BBoxEntries& work, int depth = 0)
 	inner->_left = Recurse(left, depth + 1);
 	inner->_left->_bottom = lbottom;
 	inner->_left->_top = ltop;
-
+	
 	
 	// recursively build the right child
 	inner->_right = Recurse(right, depth + 1);
