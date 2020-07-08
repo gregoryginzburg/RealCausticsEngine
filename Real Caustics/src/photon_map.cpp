@@ -73,7 +73,7 @@ int aproximate_median(std::vector<std::shared_ptr<photon>>& points, int axis, in
 	auto comparator = (axis == 0) ? x_compare
 		: (axis == 1) ? y_compare
 		: z_compare;
-	if (points.size() < 500)
+	if (true)  //points.size() < 500)
 	{
 		std::vector<sorting_photon> photons;
 		photons.reserve(points.size());

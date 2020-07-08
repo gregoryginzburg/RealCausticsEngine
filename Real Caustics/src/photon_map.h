@@ -52,6 +52,7 @@ public:
 
 		for (int i = 0; i < points.size(); ++i)
 		{
+			
 			if (i == index)
 			{
 				continue;
@@ -65,7 +66,7 @@ public:
 			{
 				left.push_back(points[i]);
 			}
-			else
+			else if (position_axis != best_split)
 			{
 				right.push_back(points[i]);
 			}

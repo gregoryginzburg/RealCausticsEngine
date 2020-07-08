@@ -50,8 +50,7 @@ int main()
 	Mesh plane;
 	Lights_list ligths;
 
-	Area_Light lamp(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
-	Photon_map map(1023);
+	Photon_map map(511);
 
 	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
 	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));
@@ -82,15 +81,10 @@ int main()
 	#endif
 	
 	Timer rendering;
+	std::cout << "Tracing started";
 	
 	for (int i = 0; i < number_of_photons; ++i)
 	{
-		#ifdef REPORT_PROGRESS
-			int progress = static_cast<int>(i / (float)number_of_photons);
-			std::cout << "Progress rendering: ";
-			std::cout << progress << "%" << "\r" << std::flush;
-		#endif
-
 		ray r = ligths.emit_photon();
 		trace_photon(map, world, r, 2);
 	}	
@@ -99,6 +93,9 @@ int main()
 	std::cout << "\n";
 	std::cout << "Done  :  " << rendering.elapsed() << std::endl;
 	#endif
+	Timer balacing;
+	map.balance(1, map.photons);
+	std::cout << "balalcning " << balacing.elapsed();
 
 	Timer writing;
 	std::ofstream out;																		//создать и открыть файл
