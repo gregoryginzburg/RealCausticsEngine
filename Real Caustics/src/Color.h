@@ -30,7 +30,19 @@ public:
 public:
 	colorf() : r(0.f), g(0.f), b(0.f) {}
 	colorf(float red, float green, float blue) : r(red), g(green), b(blue) {}
+public:
+	inline colorf& operator*=(const colorf& other)
+	{
+		r *= other.r;
+		g *= other.g;
+		b *= other.b;
+		return *this;
+	}
 };
+inline colorf operator*(const colorf& a, const colorf& b)
+{
+	return colorf(a.r * b.r, a.g * b.g, a.b * b.b);
+}
 inline color clamp(color& c)
 {
 	if (c.r > 255)

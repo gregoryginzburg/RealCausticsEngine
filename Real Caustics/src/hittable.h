@@ -4,6 +4,7 @@
 #include "ray.h"
 #include "aabb.h"
 #include "vec2.h"
+#include "Color.h"
 class Material;
 class aabb;
 struct hit_rec
@@ -14,6 +15,7 @@ struct hit_rec
 	bool front_face = false;
 	float u = 0;
 	float v = 0;
+	
 	vec2 tex_coord_v0;
 	vec2 tex_coord_v1;
 	vec2 tex_coord_v2;

@@ -4,6 +4,7 @@
 #include <memory>
 #include "photon.h"
 #include "priority_queue.h"
+#include "Color.h"
 
 int biggest_dimension(std::vector<std::shared_ptr<photon>>& points);
 int aproximate_median(std::vector<std::shared_ptr<photon>>& points, int axis, int& index);
@@ -12,10 +13,20 @@ class Photon_map
 {
 public:
 	std::vector<std::shared_ptr<photon>> photons;
+	int capacity = 0;
 	Photon_map() {}
 	Photon_map(int number_of_photons) 
 	{
-		photons.resize(number_of_photons);
+		photons.reserve(number_of_photons);
+	}
+	bool is_full()
+	{
+		return capacity == photons.capacity();
+	}
+	void add(const vec3& p, const colorf power)
+	{
+		photons.emplace_back(std::make_shared<photon>(p, power));
+		++capacity;
 	}
 	void balance(int element, std::vector<std::shared_ptr<photon>>& points)
 	{

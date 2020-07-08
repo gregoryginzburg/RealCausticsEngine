@@ -33,13 +33,13 @@ extern const float inf = std::numeric_limits<float>::infinity();
 extern const float negative_inf = -inf;
 extern const float PI = 3.14159265359f;
 extern const float PI2 = 6.28318530718f;
-extern int number_of_photons = 1000000;
+extern int number_of_photons = 1000;
 
 extern const int image_width = 2000;
 extern const int image_height = 2000;
 
 
-void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, int depth);
+void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int depth);
 
 
 int main()
@@ -50,24 +50,9 @@ int main()
 	Mesh plane;
 	Lights_list ligths;
 
-
-
 	Area_Light lamp(vec3(0, 0, 0), vec3(0, 0, 90), 2, 2, 0, 100);
-	Photon_map map;
-	map.photons.push_back(std::make_shared<photon>(vec3(1.0, 0.0, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(-2.0, 0.5, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(-1.0, 1.0, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(0.5, -0.5, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(2.0, 2.5, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(0.0, 0.5, 0)));
-	map.photons.push_back(std::make_shared<photon>(vec3(1.0, -1.0, 0)));
-	std::vector<std::shared_ptr<photon>> e;
-	//map.balance(1, map.photons);
-	Priority_queue ad(6);	
-	vec3 daw(0, 0, 0);
-	map.find_photons(1, daw, 2.09, ad);
-	int fsef = 10;
-	/*
+	Photon_map map(1023);
+
 	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
 	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));
 	ligths.calculate_weights();
@@ -77,7 +62,7 @@ int main()
 	std::cout << "Parsing Started" << std::endl;
 	#endif
 	parse("floor.obj", plane, std::make_shared<Catcher>());
-	parse("poool.obj", ocean, std::make_shared<Glass>(1.4, colorf(1, 1, 1)));
+	parse("poool.obj", ocean, std::make_shared<Glass>(1.4, colorf(0.5, 1, 1)));
 	#ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
 	#endif
@@ -107,6 +92,7 @@ int main()
 		#endif
 
 		ray r = ligths.emit_photon();
+		trace_photon(map, world, r, 2);
 	}	
 
 	#ifdef REPORT_PROGRESS
@@ -146,7 +132,6 @@ int main()
 	std::cout << "\n";
 	std::cout << "Summary Time  :  " << Summary.elapsed();
 	#endif
-	*/
 	return 0;
 
 }

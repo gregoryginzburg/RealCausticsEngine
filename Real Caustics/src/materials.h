@@ -9,6 +9,7 @@ class Material
 {
 public:
 	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered) = 0;
+	virtual colorf get_color() = 0;
 };
 class Metal : public Material
 {
@@ -22,6 +23,10 @@ public:
 		vec3 scattered_dir = reflect(r.direction, rec.normal);
 		scattered = ray(rec.p, scattered_dir);
 		return true;
+	}
+	virtual colorf get_color()
+	{
+		return color;
 	}
 };
 class Glass : public Material
@@ -41,6 +46,10 @@ public:
 		scattered = ray(rec.p, scattered_dir);
 		return true;
 	}
+	virtual colorf get_color()
+	{
+		return color;
+	}
 };
 class Catcher : public Material
 {
@@ -49,6 +58,11 @@ public:
 	{
 		return false;
 	}
+	virtual colorf get_color() 
+	{
+		return colorf(0, 0, 0);
+	}
+	
 
 };
 

@@ -4,11 +4,13 @@
 #include "hittable.h"
 #include "hittable_list.h"
 #include "materials.h"
+#include "photon_map.h"
+#include "Color.h"
 #include <memory>
 
 extern const float inf;
 
-void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, int depth)
+void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int depth)
 {
 	if (depth == 0)
 	{
@@ -20,11 +22,17 @@ void trace_photon(std::vector<photon>& photons, hittable_list& world, ray& r, in
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
-			return trace_photon(photons, world, scattered_ray, depth - 1);
+			scattered_ray.was_refracted = true;
+			scattered_ray.power = r.power;
+			scattered_ray *= rec.mat_ptr->get_color();
+			return trace_photon(photon_map, world, scattered_ray, depth - 1);
 		}
 		else
 		{
-			//photons.push_back(rec.p);
+			if (r.was_refracted && !photon_map.is_full())
+			{
+				photon_map.add(rec.p, r.power);
+			}
 			return;
 		}
 	}

@@ -6,6 +6,7 @@
 #include "ray.h"
 #include "utils.h"
 #include "random_generators.h"
+#include "Color.h"
 
 extern const float negative_inf;
 extern int number_of_photons;
@@ -13,7 +14,7 @@ extern int number_of_photons;
 class Light
 {
 public:
-	virtual ray emit_photon(size_t i) const = 0;
+	virtual ray emit_photon(size_t i, float power) const = 0;
 	virtual float get_power() const = 0;
 
 };
@@ -42,9 +43,9 @@ public:
 	}
 	
 public:
-	virtual ray emit_photon(size_t i) const
+	virtual ray emit_photon(size_t i, float power) const
 	{
-		return ray(bottom_left_corner + r2(i).x * horizontal + r2(i).y * vertical, normal + spread*random_in_hemisphere());
+		return ray(bottom_left_corner + r2(i).x * horizontal + r2(i).y * vertical, normal + spread*random_in_hemisphere(), colorf(power, power, power));
 	}
 	virtual float get_power() const
 	{
@@ -86,6 +87,7 @@ public:
 	{
 		static int light = 0;
 		static int numbers_photons_light = (int)(weights[light] * number_of_photons);
+		static float current_power = lights[light]->get_power() / (float)(numbers_photons_light - 1);
 		static int ii = -1;
 		if (ii > numbers_photons_light - 2)
 		{
@@ -95,12 +97,13 @@ public:
 				return ray(vec3(0, 0, 0), vec3(0, 0, 0));
 			}
 			numbers_photons_light = static_cast<int>(weights[light] * number_of_photons);
+			current_power = lights[light]->get_power() / (float)(numbers_photons_light - 1);
 			ii = 0;
-			return lights[light]->emit_photon(ii);
+			return lights[light]->emit_photon(ii, current_power);
 		}
 
 		ii += 1;
-		return lights[light]->emit_photon(ii);
+		return lights[light]->emit_photon(ii, current_power);
 	}
 	void calculate_weights()
 	{
