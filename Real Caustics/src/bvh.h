@@ -127,7 +127,6 @@ BVH_node::BVH_node(std::vector<aabb>& objects)
 
 		float min_cost = inf;
 		float best_split = inf;
-		//int best_axis;
 		bool is_better_split = false;
 		int count_left;
 		int count_right;

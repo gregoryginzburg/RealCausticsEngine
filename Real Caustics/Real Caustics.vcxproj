@@ -147,6 +147,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\2D\2D_aabb.cpp" />
+    <ClCompile Include="src\2D\2D_BVH.cpp" />
     <ClCompile Include="src\aabb.cpp" />
     <ClCompile Include="src\bvh.cpp" />
     <ClCompile Include="src\parser.cpp" />
@@ -155,6 +157,10 @@
     <ClCompile Include="src\trace_photon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\2D\2D_aabb.h" />
+    <ClInclude Include="src\2D\2D_BVH.h" />
+    <ClInclude Include="src\2D\2D_Hittable.h" />
+    <ClInclude Include="src\2d\2d_triangle.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\bvh.h" />
     <ClInclude Include="src\Color.h" />
@@ -173,6 +179,7 @@
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\trace_photon.h" />
     <ClInclude Include="src\utils.h" />
+    <ClInclude Include="src\2d\UV_Map.h" />
     <ClInclude Include="src\vec2.h" />
     <ClInclude Include="src\vec3.h" />
     <ClInclude Include="src\vec4.h" />
