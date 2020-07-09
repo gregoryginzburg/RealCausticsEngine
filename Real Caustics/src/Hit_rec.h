@@ -30,12 +30,7 @@ struct hit_rec
 
 };
 
-class Hittable
-{
-public:
-	virtual bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const = 0;
-	virtual bool bounding_box(aabb& output_box) const = 0;
-};
+
 #endif
 
 

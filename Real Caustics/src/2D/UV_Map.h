@@ -14,6 +14,8 @@ public:
 	void build_bvh()
 	{
 		root = build_bvh_2(*this);
+		triangles.clear();
+		triangles.shrink_to_fit();
 	}
 	void get_u_v(vec2 point, hit_rec_2& rec)
 	{

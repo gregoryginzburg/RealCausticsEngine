@@ -310,3 +310,19 @@ int CountBoxes(KDTreeNode* root)
 	else
 		return 1;
 }
+void delete_kd_tree(KDTreeNode* root)
+{
+	if (!root->IsLeaf())
+	{
+		KDTreeInner* photons_inner = dynamic_cast<KDTreeInner*>(root);
+		delete_kd_tree(photons_inner->_left);
+		delete_kd_tree(photons_inner->_right);
+		delete photons_inner;
+	}
+	else
+	{
+		KDTreeLeaf* photons_leaf = dynamic_cast<KDTreeLeaf*>(root);
+		delete photons_leaf;
+	}
+		
+}

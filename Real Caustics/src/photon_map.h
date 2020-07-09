@@ -33,6 +33,12 @@ struct KDTreeInner : KDTreeNode
 	{
 		points_on_median = new Points_on_median;
 	}
+	~KDTreeInner()
+	{
+		delete points_on_median;
+		delete _left;
+		delete _right;
+	}
 };
 
 struct KDTreeLeaf : KDTreeNode 

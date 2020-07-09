@@ -4,7 +4,7 @@
 #include "vec3.h"
 #include "ray.h"
 #include <algorithm>
-#include "hittable.h"
+#include "Hit_rec.h"
 class Hittable;
 class aabb
 {

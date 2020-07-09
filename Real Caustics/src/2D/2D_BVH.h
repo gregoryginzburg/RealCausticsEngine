@@ -20,6 +20,11 @@ struct BVHInner2 : BVHNode2
 	aabb2 bbox;
 	BVHInner2() {}
 	virtual bool IsLeaf() { return false; }
+	~BVHInner2()
+	{
+		delete _left;
+		delete _right;
+	}
 };
 
 struct BVHLeaf2 : BVHNode2

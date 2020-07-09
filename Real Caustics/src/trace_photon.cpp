@@ -1,7 +1,7 @@
 #include "photon.h"
 #include "vec3.h"
 #include "ray.h"
-#include "hittable.h"
+#include "Hit_rec.h"
 #include "hittable_list.h"
 #include "materials.h"
 #include "photon_map.h"

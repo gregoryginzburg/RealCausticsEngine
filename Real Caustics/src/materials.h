@@ -2,7 +2,7 @@
 #define MATERIALS_H
 #include "ray.h"
 #include "vec3.h"
-#include "hittable.h"
+#include "Hit_rec.h"
 #include "Color.h"
 #include <cmath>
 class Material

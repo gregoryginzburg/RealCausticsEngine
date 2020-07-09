@@ -160,7 +160,8 @@ BVHNode2* build_bvh_2(UV_Map& uv_map)
 		vec2 center = (bbox.min + bbox.max) / 2.f;
 		temp_bboxes.emplace_back(bbox, center, uv_map.triangles[i]);
 	}
-	return recurse_bvh_2(temp_bboxes);
+	BVHNode2* root = recurse_bvh_2(temp_bboxes);
+	return root;
 }
 
 bool hit(BVHNode2* root, vec2 point, hit_rec_2& rec)
@@ -191,5 +192,19 @@ bool hit(BVHNode2* root, vec2 point, hit_rec_2& rec)
 	{
 		BVHLeaf2* leaf = dynamic_cast<BVHLeaf2*>(root);
 		return leaf->hit(point, rec);
+	}
+}
+void delete_bvh2(BVHNode2* root)
+{
+	if (!root->IsLeaf())
+	{
+		BVHInner2* inner = dynamic_cast<BVHInner2*>(root);
+		delete_bvh2(inner->_left);
+		delete_bvh2(inner->_right);
+	}
+	else
+	{
+		BVHLeaf2* leaf = dynamic_cast<BVHLeaf2*>(root);
+		delete leaf;
 	}
 }

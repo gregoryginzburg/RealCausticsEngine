@@ -47,9 +47,6 @@
     <ClInclude Include="src\Color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hittable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\hittable_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -117,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\2D\2D_Hit_rec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hit_rec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
