@@ -9,7 +9,7 @@ class UV_Map
 {
 public:
 	std::vector<std::shared_ptr<triangle2>> triangles;
-	BVHNode* root = nullptr;
+	BVHNode2* root = nullptr;
 public:
 	void build_bvh()
 	{

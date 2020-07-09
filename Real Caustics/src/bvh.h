@@ -19,6 +19,12 @@ class Hittable;
 extern const float inf;
 
 void make_list_for_bvh(Mesh& mesh, std::vector<aabb>& working_list);
+struct aabb_temp
+{
+	aabb bbox;
+	std::shared_ptr<Hittable> triangle;
+	vec3 center;
+};
 
 class BVH_Leaf : public Hittable
 {

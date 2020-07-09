@@ -7,11 +7,11 @@
 #include <cmath> 
 #include <iostream>
 extern const float inf;
-BVHNode* recurse_bvh_2(std::vector<aabb2_temp>& objects)
+BVHNode2* recurse_bvh_2(std::vector<aabb2_temp>& objects)
 {
 	if (objects.size() < 4)
 	{
-		BVHLeaf* leaf = new BVHLeaf;
+		BVHLeaf2* leaf = new BVHLeaf2;
 		for (size_t i = 0; i < objects.size(); ++i)
 		{
 			leaf->triangles.push_back(objects[i].triangle);
@@ -111,7 +111,7 @@ BVHNode* recurse_bvh_2(std::vector<aabb2_temp>& objects)
 		}
 		if (!is_better_split)
 		{
-			BVHLeaf* leaf = new BVHLeaf;
+			BVHLeaf2* leaf = new BVHLeaf2;
 			for (size_t i = 0; i < objects.size(); ++i)
 			{
 				leaf->triangles.push_back(objects[i].triangle);
@@ -141,7 +141,7 @@ BVHNode* recurse_bvh_2(std::vector<aabb2_temp>& objects)
 				}
 			}
 
-			BVHInner* inner = new BVHInner;
+			BVHInner2* inner = new BVHInner2;
 			inner->bbox = bbox_temp;
 			inner->_left = recurse_bvh_2(left_objects);
 			inner->_right = recurse_bvh_2(right_objects);
@@ -150,7 +150,7 @@ BVHNode* recurse_bvh_2(std::vector<aabb2_temp>& objects)
 	}
 }
 
-BVHNode* build_bvh_2(UV_Map& uv_map)
+BVHNode2* build_bvh_2(UV_Map& uv_map)
 {
 	std::vector<aabb2_temp> temp_bboxes;
 	temp_bboxes.reserve(uv_map.triangles.size());
@@ -163,11 +163,11 @@ BVHNode* build_bvh_2(UV_Map& uv_map)
 	return recurse_bvh_2(temp_bboxes);
 }
 
-bool hit(BVHNode* root, vec2 point, hit_rec_2& rec)
+bool hit(BVHNode2* root, vec2 point, hit_rec_2& rec)
 {
 	if (!root->IsLeaf())
 	{
-		BVHInner* inner = dynamic_cast<BVHInner*>(root);
+		BVHInner2* inner = dynamic_cast<BVHInner2*>(root);
 		if (!inner->bbox.hit(point))
 		{
 			return false;
@@ -189,7 +189,7 @@ bool hit(BVHNode* root, vec2 point, hit_rec_2& rec)
 	}
 	else
 	{
-		BVHLeaf* leaf = dynamic_cast<BVHLeaf*>(root);
+		BVHLeaf2* leaf = dynamic_cast<BVHLeaf2*>(root);
 		return leaf->hit(point, rec);
 	}
 }

@@ -9,23 +9,23 @@
 #include "2D_Hit_rec.h"
 #include "../vec2.h"
 
-struct BVHNode {
+struct BVHNode2 {
 	virtual bool IsLeaf() = 0;
 };
 
-struct BVHInner : BVHNode 
+struct BVHInner2 : BVHNode2 
 {
-	BVHNode* _left = nullptr;
-	BVHNode* _right = nullptr;
+	BVHNode2* _left = nullptr;
+	BVHNode2* _right = nullptr;
 	aabb2 bbox;
-	BVHInner() {}
+	BVHInner2() {}
 	virtual bool IsLeaf() { return false; }
 };
 
-struct BVHLeaf : BVHNode
+struct BVHLeaf2 : BVHNode2
 {
 	std::vector<std::shared_ptr<triangle2>> triangles;
-	BVHLeaf() {}
+	BVHLeaf2() {}
 	virtual bool IsLeaf() { return true; }	
 	bool hit(vec2& point, hit_rec_2& rec)
 	{
@@ -58,8 +58,8 @@ struct aabb2_temp
 	aabb2_temp(aabb2& aabb, vec2& c, std::shared_ptr<triangle2> t) : bbox(aabb), center(c), triangle(t) {}
 };
 class UV_Map;
-BVHNode* build_bvh_2(UV_Map& uv_map);
-bool hit(BVHNode* root, vec2 point, hit_rec_2& rec);
+BVHNode2* build_bvh_2(UV_Map& uv_map);
+bool hit(BVHNode2* root, vec2 point, hit_rec_2& rec);
 
 #endif
 
