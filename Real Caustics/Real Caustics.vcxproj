@@ -159,7 +159,7 @@
   <ItemGroup>
     <ClInclude Include="src\2D\2D_aabb.h" />
     <ClInclude Include="src\2D\2D_BVH.h" />
-    <ClInclude Include="src\2D\2D_Hittable.h" />
+    <ClInclude Include="src\2D\2D_Hit_rec.h" />
     <ClInclude Include="src\2d\2d_triangle.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\bvh.h" />

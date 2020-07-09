@@ -113,10 +113,10 @@
     <ClInclude Include="src\2D\2D_BVH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\2D\2D_Hittable.h">
+    <ClInclude Include="src\2D\2D_aabb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\2D\2D_aabb.h">
+    <ClInclude Include="src\2D\2D_Hit_rec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

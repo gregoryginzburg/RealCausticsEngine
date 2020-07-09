@@ -21,6 +21,9 @@
 #include "photon_map.h"
 #include "priority_queue.h"
 #include "trace_photon.h"
+#include "2D\2D_triangle.h"
+#include "2D\2D_BVH.h"
+#include "2D\UV_Map.h"
 
 
 #define REPORT_PROGRESS
@@ -54,6 +57,21 @@ int main()
 	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 500));
 	//ligths.add(std::make_shared<Area_Light>(vec3(0., 2., 4.), 2., 2., 0, 500));
 	ligths.calculate_weights();
+
+	UV_Map uv;
+	uv.triangles.push_back(std::make_shared<triangle2>(vec2(0.42, 0.39), vec2(0.39, 0.0), vec2(0.0, 0.0)));
+	uv.triangles.push_back(std::make_shared<triangle2>(vec2(0.06, 0.69), vec2(-0.57, 0.12), vec2(-0.27, 0.0)));
+	uv.triangles.push_back(std::make_shared<triangle2>(vec2(0.84, -0.42), vec2(1.17, 0.0), vec2(0.72, 0.0)));
+	uv.triangles.push_back(std::make_shared<triangle2>(vec2(0.33, -0.72), vec2(0.0, -0.42), vec2(-0.24, -0.93)));
+	uv.triangles.push_back(std::make_shared<triangle2>(vec2(0.78, 0.39), vec2(1.02, 1.05), vec2(1.29, 0.45)));
+	uv.build_bvh();
+	hit_rec_2 rec;
+	vec2 point(0.f, 0.f);
+	uv.get_u_v(point, rec);
+
+
+
+
 
 	#ifdef REPORT_PROGRESS
 	Timer parser;
@@ -94,7 +112,6 @@ int main()
 	Timer balacing;
 	std::cout << "balalcning " << balacing.elapsed();
 	map.build_kd_tree();
-	std::cout << glea;
 	Timer writing;
 	std::ofstream out;																		//создать и открыть файл
 	out.open("D:\\hello.ppm");

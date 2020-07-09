@@ -1,10 +1,24 @@
 #ifndef UV_MAP_H
 #define UV_MAP_H
 #include <vector>
-#include "vec2.h"
+#include <memory>
+#include "2D_triangle.h"
+#include "2D_BVH.h"
+#include "../vec2.h"
 class UV_Map
 {
-	std::vector<std::shared_ptr<vec2>> triangles;
+public:
+	std::vector<std::shared_ptr<triangle2>> triangles;
+	BVHNode* root = nullptr;
+public:
+	void build_bvh()
+	{
+		root = build_bvh_2(*this);
+	}
+	void get_u_v(vec2 point, hit_rec_2& rec)
+	{
+		hit(root, point, rec);
+	}
 };
 
 
