@@ -52,6 +52,7 @@ int main()
 	hittable_list world;
 	Mesh ocean;
 	Mesh plane;
+	Mesh test;
 	Lights_list ligths;
 	Photon_map map(number_of_photons);
 	UV_Map uv;
@@ -63,7 +64,7 @@ int main()
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
 	#endif
-	parse("floor.obj", plane, std::make_shared<Catcher>());
+	//parse("floor.obj", plane, std::make_shared<Catcher>());
 	parse("poool.obj", ocean, std::make_shared<Glass>(1.4, colorf(0.5, 1, 1)));
 	#ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
@@ -75,11 +76,13 @@ int main()
 	Timer BVH_timer;
 	#endif
 	BVHNode_mesh* root1 = make_bvh(ocean);
-	BVHNode_mesh* root2 = make_bvh(plane);
+	//BVHNode_mesh* root2 = make_bvh(plane);
 
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
+	delete root1;
+	
 	Timer rendering;
 	std::cout << "Tracing started";
 	

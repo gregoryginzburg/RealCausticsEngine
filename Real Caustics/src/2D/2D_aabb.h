@@ -1,6 +1,7 @@
 #ifndef _AABB_H
 #define _AABB_H
 #include "../vec2.h"
+
 class aabb2
 {
 public:
@@ -16,5 +17,7 @@ public:
 	}
 };
 aabb2 surrounding_box(const aabb2 a, const aabb2 b);
+
+
 #endif 
 

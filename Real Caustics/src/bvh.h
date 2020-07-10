@@ -21,6 +21,8 @@ extern const float inf;
 
 struct BVHNode_mesh {
 	virtual bool IsLeaf() = 0;
+	virtual ~BVHNode_mesh() {}
+	
 };
 
 struct BVHInner_mesh : BVHNode_mesh
@@ -30,8 +32,8 @@ struct BVHInner_mesh : BVHNode_mesh
 	aabb bbox;
 	BVHInner_mesh() {}
 	virtual bool IsLeaf() { return false; }
-	~BVHInner_mesh()
-	{
+	virtual ~BVHInner_mesh()
+	{		
 		delete _left;
 		delete _right;
 	}
@@ -58,6 +60,10 @@ struct BVHLeaf_mesh : BVHNode_mesh
 		}
 		return hit_anything;
 	}
+	virtual ~BVHLeaf_mesh() 
+	{
+
+	}
 };
 struct aabb_temp_mesh
 {
@@ -69,4 +75,5 @@ struct aabb_temp_mesh
 
 BVHNode_mesh* make_bvh(Mesh& mesh);
 bool hit(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf);
+void delete_bvh_mesh(BVHNode_mesh* root);
 #endif

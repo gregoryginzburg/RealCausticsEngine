@@ -11,6 +11,7 @@
 
 struct BVHNode2 {
 	virtual bool IsLeaf() = 0;
+	virtual ~BVHNode2() {}
 };
 
 struct BVHInner2 : BVHNode2 
@@ -20,7 +21,7 @@ struct BVHInner2 : BVHNode2
 	aabb2 bbox;
 	BVHInner2() {}
 	virtual bool IsLeaf() { return false; }
-	~BVHInner2()
+	virtual ~BVHInner2()
 	{
 		delete _left;
 		delete _right;
@@ -54,6 +55,7 @@ struct BVHLeaf2 : BVHNode2
 		}
 		return count > 0;
 	}
+	virtual ~BVHLeaf2() {}
 };
 struct aabb2_temp
 {
@@ -65,6 +67,7 @@ struct aabb2_temp
 class UV_Map;
 BVHNode2* build_bvh_2(UV_Map& uv_map);
 bool hit(BVHNode2* root, vec2 point, hit_rec_2& rec);
+void delete_bvh2(BVHNode2* root);
 
 #endif
 

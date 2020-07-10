@@ -199,16 +199,24 @@ bool hit(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_
 }
 void delete_bvh_mesh(BVHNode_mesh* root)
 {
-	if (!root->IsLeaf())
+
+	BVHInner_mesh* inner = dynamic_cast<BVHInner_mesh*>(root);
+	if (inner->_left->IsLeaf())
 	{
-		BVHInner_mesh* inner = dynamic_cast<BVHInner_mesh*>(root);
+		delete inner;
+		return;
+	}
+	else if (inner->_right->IsLeaf())
+	{
+		delete inner;
+		return;
+	}
+	else
+	{
 		delete_bvh_mesh(inner->_left);
 		delete_bvh_mesh(inner->_right);
 		delete inner;
 	}
-	else
-	{
-		BVHLeaf_mesh* leaf = dynamic_cast<BVHLeaf_mesh*>(root);
-		delete leaf;
-	}
+	
+
 }

@@ -19,6 +19,7 @@ struct Points_on_median
 struct KDTreeNode 
 {
 	virtual bool IsLeaf() = 0; // pure virtual
+	virtual ~KDTreeNode() {}
 };
 
 struct KDTreeInner : KDTreeNode 
@@ -33,7 +34,7 @@ struct KDTreeInner : KDTreeNode
 	{
 		points_on_median = new Points_on_median;
 	}
-	~KDTreeInner()
+	virtual ~KDTreeInner()
 	{
 		delete points_on_median;
 		delete _left;
@@ -45,6 +46,7 @@ struct KDTreeLeaf : KDTreeNode
 {
 	std::vector<std::shared_ptr<photon>> points;
 	virtual bool IsLeaf() { return true; }
+	virtual ~KDTreeLeaf() {}
 };
 
 
@@ -53,6 +55,8 @@ KDTreeNode* build(std::vector<std::shared_ptr<photon>>& points);
 void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue& closest_photons);
 
 int CountBoxes(KDTreeNode* root);
+
+void delete_kd_tree(KDTreeNode* root);
 
 class Photon_map
 {
