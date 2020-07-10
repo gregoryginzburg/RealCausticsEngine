@@ -1,20 +1,18 @@
-#ifndef BVH_H
-#define BVH_H
+#ifndef BVH_MESH_H
+#define BVH_MESH_H
 
-#include "vec3.h"
-#include "ray.h"
-#include "Hit_rec.h"
-#include "hittable_list.h"
-#include "utils.h"
+#include "../vec3.h"
+#include "../ray.h"
+#include "../Hit_rec.h"
+#include "../utils.h"
 #include <algorithm>
 #include <cmath>
 #include <memory>
-#include "aabb.h"
-#include "mesh.h"
+#include "../aabb.h"
+#include "../mesh.h"
+#include "../Triangle.h"
 
 
-
-class Hittable;
 
 extern const float inf;
 
@@ -73,7 +71,7 @@ struct aabb_temp_mesh
 	aabb_temp_mesh(aabb& box, vec3& c, std::shared_ptr<Triangle> t) : bbox(box), center(c), triangle(t) {}
 };
 
-BVHNode_mesh* make_bvh(Mesh& mesh);
-bool hit(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf);
-void delete_bvh_mesh(BVHNode_mesh* root);
+void make_bvh_mesh(std::shared_ptr<Mesh> mesh);
+bool hit_mesh(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf);
+
 #endif

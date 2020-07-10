@@ -1,7 +1,9 @@
-#include "vec3.h"
-#include "ray.h"
-#include "mesh.h"
-#include "bvh.h"
+#include "../vec3.h"
+#include "../ray.h"
+#include "../mesh.h"
+#include "BVH_mesh.h"
+#include "../Triangle.h"
+#include <memory>
 
 BVHNode_mesh* recurse(std::vector<aabb_temp_mesh> objects)
 {
@@ -156,25 +158,26 @@ BVHNode_mesh* recurse(std::vector<aabb_temp_mesh> objects)
 
 
 
-BVHNode_mesh* make_bvh(Mesh& mesh)
+void make_bvh_mesh(std::shared_ptr<Mesh> mesh)
 {
 	std::vector<aabb_temp_mesh> working_list;
-	working_list.reserve(mesh.number_of_tris());
-	for (size_t i = 0; i < mesh.number_of_tris(); ++i)
+	working_list.reserve(mesh->triangles.size());
+	for (size_t i = 0; i < mesh->triangles.size(); ++i)
 	{	
-		aabb bbox = mesh.triangles[i]->bounding_box();
+		aabb bbox = mesh->triangles[i]->bounding_box();
 		vec3 center = (bbox.min + bbox.max) / 2.f;
-		working_list.emplace_back(bbox, center, mesh.triangles[i]);
+		working_list.emplace_back(bbox, center, mesh->triangles[i]);
 	}
-	BVHNode_mesh* root = recurse(working_list);
-	mesh.triangles.clear();
-	mesh.triangles.shrink_to_fit();
-	return root;
+	mesh->root = recurse(working_list);
+	BVHInner_mesh* root = dynamic_cast<BVHInner_mesh*>(mesh->root);
+	mesh->bounding_box = root->bbox;
+	mesh->triangles.clear();
+	mesh->triangles.shrink_to_fit();
 }
 
 
 
-bool hit(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf)
+bool hit_mesh(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf)
 {
 	if (!root->IsLeaf())
 	{
@@ -185,8 +188,8 @@ bool hit(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_
 		}
 		else
 		{
-			bool left_hit = hit(inner->_left, r, tmin, tmax, hit_inf);
-			bool right_hit = hit(inner->_right, r, tmin, left_hit ? hit_inf.t : tmax, hit_inf);
+			bool left_hit = hit_mesh(inner->_left, r, tmin, tmax, hit_inf);
+			bool right_hit = hit_mesh(inner->_right, r, tmin, left_hit ? hit_inf.t : tmax, hit_inf);
 			return left_hit || right_hit;
 		}
 
@@ -197,26 +200,4 @@ bool hit(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_
 		return leaf->hit(r, tmin, tmax, hit_inf);
 	}
 }
-void delete_bvh_mesh(BVHNode_mesh* root)
-{
 
-	BVHInner_mesh* inner = dynamic_cast<BVHInner_mesh*>(root);
-	if (inner->_left->IsLeaf())
-	{
-		delete inner;
-		return;
-	}
-	else if (inner->_right->IsLeaf())
-	{
-		delete inner;
-		return;
-	}
-	else
-	{
-		delete_bvh_mesh(inner->_left);
-		delete_bvh_mesh(inner->_right);
-		delete inner;
-	}
-	
-
-}

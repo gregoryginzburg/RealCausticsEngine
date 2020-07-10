@@ -9,20 +9,18 @@
 #include "vec3.h"
 #include "timer.h"
 #include "mesh.h"
+#include "Triangle.h"
 #include "ray.h"
 #include "hittable_list.h"
 #include "utils.h"
 #include "Color.h"
 #include "parser.h"
-#include "bvh.h"
 #include "photon.h"
 #include "Lights.h"
 #include "matrix.h"
 #include "photon_map.h"
 #include "priority_queue.h"
 #include "trace_photon.h"
-#include "2D\2D_triangle.h"
-#include "2D\2D_BVH.h"
 #include "2D\UV_Map.h"
 
 
@@ -50,7 +48,7 @@ int main()
 {
 	Timer Summary;
 	hittable_list world;
-	Mesh ocean;
+	std::shared_ptr<Mesh> ocean = std::make_shared<Mesh>();
 	Mesh plane;
 	Mesh test;
 	Lights_list ligths;
@@ -66,6 +64,7 @@ int main()
 	#endif
 	//parse("floor.obj", plane, std::make_shared<Catcher>());
 	parse("poool.obj", ocean, std::make_shared<Glass>(1.4, colorf(0.5, 1, 1)));
+	world.add(ocean);
 	#ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
 	#endif
@@ -75,13 +74,10 @@ int main()
 	std::cout << "Building BVH" << std::endl;
 	Timer BVH_timer;
 	#endif
-	BVHNode_mesh* root1 = make_bvh(ocean);
-	//BVHNode_mesh* root2 = make_bvh(plane);
-
+	world.create_bvh();
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
-	delete root1;
 	
 	Timer rendering;
 	std::cout << "Tracing started";

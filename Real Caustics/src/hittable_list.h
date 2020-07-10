@@ -5,32 +5,28 @@
 #include "vec3.h"
 #include "ray.h"
 #include "Hit_rec.h"
-using std::shared_ptr;
-using std::make_shared;
+#include "mesh.h"
+#include "BVH\BVH_world.h"
 
 class hittable_list 
 {
 public:
+	std::vector<std::shared_ptr<Mesh>> objects;
+	BVHNode_world* root = nullptr;
 public:
 	hittable_list() {}
 
 	bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf) const
 	{
-		/*hit_rec temp_rec;
-		bool hit_anything = false;
-		auto closest_so_far = tmax;
-		//тут проходим по указателям на каждый объект класса hittable
-		for (const auto& object : objects)   
-		{
-
-			if (object->hit(r, tmin, closest_so_far, temp_rec))
-			{
-				hit_anything = true;
-				closest_so_far = temp_rec.t;
-				hit_inf = temp_rec;
-			}
-		}*/
-		return true;
+		return hit_world(root, r, tmin, tmax, hit_inf);
+	}
+	void create_bvh()
+	{
+		make_bvh_world(*this);
+	}
+	void add(std::shared_ptr<Mesh> mesh)
+	{
+		objects.push_back(mesh);
 	}
 	
 };
