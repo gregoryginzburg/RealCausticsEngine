@@ -27,7 +27,7 @@ public:
 		float denom = cc * bb - bc * bc;
 		rec.u = (bb * pc - bc * pb) / denom;
 		rec.v = (cc * pb - bc * pc) / denom;
-		return (rec.u >= 0.f) && (rec.v >= 0.f) && (rec.u + rec.v <= 1.f);
+		return (rec.u >= 0.f) && (rec.v >= 0.f) && (rec.u + rec.v < 1.f);
 	}
 	aabb2 bounding_box()
 	{

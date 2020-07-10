@@ -18,7 +18,7 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int dept
 	}
 	hit_rec rec;
 	ray scattered_ray;
-	if (world.hit(r, 0.000001, inf, rec))
+	if (world.hit(r, 0.000001f, inf, rec))
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
@@ -29,13 +29,12 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int dept
 		}
 		else
 		{
-			if (r.was_refracted && !photon_map.is_full())
-			{
+			if (r.was_refracted)
 				photon_map.add(rec.p, r.power);
-			}
-			return;
 		}
+		
+		
 	}
-	return;
+	
 
 }

@@ -4,6 +4,7 @@ struct hit_rec_2
 {
 	float u;
 	float v;
+	int index;
 };
 
 

@@ -169,10 +169,18 @@ void make_bvh_mesh(std::shared_ptr<Mesh> mesh)
 		working_list.emplace_back(bbox, center, mesh->triangles[i]);
 	}
 	mesh->root = recurse(working_list);
-	BVHInner_mesh* root = dynamic_cast<BVHInner_mesh*>(mesh->root);
-	mesh->bounding_box = root->bbox;
-	mesh->triangles.clear();
-	mesh->triangles.shrink_to_fit();
+	if (!mesh->root->IsLeaf())
+	{
+		BVHInner_mesh* root = dynamic_cast<BVHInner_mesh*>(mesh->root);
+		mesh->bounding_box = root->bbox;
+	}
+	else
+	{
+		mesh->bounding_box = mesh->create_bvh();
+	}
+	
+	//mesh->triangles.clear();
+	//mesh->triangles.shrink_to_fit();
 }
 
 

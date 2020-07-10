@@ -1,6 +1,7 @@
 #include "2D_BVH.h"
 #include "2D_triangle.h"
 #include "2D_aabb.h"
+#include "../vec3.h"
 #include "UV_Map.h"
 #include <vector>
 #include <memory>

@@ -71,9 +71,9 @@ public:
 
 	}
 public:
-	point3 vertice0;
-	point3 vertice1;
-	point3 vertice2;
+	vec3 vertice0;
+	vec3 vertice1;
+	vec3 vertice2;
 	vec2 texture_vert0;
 	vec2 texture_vert1;
 	vec2 texture_vert2;

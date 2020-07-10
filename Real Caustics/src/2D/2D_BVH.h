@@ -41,6 +41,7 @@ struct BVHLeaf2 : BVHNode2
 		{
 			if (!(count > 1))
 			{
+				temp_rec.index = i;
 				if (triangles[i]->hit(point, temp_rec))
 				{
 					rec = temp_rec;

@@ -28,6 +28,10 @@ public:
 	{
 		objects.push_back(mesh);
 	}
+	void delete_world()
+	{
+		delete root;
+	}
 	
 };
 

@@ -38,6 +38,20 @@ public:
 		b *= other.b;
 		return *this;
 	}
+	inline colorf& operator/=(float t)
+	{
+		r /= t;
+		g /= t;
+		b /= t;
+		return *this;
+	}
+	inline colorf& operator+=(const colorf& other)
+	{
+		r += other.r;
+		g += other.g;
+		b += other.b;
+		return *this;
+	}
 };
 inline colorf operator*(const colorf& a, const colorf& b)
 {

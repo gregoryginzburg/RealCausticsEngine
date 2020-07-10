@@ -51,19 +51,36 @@ struct BVHLeaf_world : BVHNode_world
 		float closest_so_far = tmax;
 		for (size_t i = 0; i < meshes.size(); ++i)
 		{
-			BVHInner_mesh* mesh_root = dynamic_cast<BVHInner_mesh*>(meshes[i]);
-			if (hit_mesh(mesh_root, r, tmin, tmax, temp_rec))
+			if (!meshes[i]->IsLeaf())
 			{
-				hit_anything = true;
-				closest_so_far = temp_rec.t;
-				hit_inf = temp_rec;
+				BVHInner_mesh* mesh_root = dynamic_cast<BVHInner_mesh*>(meshes[i]);
+				if (hit_mesh(mesh_root, r, tmin, closest_so_far, temp_rec))
+				{
+					hit_anything = true;
+					closest_so_far = temp_rec.t;
+					hit_inf = temp_rec;
+				}
 			}
+			else
+			{
+				BVHLeaf_mesh* mesh_root = dynamic_cast<BVHLeaf_mesh*>(meshes[i]);
+				if (mesh_root->hit(r, tmin, closest_so_far, temp_rec))
+				{
+					hit_anything = true;
+					closest_so_far = temp_rec.t;
+					hit_inf = temp_rec;
+				}
+			}
+			
 		}
 		return hit_anything;
 	}
 	virtual ~BVHLeaf_world()
 	{
-
+		for (size_t i = 0; i < meshes.size(); ++i)
+		{
+			delete meshes[i];
+		}
 	}
 };
 struct aabb_temp_world

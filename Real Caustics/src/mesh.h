@@ -13,7 +13,7 @@
 #include "Triangle.h"
 
 struct BVHNode_mesh;
-
+extern const float inf;
 class Mesh 
 {
 public:
@@ -24,6 +24,15 @@ public:
 	std::vector<std::shared_ptr<Triangle>> triangles;
 	aabb bounding_box;
 	BVHNode_mesh* root = nullptr;
+	aabb create_bvh()
+	{
+		aabb bbox(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
+		for (size_t i = 0; i < triangles.size(); ++i)
+		{
+			bbox = surrounding_box(bbox, triangles[i]->bounding_box());
+		}
+		return bbox;
+	}
 };
 
 #endif
