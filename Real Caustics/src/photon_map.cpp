@@ -238,7 +238,7 @@ void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue&
 			find_photons(photons_inner->_left, point, search_distance_squared, closest_photons);
 			if (dist_to_plane * dist_to_plane < search_distance_squared)
 			{
-				if (photons_inner->points_on_median->points.size())
+				/*if (photons_inner->points_on_median->points.size())
 				{
 					for (int i = 0; i < photons_inner->points_on_median->points.size(); ++i)
 					{
@@ -252,7 +252,7 @@ void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue&
 							}
 						}
 					}
-				}
+				}*/
 				find_photons(photons_inner->_right, point, search_distance_squared, closest_photons);
 			}
 
@@ -262,7 +262,7 @@ void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue&
 			find_photons(photons_inner->_right, point, search_distance_squared, closest_photons);
 			if (dist_to_plane * dist_to_plane < search_distance_squared)
 			{
-				if (photons_inner->points_on_median->points.size())
+				/*if (photons_inner->points_on_median->points.size())
 				{
 					for (int i = 0; i < photons_inner->points_on_median->points.size(); ++i)
 					{
@@ -276,7 +276,7 @@ void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue&
 							}
 						}
 					}
-				}
+				}*/
 				find_photons(photons_inner->_left, point, search_distance_squared, closest_photons);
 			}
 

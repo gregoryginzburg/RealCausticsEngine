@@ -27,13 +27,12 @@ color gather_photons(vec2 pixel, UV_Map& uv_map, Photon_map& photon_map, float s
 		float delta_A = PI * closest_photons.priorities[0] * closest_photons.priorities[0];
 		for (int i = 0; i < closest_photons.photons.size(); ++i)
 		{
-			flux += closest_photons.photons[i]->power;
-			
+			flux += closest_photons.photons[i]->power;			
 		}
 		flux /= delta_A;
-		int r = (int)(flux.r * 1);
-		int g = (int)(flux.g * 1);
-		int b = (int)(flux.b * 1);
+		int r = static_cast<int>(flux.r / 200000.f);
+		int g = static_cast<int>(flux.g / 200000.f);
+		int b = static_cast<int>(flux.b / 200000.f);
 		return color(r, g, b);
 	}
 	

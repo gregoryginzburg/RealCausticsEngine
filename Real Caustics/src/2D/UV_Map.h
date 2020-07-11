@@ -40,8 +40,8 @@ public:
 	{
 		hit_rec_2 rec;
 		get_u_v(point, rec);
-		return mesh->triangles[rec.index]->vertice0 * rec.u + mesh->triangles[rec.index]->vertice1 * rec.v +
-			mesh->triangles[rec.index]->vertice2 * (1.f - rec.v - rec.u);
+		return mesh->triangles[rec.index]->vertice0 * (1.f - rec.v - rec.u) + mesh->triangles[rec.index]->vertice1 * rec.u +
+			mesh->triangles[rec.index]->vertice2 * rec.v;
 	}
 };
 
