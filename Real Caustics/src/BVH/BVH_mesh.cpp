@@ -5,7 +5,7 @@
 #include "../Triangle.h"
 #include <memory>
 
-BVHNode_mesh* recurse(std::vector<aabb_temp_mesh> objects)
+BVHNode_mesh* recurse(std::vector<aabb_temp_mesh>& objects)
 {
 	if (objects.size() < 4)
 	{

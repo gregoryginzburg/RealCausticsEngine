@@ -57,6 +57,10 @@ inline colorf operator*(const colorf& a, const colorf& b)
 {
 	return colorf(a.r * b.r, a.g * b.g, a.b * b.b);
 }
+inline colorf operator*(const colorf& a, float t)
+{
+	return colorf(a.r * t, a.g * t, a.b * t);
+}
 inline color clamp(color& c)
 {
 	if (c.r > 255)

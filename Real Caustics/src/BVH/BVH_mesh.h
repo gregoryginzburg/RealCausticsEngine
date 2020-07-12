@@ -39,7 +39,7 @@ struct BVHInner_mesh : BVHNode_mesh
 
 struct BVHLeaf_mesh : BVHNode_mesh
 {
-	std::vector<std::shared_ptr<Triangle>> triangles;
+	std::vector<int> triangle_indices;
 	BVHLeaf_mesh() {}
 	virtual bool IsLeaf() { return true; }
 	bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf)

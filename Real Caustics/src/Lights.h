@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "random_generators.h"
 #include "Color.h"
+#include <cmath>
 
 extern const float negative_inf;
 extern int number_of_photons;
@@ -14,8 +15,9 @@ extern int number_of_photons;
 class Light
 {
 public:
-	virtual ray emit_photon(size_t i, float power) const = 0;
+	virtual ray emit_photon(size_t i, size_t j, float power) const = 0;
 	virtual float get_power() const = 0;
+	virtual void geyt_i_j(int number_of_rays, int& i, int& j) = 0;
 
 };
 class Area_Light : public Light
@@ -28,6 +30,8 @@ public:
 	vec3 normal = vec3(0, 0, -1);
 	float spread;
 	float power;
+	float width;
+	float height;
 
 public:
 	Area_Light(vec3 p, float w, float h, float spr, float pow)  : spread(spr), position(p), power(pow)
@@ -35,6 +39,8 @@ public:
 		bottom_left_corner = position - vec3(w / 2.f, h / 2.f, 0.f);
 		horizontal = vec3(w, 0., 0.);
 		vertical = vec3(0., h, 0.);	
+		width = w;
+		height = h;
 	}
 
 	Area_Light(vec3 p, vec3 rot, float w, float h, float spr, float pow) : Area_Light(p, w, h, spr, pow)
@@ -43,9 +49,9 @@ public:
 	}
 	
 public:
-	virtual ray emit_photon(size_t i, float power) const
+	virtual ray emit_photon(size_t i, size_t j, float power) const
 	{
-		return ray(bottom_left_corner + random_float_0_1() * horizontal + random_float_0_1() * vertical, normal + spread*random_in_hemisphere(), colorf(power, power, power));
+		return ray(bottom_left_corner + halton_sequnce(i, 2) * horizontal + halton_sequnce(j, 3) * vertical, normal + spread*random_in_hemisphere(), colorf(power, power, power));
 	}
 	virtual float get_power() const
 	{
@@ -62,6 +68,12 @@ public:
 		rotate_vec(normal, position, rotation);
 		horizontal = bottom_rigth_corner - bottom_left_corner;
 		vertical = top_left_corner - bottom_left_corner;
+	}
+	void geyt_i_j(int number_of_rays, int& i, int& j)
+	{
+		float k = std::sqrtf(number_of_rays / (1.f + width / height));
+		i = (int)k;
+		j = (int)(number_of_rays / k);
 	}
 };
 
@@ -88,8 +100,11 @@ public:
 		static int light = 0;
 		static int numbers_photons_light = (int)(weights[light] * number_of_photons);
 		static float current_power = lights[light]->get_power() / (float)(numbers_photons_light - 1);
-		static int ii = -1;
-		if (ii > numbers_photons_light - 2)
+		static int current_call = -1;
+		static int x;
+		static int y;
+		lights[light]->geyt_i_j(numbers_photons_light, x, y);
+		if (current_call > numbers_photons_light - 2)
 		{
 			light += 1;
 			if (light > lights.size() - 1)
@@ -98,12 +113,12 @@ public:
 			}
 			numbers_photons_light = static_cast<int>(weights[light] * number_of_photons);
 			current_power = lights[light]->get_power() / (float)(numbers_photons_light - 1);
-			ii = 0;
-			return lights[light]->emit_photon(ii, current_power);
+			current_call = 0;
+			return lights[light]->emit_photon(current_call % x, current_call / y, current_power);
 		}
 
-		ii += 1;
-		return lights[light]->emit_photon(ii, current_power);
+		current_call += 1;
+		return lights[light]->emit_photon(current_call % x, current_call / y, current_power);
 	}
 	void calculate_weights()
 	{

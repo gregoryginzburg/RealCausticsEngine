@@ -9,16 +9,10 @@
 
 extern const float inf;
 
-aabb construct_bbox(std::vector<std::shared_ptr<photon>>& points);
 
-
-struct Points_on_median
-{
-	std::vector<std::shared_ptr<photon>> points;
-};
 struct KDTreeNode 
 {
-	virtual bool IsLeaf() = 0; // pure virtual
+	virtual bool IsLeaf() = 0; 
 	virtual ~KDTreeNode() {}
 };
 
@@ -28,15 +22,10 @@ struct KDTreeInner : KDTreeNode
 	KDTreeNode* _right = nullptr;
 	float split = 0.f;
 	char axis = 0;
-	Points_on_median* points_on_median;
 	virtual bool IsLeaf() { return false; }
-	KDTreeInner()
-	{
-		points_on_median = new Points_on_median;
-	}
+	KDTreeInner() {}
 	virtual ~KDTreeInner()
 	{
-		delete points_on_median;
 		delete _left;
 		delete _right;
 	}

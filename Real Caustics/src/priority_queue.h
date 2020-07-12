@@ -14,32 +14,21 @@ public:
 	//max size
 	int size;
 public:
-	Priority_queue(int s) : size(s) 
+	Priority_queue() 
 	{
-		photons.reserve(s);
-		priorities.reserve(s);
+		//photons.reserve(s);
+		//priorities.reserve(s);
 	}
 public:
 	void insert_element(std::shared_ptr<photon> insertion_photon, float priority)
 	{
-		if (capacity == size)
-		{
-			if (priority < priorities[0])
-			{
-				photons[0] = insertion_photon;
-				priorities[0] = priority;
-				heapify(1);
-			}
-		}
-		else
-		{
-			++capacity;
-			photons.push_back(insertion_photon);
-			priorities.push_back(priority);
-			//photons[capacity - 1] = insertion_photon;
-			//priorities[capacity - 1] = priority;
-			increase_key(capacity - 1);
-		}
+
+
+		++capacity;
+		photons.push_back(insertion_photon);
+		priorities.push_back(priority);
+		increase_key(capacity - 1);
+	
 			
 	}
 	void increase_key(int i)

@@ -5,16 +5,12 @@
 #include "photon.h"
 #include "random_generators.h"
 #include "aabb.h"
+#include <cmath>
 
-//initialize with element = 1
 
 extern const float inf;
-
-
-aabb construct_bbox(std::vector<std::shared_ptr<photon>>& points)
+void construct_bbox(std::vector<std::shared_ptr<photon>>& points, vec3& bottom, vec3& top)
 {
-	vec3 bottom(inf, inf, inf);
-	vec3 top(-inf, -inf, -inf);
 	for (int i = 0; i < points.size(); ++i)
 	{
 		if (points[i]->position.x < bottom.x)
@@ -42,9 +38,78 @@ aabb construct_bbox(std::vector<std::shared_ptr<photon>>& points)
 			top.z = points[i]->position.z;
 		}
 	}
-	return aabb(bottom, top);
 }
 
+int biggest_axis(std::vector<std::shared_ptr<photon>>& points)
+{
+	vec3 bottom(inf, inf, inf);
+	vec3 top(-inf, -inf, -inf);
+	if (points.size() < 500)
+	{
+		construct_bbox(points, bottom, top);
+	}
+	else
+	{
+		std::vector<std::shared_ptr<photon>> random_photons;
+		random_photons.reserve(500);
+		for (int i = 0; i < 500; ++i)
+		{
+			int random = random_int(points.size());
+			random_photons.push_back(points[random]);
+		}
+		construct_bbox(random_photons, bottom, top);
+	}
+		
+	float side1 = top.x - bottom.x;
+	float side2 = top.y - bottom.y;
+	float side3 = top.z - bottom.z;
+	float max_side = std::fmax(std::fmax(top.x - bottom.x, top.y - bottom.y), top.z - bottom.z);
+	return max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
+}
+
+bool x_compare(std::shared_ptr<photon>& a, std::shared_ptr<photon>& b)
+{
+	return a->position.x < b->position.x;
+}
+bool y_compare(std::shared_ptr<photon>& a, std::shared_ptr<photon>& b)
+{
+	return a->position.y < b->position.y;
+}
+bool z_compare(std::shared_ptr<photon>& a, std::shared_ptr<photon>& b)
+{
+	return a->position.z < b->position.z;
+}
+
+
+
+
+
+float aproximate_median(std::vector<std::shared_ptr<photon>>& points, int axis)
+{
+	auto comparator = (axis == 0) ? x_compare
+		: (axis == 1) ? y_compare
+		: z_compare;
+	if (points.size() < 500) 
+	{
+		std::sort(points.begin(), points.end(), comparator);
+		return axis == 0 ? points[points.size() / 2]->position.x : axis == 1 ? points[points.size() / 2]->position.y : points[points.size() / 2]->position.z;
+	}
+	else
+	{
+
+		std::vector<std::shared_ptr<photon>> random_photons;
+		random_photons.reserve(401);
+		for (int i = 0; i < 401; ++i)
+		{
+			int random = random_int(points.size());
+			random_photons.push_back(points[random]);
+		}
+		std::sort(random_photons.begin(), random_photons.end(), comparator);
+
+		return axis == 0 ? random_photons[200]->position.x : axis == 1 ? random_photons[200]->position.y : random_photons[200]->position.z;
+	}
+
+}
 
 KDTreeNode* build(std::vector<std::shared_ptr<photon>>& points)
 {
@@ -57,135 +122,14 @@ KDTreeNode* build(std::vector<std::shared_ptr<photon>>& points)
 		}
 		return leaf;
 	}
-	aabb bbox_temp = construct_bbox(points);
-	float min_cost = inf;
-	float best_split = inf;
-	bool is_better_split = false;
-	int count_left;
-	int count_right;
-	int best_left_amount;
-	int best_right_amount;
-
-
-
-	float side1 = bbox_temp.max.x - bbox_temp.min.x;
-	float side2 = bbox_temp.max.y - bbox_temp.min.y;
-	float side3 = bbox_temp.max.z - bbox_temp.min.z;
-
-	float max_side = std::fmax(std::fmax(side1, side2), side3);
-	int axis = max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
-
-	float start;
-	float stop;
-
-
-	if (axis == 0)
-	{
-		start = bbox_temp.min.x;
-		stop = bbox_temp.max.x;
-	}
-	else if (axis == 1)
-	{
-		start = bbox_temp.min.y;
-		stop = bbox_temp.max.y;
-	}
 	else
 	{
-		start = bbox_temp.min.z;
-		stop = bbox_temp.max.z;
-	}
-	float step = (stop - start) / 16.f;
-
-	for (float testSplit = start + step; testSplit < stop - step; testSplit += step)
-	{
-		count_left = 0;
-		count_right = 0;
-		for (unsigned int i = 0; i < points.size(); ++i)
-		{
-			float point_axis;
-			if (axis == 0) point_axis = points[i]->position.x;
-			else if (axis == 1) point_axis = points[i]->position.y;
-			else point_axis = points[i]->position.z;
-
-			if (point_axis < testSplit)
-			{
-				count_left += 1;
-			}
-			else
-			{
-				count_right += 1;
-			}
-		}
-		if (count_left < 1 || count_right < 1)
-		{
-			continue;
-		}
-		float lside1;
-		float lside2;
-		float lside3;
-		float rside1;
-		float rside2;
-		float rside3;
-		if (axis == 0)
-		{
-			lside1 = testSplit;
-			lside2 = bbox_temp.max.y - bbox_temp.min.y;
-			lside3 = bbox_temp.max.z - bbox_temp.min.z;
-			rside1 = bbox_temp.max.x - testSplit;
-			rside2 = bbox_temp.max.y - bbox_temp.min.y;
-			rside3 = bbox_temp.max.z - bbox_temp.min.z;
-		}
-		else if (axis == 1)
-		{
-			lside1 = bbox_temp.max.x - bbox_temp.min.x;
-			lside2 = testSplit;
-			lside3 = bbox_temp.max.z - bbox_temp.min.z;
-			rside1 = bbox_temp.max.x - bbox_temp.min.x;
-			rside2 = bbox_temp.max.y - testSplit;
-			rside3 = bbox_temp.max.z - bbox_temp.min.z;
-		}
-		else
-		{
-			lside1 = bbox_temp.max.x - bbox_temp.min.x;
-			lside2 = bbox_temp.max.y - bbox_temp.min.y;
-			lside3 = testSplit;
-			rside1 = bbox_temp.max.x - bbox_temp.min.x;
-			rside2 = bbox_temp.max.y - bbox_temp.min.y;
-			rside3 = bbox_temp.max.z - testSplit;
-		}
-		
-
-		float lsurface_area = lside1 * lside2 + lside2 * lside3 + lside3 * lside1;
-		float rsurface_area = rside1 * rside2 + rside2 * rside3 + rside3 * rside1;
-
-		float total_cost = lsurface_area * count_left + rsurface_area * count_right;
-
-		if (total_cost < min_cost)
-		{
-			min_cost = total_cost;
-			best_split = testSplit;
-			is_better_split = true;
-			best_left_amount = count_left;
-			best_right_amount = count_right;
-		}
-
-	}
-	if (!is_better_split)
-	{
-		KDTreeLeaf* leaf = new KDTreeLeaf;
-		for (int i = 0; i < points.size(); ++i)
-		{
-			leaf->points.push_back(points[i]);
-		}
-		return leaf;
-	}
-	else
-	{
+		int axis = biggest_axis(points);
+		float best_split = aproximate_median(points, axis);
 		std::vector<std::shared_ptr<photon>> left_objects;
-		left_objects.reserve(best_left_amount);
+		left_objects.reserve(points.size() / 2);
 		std::vector<std::shared_ptr<photon>> right_objects;
-		right_objects.reserve(best_right_amount);
-		std::vector<std::shared_ptr<photon>> objects_on_median;
+		right_objects.reserve(points.size() / 2);
 
 		for (size_t i = 0; i < points.size(); ++i)
 		{
@@ -198,14 +142,11 @@ KDTreeNode* build(std::vector<std::shared_ptr<photon>>& points)
 			{
 				left_objects.push_back(points[i]);
 			}
-			else if (point_axis == best_split)
-			{
-				objects_on_median.push_back(points[i]);		
-			}
-			else
+			else 
 			{
 				right_objects.push_back(points[i]);
 			}
+
 		}
 		KDTreeInner* inner = new KDTreeInner;
 		inner->axis = axis;
@@ -291,10 +232,10 @@ void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue&
 			if (dist_to_point_squared < search_distance_squared)
 			{
 				closest_photons.insert_element(photons_leaf->points[i], dist_to_point_squared);
-				if (closest_photons.capacity == closest_photons.size)
+				/*if (closest_photons.capacity == closest_photons.size)
 				{
 					search_distance_squared = (point - photons_leaf->points[i]->position).length_squared();
-				}
+				}*/
 			}
 		}
 

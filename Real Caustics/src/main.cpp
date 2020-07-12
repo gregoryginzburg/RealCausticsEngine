@@ -36,8 +36,9 @@
 extern const float inf = std::numeric_limits<float>::infinity();
 extern const float negative_inf = -inf;
 extern const float PI = 3.14159265359f;
+extern const float E = 2.71828182846;
 extern const float PI2 = 6.28318530718f;
-extern int number_of_photons = 5000000;
+extern int number_of_photons = 100000;
 
 extern const int image_width = 1000;
 extern const int image_height = 1000;
@@ -64,7 +65,7 @@ int main()
 	std::cout << "Parsing Started" << std::endl;
 	#endif
 	parse("floor.obj", plane, std::make_shared<Catcher>());
-	parse("poool.obj", ocean, std::make_shared<Glass>(1.4, colorf(1, 1, 1)));
+	parse("poool.obj", ocean, std::make_shared<Glass>(1.45, colorf(1, 1, 1)));
 	world.add(ocean);
 	world.add(plane);
 	uv.mesh = plane;
@@ -119,7 +120,7 @@ int main()
 		for (int i = 0; i < image_width; ++i)
 		{
 			vec2 pixel = vec2(i, j);
-			color pixel_color = gather_photons(pixel, uv, map, 0.004, 10000);
+			color pixel_color = gather_photons(pixel, uv, map, 0.03, 10000);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
 		}
 	}
