@@ -23,7 +23,7 @@
 #include "trace_photon.h"
 #include "2D\UV_Map.h"
 #include "Gather_photons.h"
-
+#include "BVH\BVH_mesh.h"
 
 
 #define REPORT_PROGRESS
@@ -38,7 +38,7 @@ extern const float negative_inf = -inf;
 extern const float PI = 3.14159265359f;
 extern const float E = 2.71828182846;
 extern const float PI2 = 6.28318530718f;
-extern int number_of_photons = 100000;
+extern int number_of_photons = 5000000;
 
 extern const int image_width = 1000;
 extern const int image_height = 1000;
@@ -53,6 +53,8 @@ int main()
 	hittable_list world;
 	std::shared_ptr<Mesh> ocean = std::make_shared<Mesh>();
 	std::shared_ptr<Mesh> plane = std::make_shared<Mesh>();
+	BVH_mesh plane_bvh;
+	BVH_mesh ocean_bvh;
 
 	Lights_list ligths;
 	Photon_map map(number_of_photons);
@@ -66,39 +68,45 @@ int main()
 	#endif
 	parse("floor.obj", plane, std::make_shared<Catcher>());
 	parse("poool.obj", ocean, std::make_shared<Glass>(1.45, colorf(1, 1, 1)));
-	world.add(ocean);
-	world.add(plane);
-	uv.mesh = plane;
-	uv.make_uv_map();
+
+
 	#ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
 	#endif
 
+
+	
 	
 	#ifdef REPORT_PROGRESS
 	std::cout << "Building BVH" << std::endl;
 	Timer BVH_timer;
 	#endif
-	world.create_bvh();
+	update_bvh(0, ocean_bvh, ocean, "ocean_bvh.bvh");
+	update_bvh(0, plane_bvh, plane, "plane_bvh.bvh");
+	world.add(ocean_bvh, ocean);
+	world.add(plane_bvh, plane);
+	uv.mesh = plane;
+	uv.make_uv_map();
 	uv.build_bvh();
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
-
+	
 	Timer rendering;
+
 	std::cout << "Tracing started";
 	for (int i = 0; i < number_of_photons; ++i)
 	{
 		ray r = ligths.emit_photon();
 		trace_photon(map, world, r, 2);
 	}	
-
-
 	
+
 	#ifdef REPORT_PROGRESS
 	std::cout << "\n";
 	std::cout << "Done  :  " << rendering.elapsed() << std::endl;
 	#endif
+
 	Timer balacing;
 	std::cout << "Balacing Started" << std::endl;
 	map.build_kd_tree();
@@ -120,7 +128,7 @@ int main()
 		for (int i = 0; i < image_width; ++i)
 		{
 			vec2 pixel = vec2(i, j);
-			color pixel_color = gather_photons(pixel, uv, map, 0.03, 10000);
+			color pixel_color = gather_photons(pixel, uv, map, 0.008, 10000);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
 		}
 	}
@@ -133,7 +141,7 @@ int main()
 
 	std::cout << "\n";
 	std::cout << "Summary Time  :  " << Summary.elapsed();
-	#endif
+	#endif*/
 	return 0;
 
 }

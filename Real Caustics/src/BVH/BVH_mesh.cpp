@@ -4,16 +4,21 @@
 #include "BVH_mesh.h"
 #include "../Triangle.h"
 #include <memory>
+#include <fstream>
+
 
 BVHNode_mesh* recurse(std::vector<aabb_temp_mesh>& objects)
 {
 	if (objects.size() < 4)
 	{
+		aabb temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
 		BVHLeaf_mesh* leaf = new BVHLeaf_mesh;
 		for (size_t i = 0; i < objects.size(); ++i)
 		{
-			leaf->triangles.push_back(objects[i].triangle);
+			temp = surrounding_box(temp, objects[i].bbox);
+			leaf->triangle_indices.push_back(objects[i].index);
 		}
+		leaf->bbox = temp;
 		return leaf;
 	}
 	else
@@ -116,11 +121,14 @@ BVHNode_mesh* recurse(std::vector<aabb_temp_mesh>& objects)
 		}
 		if (!is_better_split)
 		{
+			aabb temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
 			BVHLeaf_mesh* leaf = new BVHLeaf_mesh;
 			for (size_t i = 0; i < objects.size(); ++i)
 			{
-				leaf->triangles.push_back(objects[i].triangle);
+				temp = surrounding_box(temp, objects[i].bbox);
+				leaf->triangle_indices.push_back(objects[i].index);
 			}
+			leaf->bbox = temp;
 			return leaf;
 		}
 		else
@@ -129,6 +137,7 @@ BVHNode_mesh* recurse(std::vector<aabb_temp_mesh>& objects)
 			left_objects.reserve(best_left_amount);
 			std::vector<aabb_temp_mesh> right_objects;
 			right_objects.reserve(best_right_amount);
+	
 
 			for (size_t i = 0; i < objects.size(); ++i)
 			{
@@ -155,57 +164,156 @@ BVHNode_mesh* recurse(std::vector<aabb_temp_mesh>& objects)
 	}
 
 }
+unsigned CountTriangles(BVHNode_mesh* root)
+{
+	if (!root->IsLeaf()) 
+	{
+		BVHInner_mesh* p = dynamic_cast<BVHInner_mesh*>(root);
+		return CountTriangles(p->_left) + CountTriangles(p->_right);
+	}
+	else {
+		BVHLeaf_mesh* p = dynamic_cast<BVHLeaf_mesh*>(root);
+		return (unsigned)p->triangle_indices.size();
+	}
+}
+int CountBoxes(BVHNode_mesh* root)
+{
+	if (!root->IsLeaf()) 
+	{
+		BVHInner_mesh* p = dynamic_cast<BVHInner_mesh*>(root);
+		return 1 + CountBoxes(p->_left) + CountBoxes(p->_right);
+	}
+	else
+		return 1;
+}
 
 
 
-void make_bvh_mesh(std::shared_ptr<Mesh> mesh)
+BVHNode_mesh* make_default_bvh(std::shared_ptr<Mesh> mesh)
 {
 	std::vector<aabb_temp_mesh> working_list;
 	working_list.reserve(mesh->triangles.size());
 	for (size_t i = 0; i < mesh->triangles.size(); ++i)
-	{	
+	{
 		aabb bbox = mesh->triangles[i]->bounding_box();
 		vec3 center = (bbox.min + bbox.max) / 2.f;
-		working_list.emplace_back(bbox, center, mesh->triangles[i]);
+		working_list.emplace_back(bbox, center, mesh->triangles[i], i);
 	}
 	mesh->root = recurse(working_list);
-	if (!mesh->root->IsLeaf())
-	{
-		BVHInner_mesh* root = dynamic_cast<BVHInner_mesh*>(mesh->root);
-		mesh->bounding_box = root->bbox;
-	}
-	else
-	{
-		mesh->bounding_box = mesh->create_bvh();
-	}
+
+
+	return mesh->root;
+
 	
 	//mesh->triangles.clear();
 	//mesh->triangles.shrink_to_fit();
 }
-
-
-
-bool hit_mesh(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf)
+void populate_cache_friendly_bvh(BVHNode_mesh* root, unsigned& idxBoxes, unsigned& idxTriList, BVH_mesh& cache_friendly_bvh)
 {
-	if (!root->IsLeaf())
-	{
-		BVHInner_mesh* inner = dynamic_cast<BVHInner_mesh*>(root);
-		if (!inner->bbox.hit(r, tmin, tmax))
-		{
-			return false;
-		}
-		else
-		{
-			bool left_hit = hit_mesh(inner->_left, r, tmin, tmax, hit_inf);
-			bool right_hit = hit_mesh(inner->_right, r, tmin, left_hit ? hit_inf.t : tmax, hit_inf);
-			return left_hit || right_hit;
-		}
 
+	if (!root->IsLeaf()) 
+	{ 
+		BVHInner_mesh* p = dynamic_cast<BVHInner_mesh*>(root);
+		unsigned currIdxBoxes = idxBoxes;
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].bounding_box = p->bbox;
+
+		int idxLeft = ++idxBoxes;
+		populate_cache_friendly_bvh(p->_left, idxBoxes, idxTriList, cache_friendly_bvh);
+		int idxRight = ++idxBoxes;
+		populate_cache_friendly_bvh(p->_right, idxBoxes, idxTriList, cache_friendly_bvh);
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.inner.idxLeft = idxLeft;
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.inner.idxRight = idxRight;
+	}
+
+	else 
+	{ 
+		BVHLeaf_mesh* p = dynamic_cast<BVHLeaf_mesh*>(root);
+
+		unsigned currIdxBoxes = idxBoxes;
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].bounding_box = p->bbox;
+
+		unsigned count = p->triangle_indices.size();
+		// highest bit set indicates a leaf node (inner node if highest bit is 0)
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.leaf.count = 0x80000000 | count;  
+
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.leaf.startIndex = idxTriList;
+
+		for (unsigned i = 0; i < p->triangle_indices.size(); ++i)
+		{			
+			cache_friendly_bvh.tris_indices[++idxTriList] = p->triangle_indices[i];
+		}
+	}
+}
+void create_cache_friendly_bvh(BVHNode_mesh* root, BVH_mesh& cache_friendly_bvh, const char* file_path)
+{
+	unsigned tris = CountTriangles(root);
+	int boxes = CountBoxes(root);
+	cache_friendly_bvh.tris_indices.resize((size_t)tris + 1);
+	cache_friendly_bvh.bvh_nodes.resize(boxes);
+	unsigned idxTriList = 0;
+	unsigned idxBoxes = 0;
+	populate_cache_friendly_bvh(root, idxBoxes, idxTriList, cache_friendly_bvh);
+	std::ofstream file(file_path, std::ios::binary);
+	int size1 = cache_friendly_bvh.tris_indices.size();
+	int size2 = cache_friendly_bvh.bvh_nodes.size();
+	file.write((char*)&size1, sizeof(int));
+	file.write((char*)&cache_friendly_bvh.tris_indices[0], sizeof(int) * (size_t)size1);
+	file.write((char*)&size2, sizeof(int));
+	file.write((char*)&cache_friendly_bvh.bvh_nodes[0], sizeof(CacheBVHNode) * size2);
+	file.close();
+	delete root;
+}
+void update_bvh(bool was_changed, BVH_mesh& BVH, std::shared_ptr<Mesh> mesh, const char* file_path)
+{
+	if (was_changed)
+	{
+		BVHNode_mesh* root = make_default_bvh(mesh);
+		create_cache_friendly_bvh(root, BVH, file_path);
 	}
 	else
 	{
-		BVHLeaf_mesh* leaf = dynamic_cast<BVHLeaf_mesh*>(root);
-		return leaf->hit(r, tmin, tmax, hit_inf);
+		std::ifstream file(file_path, std::ios::binary);
+		int size1; 
+		int size2;
+		file.read((char*)&size1, sizeof(int));
+		BVH.tris_indices.resize(size1);
+		file.read((char*)&BVH.tris_indices[0], sizeof(int) * (size_t)size1);
+		file.read((char*)&size2, sizeof(int));
+		BVH.bvh_nodes.resize(size2);
+		file.read((char*)&BVH.bvh_nodes[0], sizeof(CacheBVHNode) * size2);
 	}
 }
+//index = 0
+bool hit_mesh_bvh(const BVH_mesh& BVH, unsigned index, const ray& r, float tmin, float tmax, hit_rec& hit_inf, const std::shared_ptr<Mesh>& mesh)
+{
+	//1 - leaf node
+	if (BVH.bvh_nodes[index].u.leaf.count & 0x80000000)
+	{
+		
+		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
+		{
+			return BVH.bvh_nodes[index].hit(r, tmin, tmax, hit_inf, BVH, mesh);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
+		{
+			bool left_hit = hit_mesh_bvh(BVH, BVH.bvh_nodes[index].u.inner.idxLeft, r, tmin, tmax, hit_inf, mesh);
+			bool right_hit = hit_mesh_bvh(BVH, BVH.bvh_nodes[index].u.inner.idxRight, r, tmin, tmax, hit_inf, mesh);
+
+			return left_hit | right_hit;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+
 

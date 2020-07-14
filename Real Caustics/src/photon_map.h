@@ -9,29 +9,40 @@
 
 extern const float inf;
 
+aabb construct_bbox(std::vector<std::shared_ptr<photon>>& points);
 
-struct KDTreeNode 
+
+struct Points_on_median
 {
-	virtual bool IsLeaf() = 0; 
+	std::vector<std::shared_ptr<photon>> points;
+};
+struct KDTreeNode
+{
+	virtual bool IsLeaf() = 0; // pure virtual
 	virtual ~KDTreeNode() {}
 };
 
-struct KDTreeInner : KDTreeNode 
+struct KDTreeInner : KDTreeNode
 {
 	KDTreeNode* _left = nullptr;
 	KDTreeNode* _right = nullptr;
 	float split = 0.f;
 	char axis = 0;
+	Points_on_median* points_on_median;
 	virtual bool IsLeaf() { return false; }
-	KDTreeInner() {}
+	KDTreeInner()
+	{
+		points_on_median = new Points_on_median;
+	}
 	virtual ~KDTreeInner()
 	{
+		delete points_on_median;
 		delete _left;
 		delete _right;
 	}
 };
 
-struct KDTreeLeaf : KDTreeNode 
+struct KDTreeLeaf : KDTreeNode
 {
 	std::vector<std::shared_ptr<photon>> points;
 	virtual bool IsLeaf() { return true; }
@@ -45,7 +56,6 @@ void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue&
 
 int CountBoxes(KDTreeNode* root);
 
-void delete_kd_tree(KDTreeNode* root);
 
 class Photon_map
 {

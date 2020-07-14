@@ -122,7 +122,7 @@ void parse(std::string path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Materia
 			vertice2 = vertices[face_indices[i] - 1];
 			t_vert2 = texture_coordinates_verts[texture_coordinate_indices[i] - 1];
 			v_n2 = vertex_normals[vertex_normals_indices[i] - 1];
-			mesh->triangles.push_back((std::make_shared<Triangle>(vertice0, vertice1, vertice2, t_vert0, t_vert1, t_vert2, material, v_n0, v_n1, v_n2)));
+			mesh->triangles.push_back(Triangle(vertice0, vertice1, vertice2, t_vert0, t_vert1, t_vert2, material, v_n0, v_n1, v_n2));
 		}
 	}
 

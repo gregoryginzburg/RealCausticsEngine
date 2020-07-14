@@ -13,7 +13,7 @@
 #include "BVH_mesh.h"
 #include "../Triangle.h"
 
-
+/*
 class Hittable;
 class hittable_list;
 extern const float inf;
@@ -93,5 +93,5 @@ struct aabb_temp_world
 
 void make_bvh_world(hittable_list& objects);
 bool hit_world(BVHNode_world* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf);
-
+*/
 #endif

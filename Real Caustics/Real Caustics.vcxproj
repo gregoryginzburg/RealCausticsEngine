@@ -151,7 +151,6 @@
     <ClCompile Include="src\2D\2D_BVH.cpp" />
     <ClCompile Include="src\aabb.cpp" />
     <ClCompile Include="src\BVH\BVH_mesh.cpp" />
-    <ClCompile Include="src\BVH\BVH_world.cpp" />
     <ClCompile Include="src\Gather_photons.cpp" />
     <ClCompile Include="src\parser.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -165,7 +164,6 @@
     <ClInclude Include="src\2d\2d_triangle.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\BVH\BVH_mesh.h" />
-    <ClInclude Include="src\BVH\BVH_world.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\Gather_photons.h" />
     <ClInclude Include="src\Hit_rec.h" />

@@ -4,7 +4,7 @@
 #include "../hittable_list.h"
 #include "BVH_world.h"
 #include "../Triangle.h"
-
+/*
 BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
 {
 	if (objects.size() < 4)
@@ -198,5 +198,5 @@ bool hit_world(BVHNode_world* root, const ray& r, float tmin, float tmax, hit_re
 		BVHLeaf_world* leaf = dynamic_cast<BVHLeaf_world*>(root);
 		return leaf->hit(r, tmin, tmax, hit_inf);
 	}
-}
+}*/
 
