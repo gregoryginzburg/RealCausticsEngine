@@ -161,7 +161,7 @@
     <ClInclude Include="src\2D\2D_aabb.h" />
     <ClInclude Include="src\2D\2D_BVH.h" />
     <ClInclude Include="src\2D\2D_Hit_rec.h" />
-    <ClInclude Include="src\2d\2d_triangle.h" />
+    <ClInclude Include="src\2D\2D_triangle.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\BVH\BVH_mesh.h" />
     <ClInclude Include="src\Color.h" />
@@ -182,7 +182,7 @@
     <ClInclude Include="src\trace_photon.h" />
     <ClInclude Include="src\Triangle.h" />
     <ClInclude Include="src\utils.h" />
-    <ClInclude Include="src\2d\UV_Map.h" />
+    <ClInclude Include="src\2D\UV_Map.h" />
     <ClInclude Include="src\vec2.h" />
     <ClInclude Include="src\vec3.h" />
     <ClInclude Include="src\vec4.h" />

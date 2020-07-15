@@ -18,10 +18,10 @@ class Mesh
 {
 public:
 	Mesh() {}
-	Mesh(std::vector<Triangle> tris) : triangles(tris) {}
+	Mesh(std::vector<std::shared_ptr<Triangle>> tris) : triangles(tris) {}
 
 public:
-	std::vector<Triangle> triangles;
+	std::vector<std::shared_ptr<Triangle>> triangles;
 	aabb bounding_box;
 	BVHNode_mesh* root = nullptr;
 	aabb create_bvh()

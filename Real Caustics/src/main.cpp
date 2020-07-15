@@ -128,7 +128,7 @@ int main()
 		for (int i = 0; i < image_width; ++i)
 		{
 			vec2 pixel = vec2(i, j);
-			color pixel_color = gather_photons(pixel, uv, map, 0.008, 10000);
+			color pixel_color = gather_photons(pixel, uv, map, 0.004, 10000);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
 		}
 	}
