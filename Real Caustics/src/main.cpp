@@ -93,7 +93,7 @@ int main()
 	#endif
 	
 	Timer rendering;
-
+	
 	std::cout << "Tracing started";
 	for (int i = 0; i < number_of_photons; ++i)
 	{
@@ -109,7 +109,8 @@ int main()
 
 	Timer balacing;
 	std::cout << "Balacing Started" << std::endl;
-	map.build_kd_tree();
+	
+	map.update_kdtree(0, "kdtree.kd");
 
 	std::cout << "Done " << balacing.elapsed() << std::endl;
 	Timer writing;
@@ -128,7 +129,7 @@ int main()
 		for (int i = 0; i < image_width; ++i)
 		{
 			vec2 pixel = vec2(i, j);
-			color pixel_color = gather_photons(pixel, uv, map, 0.004, 10000);
+			color pixel_color = gather_photons(pixel, uv, map, 0.01, 10000);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
 		}
 	}

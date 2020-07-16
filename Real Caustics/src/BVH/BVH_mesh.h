@@ -97,7 +97,6 @@ struct aabb_temp_mesh
 	aabb_temp_mesh(aabb& box, vec3& c, std::shared_ptr<Triangle> t, unsigned int i) : bbox(box), center(c), triangle(t), index(i){}
 };
 
-
 bool hit_mesh(BVHNode_mesh* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf);
 void update_bvh(bool was_changed, BVH_mesh& BVH, std::shared_ptr<Mesh> mesh, const char* file_path);
 bool hit_mesh_bvh(const BVH_mesh& BVH, unsigned index, const ray& r, float tmin, float tmax, hit_rec& hit_inf, const std::shared_ptr<Mesh>& mesh);

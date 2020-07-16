@@ -11,8 +11,7 @@
 }*/
 inline int random_int11(int min, int max)
 {
-	static std::random_device rd;
-	static std::mt19937 mt(rd());
+	static std::mt19937 mt(0);
 	std::uniform_int_distribution<int> dist(min, max);
 	return dist(mt);
 }
@@ -53,6 +52,7 @@ inline float random_float(float a, float b)
 {
 	return a + (b - a) * random_float_0_1();
 }
+
 
 
 inline float r1(int n)
