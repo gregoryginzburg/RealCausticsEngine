@@ -164,6 +164,7 @@
     <ClInclude Include="src\2D\2D_triangle.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\BVH\BVH_mesh.h" />
+    <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\Gather_photons.h" />
     <ClInclude Include="src\Hit_rec.h" />

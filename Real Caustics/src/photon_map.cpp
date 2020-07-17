@@ -116,18 +116,18 @@ void recurse_kd_tree(std::vector<temp_photon>& photons, std::vector<KDTreeNode>&
 				photons.begin() + start_index + count, comparator);
 			if (axis == 0)
 			{ 
-				kdtree[element].u.inner.index = photons[start_index + (count / 2)].index | mask;
-				kdtree[element].u.inner.split = photons[start_index + (count / 2)].Photon->position.x;
+				kdtree[element].u.inner.index = photons[(long)start_index + (count / 2)].index | mask;
+				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.x;
 			}
 			else if (axis == 1)
 			{ 
-				kdtree[element].u.inner.index = photons[start_index + (count / 2)].index | mask;
-				kdtree[element].u.inner.split = photons[start_index + (count / 2)].Photon->position.y;
+				kdtree[element].u.inner.index = photons[(long)start_index + (count / 2)].index | mask;
+				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.y;
 			}
 			else
 			{
-				kdtree[element].u.inner.index = photons[start_index + (count / 2)].index | mask;
-				kdtree[element].u.inner.split = photons[start_index + (count / 2)].Photon->position.z;
+				kdtree[element].u.inner.index = photons[(long)start_index + (count / 2)].index | mask;
+				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.z;
 			}
 			recurse_kd_tree(photons, kdtree, start_index, count / 2, 2 * element);
 			recurse_kd_tree(photons, kdtree, start_index + count / 2 + 1, count / 2, 2 * element + 1);
@@ -141,18 +141,18 @@ void recurse_kd_tree(std::vector<temp_photon>& photons, std::vector<KDTreeNode>&
 			if (axis == 0)
 			{
 				kdtree[element].u.inner.index = mask;
-				kdtree[element].u.inner.split = photons[start_index + (count / 2)].Photon->position.x + 1.175494e-38f;
+				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.x + 1.175494e-38f;
 
 			}
 			else if (axis == 1)
 			{
 				kdtree[element].u.inner.index = mask;
-				kdtree[element].u.inner.split = photons[start_index + (count / 2)].Photon->position.y + 1.175494e-38f;
+				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.y + 1.175494e-38f;
 			}
 			else
 			{
 				kdtree[element].u.inner.index = mask;
-				kdtree[element].u.inner.split = photons[start_index + (count / 2)].Photon->position.z + 1.175494e-38f;
+				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.z + 1.175494e-38f;
 			}
 			recurse_kd_tree(photons, kdtree, start_index, count / 2, 2 * element);
 			recurse_kd_tree(photons, kdtree, start_index + count / 2, count / 2, 2 * element + 1);
@@ -252,10 +252,10 @@ void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<p
 		if (dist_to_point_squared < search_distance_squared)
 		{
 			closest_photons.insert_element(photons[kdtree[element].u.leaf.index], dist_to_point_squared);
-			/*if (closest_photons.capacity == closest_photons.size)
+			if (closest_photons.is_full())
 			{
-				search_distance_squared = (point - photons_leaf->points[i]->position).length_squared();
-			}*/
+				search_distance_squared = (point - closest_photons.photons[0]->position).length_squared();
+			}
 		}
 	}
 }

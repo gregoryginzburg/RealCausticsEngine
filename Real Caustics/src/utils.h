@@ -12,7 +12,15 @@
 #include "photon.h"
 #include <memory>
 
-
+inline void clamp_color(color& c)
+{
+    if (c.r > 255)
+        c.r = 255;
+    if (c.g > 255)
+        c.g = 255;
+    if (c.b > 255)
+        c.b = 255;
+}
 inline int maprange(float value, float low1, float high1, float low2, float high2)
 {
 	return static_cast<int>(low2 + ((value - low1) * (high2 - low2)) / (high1 - low1));

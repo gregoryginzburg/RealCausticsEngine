@@ -31,10 +31,25 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int dept
 		{
 			if (r.was_refracted)
 				photon_map.add(rec.p, r.power);
-		}
-		
-		
+		}		
 	}
-	
-
+}
+void trace_ray(const ray& r, hittable_list& world, hit_rec& rec, int depth)
+{
+	if (depth == 0)
+	{
+		return;
+	}
+	ray scattered_ray;
+	if (world.hit(r, 0.000001f, inf, rec))
+	{
+		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
+		{
+			return trace_ray(scattered_ray, world, rec, depth - 1);
+		}
+		else
+		{
+			return;
+		}
+	}
 }

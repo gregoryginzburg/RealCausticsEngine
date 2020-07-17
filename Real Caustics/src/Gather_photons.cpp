@@ -10,13 +10,10 @@ extern const int image_width;
 extern const int image_height;
 extern const float PI;
 extern const float E;
-color gather_photons(vec2 pixel, UV_Map& uv_map, Photon_map& photon_map, float search_distance, int number_of_closest_photons)
+extern int number_of_photons;
+color gather_photons(vec3 point, Photon_map& photon_map, float search_distance, int number_of_closest_photons)
 {
-	static float delta_x = 0.5f / image_width;
-	static float delta_y = 0.5f / image_height;
-	vec2 u_v = vec2(pixel.x / image_width + delta_x, pixel.y / image_height + delta_y);
-	vec3 point = uv_map.get_point_from_uv(u_v);
-	Priority_queue closest_photons;
+	Priority_queue closest_photons(number_of_closest_photons);
 	photon_map.find_closest_photons(point, search_distance * search_distance, closest_photons);
 	if (closest_photons.photons.size() == 0)
 	{
@@ -33,9 +30,10 @@ color gather_photons(vec2 pixel, UV_Map& uv_map, Photon_map& photon_map, float s
 			flux += closest_photons.photons[i]->power * weight;
 		}
 		flux /= delta_A;
-		int red = static_cast<int>(flux.r / 10000.f);
-		int green = static_cast<int>(flux.g / 10000.f);
-		int blue = static_cast<int>(flux.b / 10000.f);
+		//flux /= closest_photons.photons.size();
+		int red = static_cast<int>(flux.r);
+		int green = static_cast<int>(flux.g);
+		int blue = static_cast<int>(flux.b);
 		/*int red = static_cast<int>(flux.r / 260000.f);
 		int green = static_cast<int>(flux.g / 260000.f);
 		int blue = static_cast<int>(flux.b / 260000.f);*/

@@ -8,7 +8,7 @@
 class Material
 {
 public:
-	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered) = 0;
+	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered) = 0;
 	virtual colorf get_color() = 0;
 };
 class Metal : public Material
@@ -18,7 +18,7 @@ public:
 public:
 	Metal(colorf c) : color(c) {}
 public:
-	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered)
+	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered)
 	{
 		vec3 scattered_dir = reflect(r.direction, rec.normal);
 		scattered = ray(rec.p, scattered_dir);
@@ -38,7 +38,7 @@ public:
 	Glass() {}
 	Glass(float ref_idx, colorf c) : ior(ref_idx), color(c) {}
 public:
-	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered)
+	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered)
 	{
 		if (rec.front_face) ior = 1 / ior;
 		vec3 direction_normalized = normalize(r.direction);
@@ -54,7 +54,7 @@ public:
 class Catcher : public Material
 {
 public:
-	virtual bool scatter(ray& r, const hit_rec& rec, ray& scattered)
+	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered)
 	{
 		return false;
 	}
