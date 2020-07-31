@@ -42,7 +42,6 @@ void trace_ray(const ray& r, hittable_list& world, hit_rec& rec1, int depth)
 	}
 	hit_rec rec;
 	ray scattered_ray;
-	hit_rec rec;
 	if (world.hit(r, 0.0000001f, inf, rec))
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))

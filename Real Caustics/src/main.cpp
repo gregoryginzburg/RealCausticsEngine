@@ -100,8 +100,7 @@ int main()
 
 	Timer rendering;
 
-	std::ofstream out;																		//создать и открыть файл
-	out.open("D:\\glass.obj");
+	
 
 	std::cout << "Tracing started";
 	// for (int i = 0; i < number_of_photons; ++i)
@@ -127,11 +126,9 @@ int main()
 
 			ray r = camera.get_ray(j, i);
 			hit_rec rec;
-			// world.hit(r, 0.00000001, inf, rec);
-		
 			trace_ray(r, world, rec, 3);
 			//trace_photon(map, world, r, 2);
-			// out << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
+			out << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
 		}	
 	}
 		
