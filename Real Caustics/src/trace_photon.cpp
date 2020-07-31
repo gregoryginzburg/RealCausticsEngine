@@ -18,7 +18,7 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int dept
 	}
 	hit_rec rec;
 	ray scattered_ray;
-	if (world.hit(r, 0.000001f, inf, rec))
+	if (world.hit(r, 0.0000001f, inf, rec))
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
@@ -34,14 +34,15 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int dept
 		}		
 	}
 }
-void trace_ray(const ray& r, hittable_list& world, hit_rec& rec, int depth)
+void trace_ray(const ray& r, hittable_list& world, hit_rec& rec1, int depth)
 {
 	if (depth == 0)
 	{
 		return;
 	}
 	ray scattered_ray;
-	if (world.hit(r, 0.000001f, inf, rec))
+	hit_rec rec;
+	if (world.hit(r, 0.0000001f, inf, rec))
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
@@ -49,7 +50,9 @@ void trace_ray(const ray& r, hittable_list& world, hit_rec& rec, int depth)
 		}
 		else
 		{
+			rec1 = rec;
 			return;
 		}
 	}
+	return;
 }

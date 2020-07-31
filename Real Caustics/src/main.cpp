@@ -58,7 +58,9 @@ int main()
 	std::shared_ptr<Mesh> plane = std::make_shared<Mesh>();
 	BVH_mesh plane_bvh;
 	BVH_mesh ocean_bvh;
-	Camera camera(1280, 720, vec3(), vec3(), vec3(), vec3(), vec3());
+	Camera camera(1280, 720, vec3(4.28185, -4.04816, 2.94677), vec3(3.690521001815796, -2.7820394, 2.3941564), 
+		vec3(3.91912, -3.00279, 1.9300302), vec3(3.2244646, -3.7221376, 1.93003034), 
+		vec3(2.995862722, -3.501379, 2.3941566));
 	Lights_list ligths;
 	Photon_map map(number_of_photons);
 	UV_Map uv;
@@ -84,8 +86,8 @@ int main()
 	std::cout << "Building BVH" << std::endl;
 	Timer BVH_timer;
 	#endif
-	update_bvh(0, ocean_bvh, ocean, "ocean_bvh.bvh");
-	update_bvh(0, plane_bvh, plane, "plane_bvh.bvh");
+	update_bvh(1, ocean_bvh, ocean, "ocean_bvh.bvh");
+	update_bvh(1, plane_bvh, plane, "plane_bvh.bvh");
 	world.add(ocean_bvh, ocean);
 	world.add(plane_bvh, plane);
 	uv.mesh = plane;
@@ -98,58 +100,84 @@ int main()
 	Timer rendering;
 	
 	std::cout << "Tracing started";
-	for (int i = 0; i < number_of_photons; ++i)
-	{
-		ray r = ligths.emit_photon();
-		trace_photon(map, world, r, 2);
-	}	
-	
-
-	#ifdef REPORT_PROGRESS
+	// for (int i = 0; i < number_of_photons; ++i)
+	// {
+	// 	ray r = ligths.emit_photon();
+	// 	trace_photon(map, world, r, 2);
+		
+	// }
+	// std::cout << "Tracing finished";
+	std::ofstream out;
+	out.open("D:\\test.obj");
+	// for (int i = 0; i < map.photons.size(); i++)
+	// {
+	// 	out << "v " << map.photons[i]->position.x << " " << map.photons[i]->position.y << " " << map.photons[i]->position.z << "\n";
+	// }
 	std::cout << "\n";
-	std::cout << "Done  :  " << rendering.elapsed() << std::endl;
-	#endif
-
-	Timer balacing;
-	std::cout << "Balacing Started" << std::endl;
-	
-	map.update_kdtree(1, "kdtree.kd");
-
-	std::cout << "Done " << balacing.elapsed() << std::endl;
-	Timer writing;
-	std::ofstream out;																		//создать и открыть файл
-	out.open("D:\\hello.ppm");
-	out << "P3" << "\n" << image_width << " " << image_height << "\n" << 255 << "\n";
-	int n_closest = 300;
-	float radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons);
 	for (int j = camera.pixel_height - 1; j >= 0; --j)
 	{
-		int progress = static_cast<int>(float((float(image_height) - 1 - j)) / (float(image_height) - 1) * 100);
-		#ifdef REPORT_PROGRESS
-		std::cout << "Progress writing to image: ";
+		int progress = static_cast<int>(float((float(camera.pixel_height) - 1 - j)) / (float(camera.pixel_height) - 1) * 100);
 		std::cout << progress << "%" << "\r" << std::flush;
-		#endif
-
 		for (int i = 0; i < camera.pixel_width; ++i)
 		{
+
 			ray r = camera.get_ray(j, i);
 			hit_rec rec;
-			trace_ray(r, world, rec, 2);
-			color pixel_color = gather_photons(rec.p, map, radius, n_closest);
-			clamp_color(pixel_color);
-			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
-		}
+			// world.hit(r, 0.00000001, inf, rec);
+		
+			trace_ray(r, world, rec, 3);
+			//trace_photon(map, world, r, 2);
+			// out << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
+		}	
 	}
+		
 	
-	
-	out.close();
-	#ifdef REPORT_PROGRESS
-	std::cout << "\n";
-	std::cout << "Done  :  " << writing.elapsed() << std::endl;
 
-	std::cout << "\n";
-	std::cout << "Summary Time  :  " << Summary.elapsed();
-	#endif*/
+	// #ifdef REPORT_PROGRESS
+	// std::cout << "\n";
+	// std::cout << "Done  :  " << rendering.elapsed() << std::endl;
+	// #endif
+
+	// Timer balacing;
+	// std::cout << "Balacing Started" << std::endl;
+	
+	// map.update_kdtree(1, "kdtree.kd");
+
+	// std::cout << "Done " << balacing.elapsed() << std::endl;
+	// Timer writing;
+	// std::ofstream out;																		//создать и открыть файл
+	// out.open("D:\\hello.ppm");
+	// out << "P3" << "\n" << image_width << " " << image_height << "\n" << 255 << "\n";
+	// int n_closest = 300;
+	// float radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons);
+	// for (int j = camera.pixel_height - 1; j >= 0; --j)
+	// {
+	// 	int progress = static_cast<int>(float((float(image_height) - 1 - j)) / (float(image_height) - 1) * 100);
+	// 	#ifdef REPORT_PROGRESS
+	// 	std::cout << "Progress writing to image: ";
+	// 	std::cout << progress << "%" << "\r" << std::flush;
+	// 	#endif
+
+	// 	for (int i = 0; i < camera.pixel_width; ++i)
+	// 	{
+	// 		ray r = camera.get_ray(j, i);
+	// 		hit_rec rec;
+	// 		trace_ray(r, world, rec, 2);
+	// 		color pixel_color = gather_photons(rec.p, map, radius, n_closest);
+	// 		clamp_color(pixel_color);
+	// 		out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
+	// 	}
+	// }
+	
+	
+	// out.close();
+	// #ifdef REPORT_PROGRESS
+	// std::cout << "\n";
+	// std::cout << "Done  :  " << writing.elapsed() << std::endl;
+
+	// std::cout << "\n";
+	// std::cout << "Summary Time  :  " << Summary.elapsed();
+	// #endif*/
 	return 0;
 
 }
