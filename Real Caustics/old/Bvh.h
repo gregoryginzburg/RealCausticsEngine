@@ -13,7 +13,7 @@
 
 class Hittable;
 
-/*class BVH_node : public Hittable
+class BVH_node : public Hittable
 {
 public:
 	BVH_node(Mesh& list) : BVH_node(list.triangles, 0, list.number_of_tris()) {}
@@ -112,7 +112,7 @@ BVH_node::BVH_node(std::vector<std::shared_ptr<Hittable>>& objects, size_t start
 	left->bounding_box(box_left);
 	right->bounding_box(box_right);
 	box = surrounding_box(box_left, box_right);
-}*/
+}
 
 
 #endif

@@ -64,15 +64,16 @@ int main()
 	Lights_list ligths;
 	Photon_map map(number_of_photons);
 	UV_Map uv;
-	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 100));
+	ligths.add(std::make_shared<Area_Light>(vec3(11.3788, -8.45559, 4.97479), vec3(79.749, 0, 54.4354), 4., 4., 0, 500));
 	ligths.calculate_weights();
-	
+	ray r = ligths.emit_photon();
+
 	#ifdef REPORT_PROGRESS
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
 	#endif
-	parse("floor.obj", plane, std::make_shared<Catcher>());
-	parse("poool.obj", ocean, std::make_shared<Glass>(1.45, colorf(1, 1, 1)));
+	parse("plane.obj", plane, std::make_shared<Catcher>());
+	parse("glass.obj", ocean, std::make_shared<Glass>(1.45, colorf(1, 1, 1)));
 
 
 	#ifdef REPORT_PROGRESS
@@ -96,9 +97,12 @@ int main()
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
-	
+
 	Timer rendering;
-	
+
+	std::ofstream out;																		//создать и открыть файл
+	out.open("D:\\glass.obj");
+
 	std::cout << "Tracing started";
 	// for (int i = 0; i < number_of_photons; ++i)
 	// {

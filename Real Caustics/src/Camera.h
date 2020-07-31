@@ -28,7 +28,7 @@ public:
 	{
 		vec3 dir = bottom_left_corner + (j / (float)pixel_height) * vertical + (i / (float)pixel_width) * horizontal;
 		dir -= origin;
-		return ray(origin, dir);
+		return ray(origin, normalize(dir));
 	}
 };
 
