@@ -22,7 +22,9 @@ public:
 public:
 	ray get_ray(int j, int i)
 	{
-		return ray(origin, bottom_left_corner + (j / (float)pixel_height) * vertical + (i / (float)pixel_width) * horizontal);
+		vec3 dir = bottom_left_corner + (j / (float)pixel_height) * vertical + (i / (float)pixel_width) * horizontal;
+		dir -= origin;
+		return ray(origin, normalize(dir));
 	}
 
 

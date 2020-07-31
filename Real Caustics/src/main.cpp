@@ -58,19 +58,21 @@ int main()
 	std::shared_ptr<Mesh> plane = std::make_shared<Mesh>();
 	BVH_mesh plane_bvh;
 	BVH_mesh ocean_bvh;
-	Camera camera(1280, 720, vec3(), vec3(), vec3(), vec3(), vec3());
+	Camera camera(1280, 720, vec3(4.28185, -4.04816, 2.94677), vec3(3.691, -2.782, 2.394), vec3(3.919, -3.002, 1.930), vec3(3.224, -3.722, 1.930), vec3(2.995, -3.5013, 2.394));
+	ray gmrd = camera.get_ray(0, 0);
 	Lights_list ligths;
 	Photon_map map(number_of_photons);
 	UV_Map uv;
-	ligths.add(std::make_shared<Area_Light>(vec3(0., 0, 4.), 2., 2., 0, 100));
+	ligths.add(std::make_shared<Area_Light>(vec3(11.3788, -8.45559, 4.97479), vec3(79.749, 0, 54.4354), 4., 4., 0, 500));
 	ligths.calculate_weights();
-	
+	ray r = ligths.emit_photon();
+
 	#ifdef REPORT_PROGRESS
 	Timer parser;
 	std::cout << "Parsing Started" << std::endl;
 	#endif
-	parse("floor.obj", plane, std::make_shared<Catcher>());
-	parse("poool.obj", ocean, std::make_shared<Glass>(1.45, colorf(1, 1, 1)));
+	parse("plane.obj", plane, std::make_shared<Catcher>());
+	parse("glass.obj", ocean, std::make_shared<Glass>(1.45, colorf(1, 1, 1)));
 
 
 	#ifdef REPORT_PROGRESS
@@ -84,8 +86,8 @@ int main()
 	std::cout << "Building BVH" << std::endl;
 	Timer BVH_timer;
 	#endif
-	update_bvh(0, ocean_bvh, ocean, "ocean_bvh.bvh");
-	update_bvh(0, plane_bvh, plane, "plane_bvh.bvh");
+	update_bvh(1, ocean_bvh, ocean, "ocean_bvh.bvh");
+	update_bvh(1, plane_bvh, plane, "plane_bvh.bvh");
 	world.add(ocean_bvh, ocean);
 	world.add(plane_bvh, plane);
 	uv.mesh = plane;
@@ -94,16 +96,22 @@ int main()
 	#ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 	#endif
-	
+
 	Timer rendering;
-	
+
+	std::ofstream out;																		//создать и открыть файл
+	out.open("D:\\glass.obj");
+
 	std::cout << "Tracing started";
 	for (int i = 0; i < number_of_photons; ++i)
 	{
 		ray r = ligths.emit_photon();
 		trace_photon(map, world, r, 2);
 	}	
-	
+	for (int i = 0; i < map.photons.size(); ++i)
+	{
+		out << "v" << map.photons[i]->position.x << " " << map.photons[i]->position.y << " " << map.photons[i]->position.z << "\n";
+	}
 
 	#ifdef REPORT_PROGRESS
 	std::cout << "\n";
@@ -112,15 +120,15 @@ int main()
 
 	Timer balacing;
 	std::cout << "Balacing Started" << std::endl;
-	
+	/*
 	map.update_kdtree(1, "kdtree.kd");
 
 	std::cout << "Done " << balacing.elapsed() << std::endl;
 	Timer writing;
 	std::ofstream out;																		//создать и открыть файл
 	out.open("D:\\hello.ppm");
-	out << "P3" << "\n" << image_width << " " << image_height << "\n" << 255 << "\n";
-	int n_closest = 300;
+	out << "P3" << "\n" << camera.pixel_width << " " << camera.pixel_height << "\n" << 255 << "\n";
+	int n_closest = 700;
 	float radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons);
 	for (int j = camera.pixel_height - 1; j >= 0; --j)
 	{
@@ -134,13 +142,21 @@ int main()
 		{
 			ray r = camera.get_ray(j, i);
 			hit_rec rec;
-			trace_ray(r, world, rec, 2);
-			color pixel_color = gather_photons(rec.p, map, radius, n_closest);
+			color pixel_color;
+			if (trace_ray(r, world, rec, 1))
+			{
+				pixel_color = gather_photons(rec.p, map, radius, n_closest);
+			}
+			else
+			{
+				pixel_color = color();
+			}
+			pixel_color = color();
 			clamp_color(pixel_color);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
+			//out << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
 		}
 	}
-	
 	
 	out.close();
 	#ifdef REPORT_PROGRESS

@@ -65,7 +65,7 @@ public:
 		rotate_vec(bottom_left_corner, position, rotation);
 		rotate_vec(top_left_corner, position, rotation);
 		rotate_vec(bottom_rigth_corner, position, rotation);
-		rotate_vec(normal, position, rotation);
+		rotate_vec(normal, vec3(0,0,0), rotation);
 		horizontal = bottom_rigth_corner - bottom_left_corner;
 		vertical = top_left_corner - bottom_left_corner;
 	}
