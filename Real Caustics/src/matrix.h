@@ -18,12 +18,23 @@ public:
 	vec3 k;
 public:
 	matrix_3x3(vec3 ii, vec3 jj, vec3 kk) : i(ii), j(jj), k(kk) {}
+	// rotation matrix in cartesian coordinates (radians)
 	matrix_3x3(vec3 r)
 	{
-		i = vec3(cosf(r.x) * cosf(r.y), sinf(r.x) * cosf(r.y), -sinf(r.y));
-		j = vec3(cosf(r.x) * sinf(r.y) * sinf(r.z) - sinf(r.x) * cosf(r.z), sinf(r.x) * sinf(r.y) * sinf(r.z) + cosf(r.x) * cosf(r.z), cosf(r.x) * sinf(r.z));
-		k = vec3(cosf(r.x) * sinf(r.y) * cosf(r.z) + sinf(r.x) * sinf(r.z), sinf(r.x) * sinf(r.y) * cosf(r.z) - cosf(r.x) * sinf(r.z), cosf(r.y) * cosf(r.z));
+		// r.x = z, r.y = y, r.z = x
+		i = vec3(cosf(r.z) * cosf(r.y),
+			sinf(r.z) * cosf(r.y),
+			-sinf(r.y));
+		j = vec3(cosf(r.z) * sinf(r.y) * sinf(r.x) - sinf(r.z) * cosf(r.x),
+			sinf(r.z) * sinf(r.y) * sinf(r.x) + cosf(r.z) * cosf(r.x),
+			cosf(r.z) * sinf(r.x));
+		k = vec3(cosf(r.z) * sinf(r.y) * cosf(r.x) + sinf(r.z) * sinf(r.x),
+			sinf(r.z) * sinf(r.y) * cosf(r.x) - cosf(r.z) * sinf(r.x),
+				cosf(r.y) * cosf(r.x));
 	}
+		
+	
+	// rotation matrix from angle and axis (radians)
 	matrix_3x3(float a, vec3 u)
 	{
 		float c = cosf(a);

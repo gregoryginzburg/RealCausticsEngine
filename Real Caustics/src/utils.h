@@ -20,6 +20,12 @@ inline void clamp_color(color& c)
         c.g = 255;
     if (c.b > 255)
         c.b = 255;
+    if (c.r < 0)
+        c.r = 0;
+    if (c.g < 0)
+        c.g = 0;
+    if (c.b < 0)
+        c.b = 0;
 }
 inline int maprange(float value, float low1, float high1, float low2, float high2)
 {

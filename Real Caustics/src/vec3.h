@@ -159,6 +159,10 @@ inline vec3 refract(const vec3& uv, const vec3& n, float etai_over_etat) {
 	auto cos_theta = dot(-uv, n);
 	vec3 r_out_parallel = etai_over_etat * (uv + cos_theta * n);
 	vec3 r_out_perp = -std::sqrt(1.0f - r_out_parallel.length_squared()) * n;
+	//float ior = etai_over_etat;
+	//float c = dot(-n, uv);
+	//return ior * uv + (ior * c - std::sqrt(1 - ior * ior * (1- c * c))) * n;
+
 	return r_out_parallel + r_out_perp;
 }
 inline float distance(const vec3& u, const vec3& v)
@@ -167,9 +171,9 @@ inline float distance(const vec3& u, const vec3& v)
 }
 inline vec3 random_in_hemisphere() 
 {
-	auto a = random_float(0.f, PI2);
-	auto z = random_float(0.f, 1.f);
-	auto r = sqrt(1 - z * z);
+	auto a = random_float(0.0f, PI2);
+	auto z = random_float(-1.0f, 1.0f);
+	auto r = sqrtf(1.0f - z * z);
 	return vec3(r * cos(a), r * sin(a), z);
 }
 

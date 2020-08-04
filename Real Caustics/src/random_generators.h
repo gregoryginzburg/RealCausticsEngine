@@ -2,13 +2,13 @@
 #define RANDOM_GENERATORS_H
 #include <random>
 #include "vec2.h"
-/*inline float random_float(float min, float max)
+inline float random_float11(float min, float max)
 {
 	static std::random_device rd;
 	static std::mt19937 mt(rd());
 	std::uniform_real_distribution<float> dist(min, max);
 	return dist(mt);
-}*/
+}
 inline int random_int11(int min, int max)
 {
 	static std::mt19937 mt(0);

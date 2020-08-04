@@ -51,7 +51,11 @@ public:
 public:
 	virtual ray emit_photon(size_t i, size_t j, float power) const
 	{
-		return ray(bottom_left_corner + halton_sequnce(i, 2) * horizontal + halton_sequnce(j, 3) * vertical, normal, colorf(power, power, power));
+		vec3 origin = bottom_left_corner + random_float_0_1() * horizontal + random_float_0_1() * vertical;
+		// vec3 origin = bottom_left_corner + halton_sequnce(i, 2) * horizontal + halton_sequnce(j, 3) * vertical;
+		// vec3 target = origin + normal + random_in_hemisphere();
+
+		return ray(origin, normal, colorf(power, power, power));
 	}
 	virtual float get_power() const
 	{
