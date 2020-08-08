@@ -10,7 +10,7 @@
 
 extern const float inf;
 
-void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int depth)
+void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, bool& was_refracted, int depth)
 {
 	if (depth == 0)
 	{
@@ -22,14 +22,14 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, int dept
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
-			scattered_ray.was_refracted = true;
 			scattered_ray.power = r.power;
 			scattered_ray *= rec.mat_ptr->get_color();
-			return trace_photon(photon_map, world, scattered_ray, depth - 1);
+			was_refracted = true;
+			return trace_photon(photon_map, world, scattered_ray, was_refracted, depth - 1);
 		}
 		else
 		{
-			if (r.was_refracted)
+			if (was_refracted)
 				photon_map.add(rec.p, r.power);
 		}		
 	}
@@ -45,7 +45,6 @@ bool trace_ray(const ray& r, hittable_list& world, hit_rec& rec, int depth)
 	{
 		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
 		{
-			scattered_ray.was_refracted = true;
 			return trace_ray(scattered_ray, world, rec, depth - 1);
 		}
 		else

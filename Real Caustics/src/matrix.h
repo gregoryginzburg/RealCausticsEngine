@@ -5,8 +5,8 @@
 #include "vec3.h"
 #include "vec4.h"
 
-using std::sinf;
-using std::cosf;
+using std::sin;
+using std::cos;
 
 extern const float PI;
 
@@ -22,23 +22,23 @@ public:
 	matrix_3x3(vec3 r)
 	{
 		// r.x = z, r.y = y, r.z = x
-		i = vec3(cosf(r.z) * cosf(r.y),
-			sinf(r.z) * cosf(r.y),
-			-sinf(r.y));
-		j = vec3(cosf(r.z) * sinf(r.y) * sinf(r.x) - sinf(r.z) * cosf(r.x),
-			sinf(r.z) * sinf(r.y) * sinf(r.x) + cosf(r.z) * cosf(r.x),
-			cosf(r.z) * sinf(r.x));
-		k = vec3(cosf(r.z) * sinf(r.y) * cosf(r.x) + sinf(r.z) * sinf(r.x),
-			sinf(r.z) * sinf(r.y) * cosf(r.x) - cosf(r.z) * sinf(r.x),
-				cosf(r.y) * cosf(r.x));
+		i = vec3(cos(r.z) * cos(r.y),
+			sin(r.z) * cos(r.y),
+			-sin(r.y));
+		j = vec3(cos(r.z) * sin(r.y) * sin(r.x) - sin(r.z) * cos(r.x),
+			sin(r.z) * sin(r.y) * sin(r.x) + cos(r.z) * cos(r.x),
+			cos(r.z) * sin(r.x));
+		k = vec3(cos(r.z) * sin(r.y) * cos(r.x) + sin(r.z) * sin(r.x),
+			sin(r.z) * sin(r.y) * cos(r.x) - cos(r.z) * sin(r.x),
+				cos(r.y) * cos(r.x));
 	}
 		
 	
 	// rotation matrix from angle and axis (radians)
 	matrix_3x3(float a, vec3 u)
 	{
-		float c = cosf(a);
-		float s = sinf(a);
+		float c = cos(a);
+		float s = sin(a);
 		float t = 1 - c;
 		i = vec3(c + u.x * u.x * t, u.x * u.y * t + u.z * s, u.x * u.z * t - u.y * s);
 		j = vec3(u.x * u.y * t - u.z * s, c + u.y * u.y * t, u.y * u.z * t + u.x * s);

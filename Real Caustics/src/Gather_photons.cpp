@@ -2,7 +2,6 @@
 #include "ray.h"
 #include "Color.h"
 #include "photon_map.h"
-#include "2D\UV_Map.h"
 #include "priority_queue.h"
 #include <cmath>
 
@@ -34,7 +33,7 @@ color gather_photons(vec3 point, Photon_map& photon_map, float search_distance, 
 		float delta_A = PI * r;
 		for (int i = 0; i < closest_photons.photons.size(); ++i)
 		{
-			float weight = 0.918f * (1.f - (1.f - std::powf(E, -1.953f * closest_photons.priorities[i] / 2.f / r)) / 0.85815f);
+			float weight = 0.918f * (1.f - (1.f - std::pow(E, -1.953f * closest_photons.priorities[i] / 2.f / r)) / 0.85815f);
 			flux += closest_photons.photons[i]->power * weight;
 			//out << "v "<< closest_photons.photons[i]->position.x << " " << closest_photons.photons[i]->position.y << " " << closest_photons.photons[i]->position.z << "\n";
 

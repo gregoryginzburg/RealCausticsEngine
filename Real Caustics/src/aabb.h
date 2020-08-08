@@ -12,7 +12,6 @@ public:
 	aabb() {}
 	aabb(const point3& a, const point3& b) : min(a), max(b) {}
 
-	aabb(const point3& a, const point3& b, std::shared_ptr<Hittable> tri, const point3 c) : min(a), max(b), triangle(tri), center(c)  {}
 
 	bool hit(const ray& r, float tmin, float tmax) const
 	{
@@ -52,8 +51,6 @@ public:
 public:
 	point3 min;
 	point3 max;
-	std::shared_ptr<Hittable> triangle;
-	point3 center;
 };
 aabb surrounding_box(aabb box_a, aabb box_b);
 void add_point(aabb& box, vec3& point);

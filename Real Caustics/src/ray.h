@@ -24,7 +24,6 @@ public:
 public:
     point3 origin;
     vec3 direction;
-    bool was_refracted = false;
     colorf power;
 
 };

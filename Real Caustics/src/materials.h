@@ -5,7 +5,6 @@
 #include "Hit_rec.h"
 #include "Color.h"
 #include <cmath>
-extern int errors;
 class Material
 {
 public:
@@ -44,10 +43,9 @@ public:
 		if (!rec.front_face) ior = 1.0f / ior;
 		vec3 direction_normalized = normalize(r.direction);
 		float cos_theta = std::fmin(dot(-direction_normalized, rec.normal), 1.0);
-		float sin_theta = std::sqrtf(1.0f - cos_theta * cos_theta);
+		float sin_theta = std::sqrt(1.0f - cos_theta * cos_theta);
 		if (ior * sin_theta > 1.0f)
 		 {
-			++errors;
 		 	vec3 reflected = reflect(direction_normalized, rec.normal);
 		 	scattered = ray(rec.p, reflected);
 			return true;

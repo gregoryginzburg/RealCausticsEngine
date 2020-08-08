@@ -75,7 +75,7 @@ public:
 	}
 	void geyt_i_j(int number_of_rays, int& i, int& j)
 	{
-		float k = std::sqrtf(number_of_rays / (1.f + width / height));
+		float k = std::sqrt(number_of_rays / (1.f + width / height));
 		i = (int)k;
 		j = (int)(number_of_rays / k);
 	}

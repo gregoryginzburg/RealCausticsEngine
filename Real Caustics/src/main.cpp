@@ -26,6 +26,9 @@
 #include "Gather_photons.h"
 #include "BVH\BVH_mesh.h"
 #include "Camera.h"
+#include "DLL.h"
+
+#define DLLEXPORT extern "C" __declspec(dllexport)
 
 #define REPORT_PROGRESS
 
@@ -39,12 +42,23 @@ extern const float negative_inf = -inf;
 extern const float PI = 3.14159265359f;
 extern const float E = 2.71828182846;
 extern const float PI2 = 6.28318530718f;
-extern int number_of_photons = 3.5e6;
-extern int no_photons;
-int camera_didnt_inter = 0;
-extern int errors = 0;
 
-int main()
+int number_of_photons;
+int n_closest;
+float radius;
+
+DLLEXPORT void init(int photons, int closest, float r)
+{
+	number_of_photons = photons;
+	n_closest = closest;
+	radius = r;
+	std::cout << "number of photons = " << number_of_photons << std::endl;
+	std::cout << "number of closest photons = " << n_closest << std::endl;
+	std::cout << "number of photons = " << radius << std::endl;
+}
+
+
+DLLEXPORT int main()
 {
 	
 	
@@ -99,8 +113,8 @@ int main()
 	// parse("cube_big.obj", cube_big, std::make_shared<Catcher>());
 	// parse("cube_small.obj", cube_small, std::make_shared<Catcher>());
 
-	parse("pool.obj", water, std::make_shared<Glass>(1.333, colorf(1, 1, 1)));
-	parse("floor.obj", floor, std::make_shared<Catcher>());
+	parse("water.obj", water, std::make_shared<Glass>(1.333, colorf(1, 1, 1)));
+	parse("everything.obj", floor, std::make_shared<Catcher>());
 
 #ifdef REPORT_PROGRESS
 	std::cout << "Done  :  " << parser.elapsed() << std::endl;
@@ -115,8 +129,8 @@ int main()
 	// update_bvh(0, cube_big_bvh, cube_big, "cube_big_bvh.bvh");
 	// update_bvh(0, cube_small_bvh, cube_small, "cube_small_bvh.bvh");
 
-	update_bvh(1, water_bvh, water, "water_bvh.bvh");
-	update_bvh(1, floor_bvh, floor, "floor_bvh.bvh");
+	update_bvh(0, water_bvh, water, "water_bvh.bvh");
+	update_bvh(0, floor_bvh, floor, "floor_bvh.bvh");
 
 	// world.add(water_bvh, water);
 	// world.add(cornel_box_bvh, cornel_box);
@@ -135,7 +149,8 @@ int main()
 	for (int i = 0; i < number_of_photons; ++i)
 	{
 		ray r = ligths.emit_photon();
-		trace_photon(map, world, r, 5);
+		bool was_refracted = false;
+		trace_photon(map, world, r, was_refracted, 5);
 	}
 	std::cout << "Tracing finished";
 	std::ofstream ou;
@@ -186,9 +201,9 @@ int main()
 		<< "\n"
 		<< camera.pixel_width << " " << camera.pixel_height << "\n"
 		<< 255 << "\n";
-	int n_closest = 2350;
+	
 	// float radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons) * 2;
-	float radius = 0.24;
+	
 	for (int j = camera.pixel_height - 1; j >= 0; --j)
 	{
 		int progress = static_cast<int>(float((float(camera.pixel_height) - 1 - j)) / (float(camera.pixel_height) - 1) * 100);
@@ -213,7 +228,7 @@ int main()
 			{
 
 				pixel_color = color(0, 0, 0);
-				camera_didnt_inter += 1;
+
 			}
 			clamp_color(pixel_color);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
@@ -224,8 +239,7 @@ int main()
 #ifdef REPORT_PROGRESS
 	std::cout << "\n";
 	std::cout << "Done  :  " << writing.elapsed() << std::endl;
-	std::cout << "Was Reflected " << errors << "times" << std::endl;
-	std::cout << "Camera didint intersect " << camera_didnt_inter << "times" << std::endl;
+
 
 	std::cout << "\n";
 	std::cout << "Summary Time  :  " << Summary.elapsed();
