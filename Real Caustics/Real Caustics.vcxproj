@@ -151,11 +151,15 @@
     <ClCompile Include="src\2D\2D_BVH.cpp" />
     <ClCompile Include="src\aabb.cpp" />
     <ClCompile Include="src\BVH\BVH_mesh.cpp" />
+    <ClCompile Include="src\BVH\BVH_world.cpp" />
     <ClCompile Include="src\Gather_photons.cpp" />
+    <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\parser.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\photon_map.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\trace_photon.cpp" />
+    <ClCompile Include="src\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\2D\2D_aabb.h" />
@@ -164,10 +168,13 @@
     <ClInclude Include="src\2D\2D_triangle.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\BVH\BVH_mesh.h" />
+    <ClInclude Include="src\BVH\BVH_world.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\DLL.h" />
     <ClInclude Include="src\Gather_photons.h" />
+    <ClInclude Include="src\Blender_definitions.h" />
+    <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Hit_rec.h" />
     <ClInclude Include="src\hittable_list.h" />
     <ClInclude Include="src\Lights.h" />

@@ -27,15 +27,15 @@
 #include "BVH\BVH_mesh.h"
 #include "Camera.h"
 #include "DLL.h"
+#include "Blender_definitions.h"
+#include "Scene.h"
 
 #define DLLEXPORT extern "C" __declspec(dllexport)
 
 #define REPORT_PROGRESS
 
-//#define UNIFORM_GRID
-#define HALTON_SEQUENCE
 
-#define MULTI_THREADED
+
 
 extern const float inf = std::numeric_limits<float>::infinity();
 extern const float negative_inf = -inf;
@@ -43,18 +43,31 @@ extern const float PI = 3.14159265359f;
 extern const float E = 2.71828182846;
 extern const float PI2 = 6.28318530718f;
 
-int number_of_photons;
-int n_closest;
-float radius;
 
-DLLEXPORT void init(int photons, int closest, float r)
+//-------------------------------------------
+//----------------SCENE----------------------
+Scene *scene;
+//----------------SCENE----------------------
+//-------------------------------------------
+
+
+DLLEXPORT void init(int number_of_photons, int n_closest, float radius, long long* meshes_pointers, unsigned int number_of_meshes,
+					unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris)
 {
-	number_of_photons = photons;
-	n_closest = closest;
-	radius = r;
+	scene = new Scene;
+
+	scene->number_of_photons = number_of_photons;
+	scene->number_of_closest_photons = n_closest;
+	scene->search_radius = radius;
+
 	std::cout << "number of photons = " << number_of_photons << std::endl;
 	std::cout << "number of closest photons = " << n_closest << std::endl;
 	std::cout << "number of photons = " << radius << std::endl;
+
+	scene->number_of_meshes = number_of_meshes;
+	//initiliazes meshes with blender data
+	scene->init_meshes(meshes_pointers, meshes_number_of_verts, meshes_number_of_tris);
+	
 }
 
 

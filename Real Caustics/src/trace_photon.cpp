@@ -20,10 +20,10 @@ void trace_photon(Photon_map& photon_map, hittable_list& world, ray& r, bool& wa
 	ray scattered_ray;
 	if (world.hit(r, 0.0001f, inf, rec))
 	{
-		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
+		if (rec.material_idx->scatter(r, rec, scattered_ray))
 		{
 			scattered_ray.power = r.power;
-			scattered_ray *= rec.mat_ptr->get_color();
+			scattered_ray *= rec.material_idx->get_color();
 			was_refracted = true;
 			return trace_photon(photon_map, world, scattered_ray, was_refracted, depth - 1);
 		}
@@ -43,7 +43,7 @@ bool trace_ray(const ray& r, hittable_list& world, hit_rec& rec, int depth)
 	ray scattered_ray;
 	if (world.hit(r, 0.0001f, inf, rec))
 	{
-		if (rec.mat_ptr->scatter(r, rec, scattered_ray))
+		if (rec.material_idx->scatter(r, rec, scattered_ray))
 		{
 			return trace_ray(scattered_ray, world, rec, depth - 1);
 		}

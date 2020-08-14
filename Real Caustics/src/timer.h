@@ -5,7 +5,6 @@
 class Timer
 {
 private:
-	// Псевдонимы типов используются для удобного доступа к вложенным типам
 	using clock_t = std::chrono::high_resolution_clock;
 	using second_t = std::chrono::duration<double, std::ratio<1> >;
 

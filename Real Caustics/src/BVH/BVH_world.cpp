@@ -1,27 +1,33 @@
 #include "../vec3.h"
 #include "../ray.h"
 #include "../mesh.h"
-#include "../hittable_list.h"
 #include "BVH_world.h"
 #include "../Triangle.h"
-/*
-BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
+#include "mesh.h"
+#include "Scene.h"
+#include <memory>
+#include <fstream>
+
+BVHNode_world *recurse(std::vector<aabb_temp_world> &mesh_temp_containers)
 {
-	if (objects.size() < 4)
+	if (mesh_temp_containers.size() < 4)
 	{
-		BVHLeaf_world* leaf = new BVHLeaf_world;
-		for (size_t i = 0; i < objects.size(); ++i)
+		aabb temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
+		BVHLeaf_world *leaf = new BVHLeaf_world;
+		for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
 		{
-			leaf->meshes.push_back(objects[i].mesh->root);
+			temp = surrounding_box(temp, mesh_temp_containers[i].bbox);
+			leaf->mesh_indices.push_back(mesh_temp_containers[i].index);
 		}
+		leaf->bbox = temp;
 		return leaf;
 	}
 	else
 	{
 		aabb bbox_temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
-		for (size_t i = 0; i < objects.size(); ++i)
+		for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
 		{
-			bbox_temp = surrounding_box(bbox_temp, objects[i].bbox);
+			bbox_temp = surrounding_box(bbox_temp, mesh_temp_containers[i].bbox);
 		}
 
 		float min_cost = inf;
@@ -32,8 +38,6 @@ BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
 		int best_left_amount;
 		int best_right_amount;
 
-
-
 		float side1 = bbox_temp.max.x - bbox_temp.min.x;
 		float side2 = bbox_temp.max.y - bbox_temp.min.y;
 		float side3 = bbox_temp.max.z - bbox_temp.min.z;
@@ -43,7 +47,6 @@ BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
 
 		float start;
 		float stop;
-
 
 		if (axis == 0)
 		{
@@ -69,21 +72,24 @@ BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
 			count_left = 0;
 			count_right = 0;
 
-			for (size_t i = 0; i < objects.size(); ++i)
+			for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
 			{
 				float bbox_center_axis;
-				if (axis == 0) bbox_center_axis = objects[i].center.x;
-				else if (axis == 1) bbox_center_axis = objects[i].center.y;
-				else bbox_center_axis = objects[i].center.z;
+				if (axis == 0)
+					bbox_center_axis = mesh_temp_containers[i].center.x;
+				else if (axis == 1)
+					bbox_center_axis = mesh_temp_containers[i].center.y;
+				else
+					bbox_center_axis = mesh_temp_containers[i].center.z;
 
 				if (bbox_center_axis < testSplit)
 				{
-					left = surrounding_box(left, objects[i].bbox);
+					left = surrounding_box(left, mesh_temp_containers[i].bbox);
 					count_left += 1;
 				}
 				else
 				{
-					right = surrounding_box(right, objects[i].bbox);
+					right = surrounding_box(right, mesh_temp_containers[i].bbox);
 					count_right += 1;
 				}
 			}
@@ -112,15 +118,17 @@ BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
 				best_left_amount = count_left;
 				best_right_amount = count_right;
 			}
-
 		}
 		if (!is_better_split)
 		{
-			BVHLeaf_world* leaf = new BVHLeaf_world;
-			for (size_t i = 0; i < objects.size(); ++i)
+			aabb temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
+			BVHLeaf_world *leaf = new BVHLeaf_world;
+			for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
 			{
-				leaf->meshes.push_back(objects[i].mesh->root);
+				temp = surrounding_box(temp, mesh_temp_containers[i].bbox);
+				leaf->mesh_indices.push_back(mesh_temp_containers[i].index);
 			}
+			leaf->bbox = temp;
 			return leaf;
 		}
 		else
@@ -130,73 +138,153 @@ BVHNode_world* recurse_world(std::vector<aabb_temp_world> objects)
 			std::vector<aabb_temp_world> right_objects;
 			right_objects.reserve(best_right_amount);
 
-			for (size_t i = 0; i < objects.size(); ++i)
+			for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
 			{
 				float bbox_center_axis;
-				if (axis == 0) bbox_center_axis = objects[i].center.x;
-				else if (axis == 1) bbox_center_axis = objects[i].center.y;
-				else bbox_center_axis = objects[i].center.z;
+				if (axis == 0)
+					bbox_center_axis = mesh_temp_containers[i].center.x;
+				else if (axis == 1)
+					bbox_center_axis = mesh_temp_containers[i].center.y;
+				else
+					bbox_center_axis = mesh_temp_containers[i].center.z;
 
 				if (bbox_center_axis < best_split)
 				{
-					left_objects.push_back(objects[i]);
+					left_objects.push_back(mesh_temp_containers[i]);
 				}
 				else
 				{
-					right_objects.push_back(objects[i]);
+					right_objects.push_back(mesh_temp_containers[i]);
 				}
 			}
-			BVHInner_world* inner = new BVHInner_world;
+			BVHInner_world *inner = new BVHInner_world;
 			inner->bbox = bbox_temp;
-			inner->_left = recurse_world(left_objects);
-			inner->_right = recurse_world(right_objects);
+			inner->_left = recurse(left_objects);
+			inner->_right = recurse(right_objects);
 			return inner;
 		}
 	}
-
 }
-
-
-
-void make_bvh_world(hittable_list& world)
-{
-	std::vector<aabb_temp_world> working_list;
-	working_list.reserve(world.objects.size());
-	for (size_t i = 0; i < world.objects.size(); ++i)
-	{
-		make_bvh_mesh(world.objects[i]);
-		aabb bbox = world.objects[i]->bounding_box;
-		vec3 center = (bbox.min + bbox.max) / 2.f;
-		working_list.emplace_back(bbox, center, world.objects[i]);
-	}
-	world.root = recurse_world(working_list);
-	world.objects.clear();
-	world.objects.shrink_to_fit();
-}
-
-
-
-bool hit_world(BVHNode_world* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf)
+unsigned int CountTriangles(BVHNode_world *root)
 {
 	if (!root->IsLeaf())
 	{
-		BVHInner_world* inner = dynamic_cast<BVHInner_world*>(root);
-		if (!inner->bbox.hit(r, tmin, tmax))
-		{
-			return false;
-		}
-		else
-		{
-			bool left_hit = hit_world(inner->_left, r, tmin, tmax, hit_inf);
-			bool right_hit = hit_world(inner->_right, r, tmin, left_hit ? hit_inf.t : tmax, hit_inf);
-			return left_hit || right_hit;
-		}
-
+		BVHInner_world *p = dynamic_cast<BVHInner_world *>(root);
+		return CountTriangles(p->_left) + CountTriangles(p->_right);
 	}
 	else
 	{
-		BVHLeaf_world* leaf = dynamic_cast<BVHLeaf_world*>(root);
-		return leaf->hit(r, tmin, tmax, hit_inf);
+		BVHLeaf_world *p = dynamic_cast<BVHLeaf_world *>(root);
+		return (unsigned)p->mesh_indices.size();
 	}
-}*/
+}
+unsigned int CountBoxes(BVHNode_world *root)
+{
+	if (!root->IsLeaf())
+	{
+		BVHInner_world *p = dynamic_cast<BVHInner_world *>(root);
+		return 1 + CountBoxes(p->_left) + CountBoxes(p->_right);
+	}
+	else
+		return 1;
+}
 
+BVHNode_world* Scene::make_default_bvh()
+{
+	std::vector<aabb_temp_world> working_list;
+	working_list.reserve(number_of_meshes);
+
+	for (size_t i = 0; i < number_of_meshes; ++i)
+	{
+		aabb bbox = meshes[i].bounding_box;
+		vec3 center = (bbox.min + bbox.max) / 2.0f;
+		working_list.emplace_back(i, bbox, center);
+	}
+
+	BVHNode_world *root = recurse(working_list);
+
+	return root;
+
+	//mesh->triangles.clear();
+	//mesh->triangles.shrink_to_fit();
+}
+void populate_cache_friendly_bvh(BVHNode_world *root, unsigned &idxBoxes, unsigned &idxTriList, BVH_world &cache_friendly_bvh)
+{
+
+	if (!root->IsLeaf())
+	{
+		BVHInner_world *p = dynamic_cast<BVHInner_world *>(root);
+		unsigned currIdxBoxes = idxBoxes;
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].bounding_box = p->bbox;
+
+		int idxLeft = ++idxBoxes;
+		populate_cache_friendly_bvh(p->_left, idxBoxes, idxTriList, cache_friendly_bvh);
+		int idxRight = ++idxBoxes;
+		populate_cache_friendly_bvh(p->_right, idxBoxes, idxTriList, cache_friendly_bvh);
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.inner.idxLeft = idxLeft;
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.inner.idxRight = idxRight;
+	}
+
+	else
+	{
+		BVHLeaf_world *p = dynamic_cast<BVHLeaf_world *>(root);
+
+		unsigned currIdxBoxes = idxBoxes;
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].bounding_box = p->bbox;
+
+		unsigned count = p->mesh_indices.size();
+		// highest bit set indicates a leaf node (inner node if highest bit is 0)
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.leaf.count = 0x80000000 | count;
+
+		cache_friendly_bvh.bvh_nodes[currIdxBoxes].u.leaf.startIndex = idxTriList;
+
+		for (unsigned i = 0; i < p->mesh_indices.size(); ++i)
+		{
+			cache_friendly_bvh.mesh_indices[++idxTriList] = p->mesh_indices[i];
+		}
+	}
+}
+void create_cache_friendly_bvh(BVHNode_world *root, BVH_world &cache_friendly_bvh, const char *file_path)
+{
+	unsigned tris = CountTriangles(root);
+	int boxes = CountBoxes(root);
+
+	cache_friendly_bvh.mesh_indices.resize((size_t)tris + 1);
+	cache_friendly_bvh.bvh_nodes.resize(boxes);
+	unsigned idxTriList = 0;
+	unsigned idxBoxes = 0;
+
+	populate_cache_friendly_bvh(root, idxBoxes, idxTriList, cache_friendly_bvh);
+	
+	std::ofstream file(file_path, std::ios::binary);
+	int size1 = cache_friendly_bvh.mesh_indices.size();
+	int size2 = cache_friendly_bvh.bvh_nodes.size();
+	
+	file.write((char *)&size1, sizeof(int));
+	file.write((char *)&cache_friendly_bvh.mesh_indices[0], sizeof(int) * (size_t)size1);
+	file.write((char *)&size2, sizeof(int));
+	file.write((char *)&cache_friendly_bvh.bvh_nodes[0], sizeof(CacheBVHNode_world) * size2);
+	
+	file.close();
+	delete root;
+}
+
+
+
+bool CacheBVHNode_world::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_world &bvh, Mesh *meshes) const
+{
+	hit_rec temp_rec;
+	bool hit_anything = false;
+	auto closest_so_far = tmax;
+	int end_index = u.leaf.startIndex + (u.leaf.count & 0x7fffffff) + 1;
+	for (int i = u.leaf.startIndex + 1; i < end_index; ++i)
+	{
+		if (meshes[bvh.mesh_indices[i]].hit(r, tmin, closest_so_far, temp_rec, 1))
+		{
+			hit_anything = true;
+			closest_so_far = temp_rec.t;
+			hit_inf = temp_rec;
+		}
+	}
+	return hit_anything;
+}

@@ -1,34 +1,26 @@
 #ifndef BVH_WORLD_H
 #define BVH_WORLD_H
 
-#include "../vec3.h"
-#include "../ray.h"
-#include "../Hit_rec.h"
-#include "../utils.h"
-#include <algorithm>
-#include <cmath>
-#include <memory>
+#include <vector>
 #include "../aabb.h"
-#include "../mesh.h"
-#include "BVH_mesh.h"
-#include "../Triangle.h"
 
-/*
-class Hittable;
-class hittable_list;
+struct hit_rec;
+class ray;
+class Triangle;
+class Mesh;
+
 extern const float inf;
 
-
-struct BVHNode_world {
+struct BVHNode_world
+{
 	virtual bool IsLeaf() = 0;
 	virtual ~BVHNode_world() {}
-
 };
 
 struct BVHInner_world : BVHNode_world
 {
-	BVHNode_world* _left = nullptr;
-	BVHNode_world* _right = nullptr;
+	BVHNode_world *_left = nullptr;
+	BVHNode_world *_right = nullptr;
 	aabb bbox;
 	BVHInner_world() {}
 	virtual bool IsLeaf() { return false; }
@@ -41,57 +33,47 @@ struct BVHInner_world : BVHNode_world
 
 struct BVHLeaf_world : BVHNode_world
 {
-	std::vector<BVHNode_mesh*> meshes;
+	aabb bbox;
+	std::vector<unsigned int> mesh_indices;
 	BVHLeaf_world() {}
 	virtual bool IsLeaf() { return true; }
-	bool hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf)
-	{
-		bool hit_anything = false;
-		hit_rec temp_rec;
-		float closest_so_far = tmax;
-		for (size_t i = 0; i < meshes.size(); ++i)
+	virtual ~BVHLeaf_world() {}
+};
+
+struct CacheBVHNode_world;
+struct BVH_world
+{
+	std::vector<int> mesh_indices;
+	std::vector<CacheBVHNode_world> bvh_nodes;
+};
+struct CacheBVHNode_world
+{
+	aabb bounding_box;
+	union {
+		// inner node - stores indexes to array of CacheFriendlyBVHNode
+		struct
 		{
-			if (!meshes[i]->IsLeaf())
-			{
-				BVHInner_mesh* mesh_root = dynamic_cast<BVHInner_mesh*>(meshes[i]);
-				if (hit_mesh(mesh_root, r, tmin, closest_so_far, temp_rec))
-				{
-					hit_anything = true;
-					closest_so_far = temp_rec.t;
-					hit_inf = temp_rec;
-				}
-			}
-			else
-			{
-				BVHLeaf_mesh* mesh_root = dynamic_cast<BVHLeaf_mesh*>(meshes[i]);
-				if (mesh_root->hit(r, tmin, closest_so_far, temp_rec))
-				{
-					hit_anything = true;
-					closest_so_far = temp_rec.t;
-					hit_inf = temp_rec;
-				}
-			}
-			
-		}
-		return hit_anything;
-	}
-	virtual ~BVHLeaf_world()
-	{
-		for (size_t i = 0; i < meshes.size(); ++i)
+			unsigned idxLeft;
+			unsigned idxRight;
+		} inner;
+		// leaf node: stores triangle count and starting index in triangle list
+		struct
 		{
-			delete meshes[i];
-		}
-	}
+			unsigned count; // Top-most bit set, leafnode if set, innernode otherwise
+			unsigned startIndex;
+		} leaf;
+	} u;
+	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_world &bvh, Mesh *meshes) const;
 };
 struct aabb_temp_world
 {
+	unsigned int index;
 	aabb bbox;
-	std::shared_ptr<Mesh> mesh;
 	vec3 center;
-	aabb_temp_world(aabb& box, vec3& c, std::shared_ptr<Mesh> m) : bbox(box), center(c), mesh(m) {}
+
+	aabb_temp_world(unsigned int i, aabb &box, vec3 &c) : index(i), bbox(box), center(c) {}
 };
 
-void make_bvh_world(hittable_list& objects);
-bool hit_world(BVHNode_world* root, const ray& r, float tmin, float tmax, hit_rec& hit_inf);
-*/
+void create_cache_friendly_bvh(BVHNode_world *root, BVH_world &cache_friendly_bvh, const char *file_path);
+
 #endif

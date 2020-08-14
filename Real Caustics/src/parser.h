@@ -4,7 +4,7 @@
 #include <memory>
 #include "materials.h"
 
-void parse(std::string path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+void parse(std::string path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material_idx);
 
 
 #endif

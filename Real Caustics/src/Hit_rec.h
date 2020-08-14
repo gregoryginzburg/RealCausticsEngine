@@ -1,13 +1,11 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
-#include <memory>
-#include "vec3.h"
-#include "ray.h"
-#include "aabb.h"
-#include "vec2.h"
-#include "Color.h"
+
 class Material;
 class aabb;
+class vec3;
+class vec2;
+
 struct hit_rec
 {
 	vec3 normal;
@@ -21,14 +19,7 @@ struct hit_rec
 	vec2 tex_coord_v1;
 	vec2 tex_coord_v2;
 
-	std::shared_ptr<Material> mat_ptr;
-
-	inline void set_normal(const ray& r, vec3 outward_normal)
-	{
-		front_face = dot(outward_normal, r.direction) < 0;
-		normal = front_face ? outward_normal : -outward_normal;
-	}
-
+	unsigned int material_idx;
 };
 
 
