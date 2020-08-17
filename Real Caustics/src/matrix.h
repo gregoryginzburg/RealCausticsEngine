@@ -44,6 +44,57 @@ public:
 		j = vec3(u.x * u.y * t - u.z * s, c + u.y * u.y * t, u.y * u.z * t + u.x * s);
 		k = vec3(u.x * u.z * t + u.y * s, u.y * u.z * t - u.x * s, c + u.z * u.z * t);
 	}
+public:
+	float& operator()(int idx1, int idx2)
+	{
+		if (idx1 == 0)
+		{
+			if (idx2 == 0)
+			{
+				return i.x;
+			}
+			else if (idx2 == 1)
+			{
+				return i.y;
+			}
+			else
+			{
+				return i.z;
+			}
+			
+		}
+		else if (idx1 == 1)
+		{
+			if (idx2 == 0)
+			{
+				return j.x;
+			}
+			else if (idx2 == 1)
+			{
+				return j.y;
+			}
+			else
+			{
+				return j.z;
+			}
+		}
+		else
+		{
+			if (idx2 == 0)
+			{
+				return k.x;
+			}
+			else if (idx2 == 1)
+			{
+				return k.y;
+			}
+			else
+			{
+				return k.z;
+			}
+		}
+		
+	}
 };
 class matrix_4x4
 {
@@ -86,6 +137,25 @@ inline void rotate_vec(vec3& v, vec3& p, float angle, vec3 axis)
 {
 	matrix_3x3 rot_matrix(angle, axis);
 	v = (v - p) * rot_matrix + p;
+}
+// not optimized at all - only used to invert 1 matrix to transform 8 bounding box points
+inline void invert_matrix(matrix_3x3& m)
+{
+	float det = m(0, 0) * (m(1, 1) * m(2, 2) - m(2, 1) * m(1, 2)) -
+				m(0, 1) * (m(1, 0) * m(2, 2) - m(1, 2) * m(2, 0)) +
+				m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0));
+
+	float inv_det = 1.0f / det;
+
+	m(0, 0) = (m(1, 1) * m(2, 2) - m(2, 1) * m(1, 2)) * inv_det;
+	m(0, 1) = (m(0, 2) * m(2, 1) - m(0, 1) * m(2, 2)) * inv_det;
+	m(0, 2) = (m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1)) * inv_det;
+	m(1, 0) = (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2)) * inv_det;
+	m(1, 1) = (m(0, 0) * m(2, 2) - m(0, 2) * m(2, 0)) * inv_det;
+	m(1, 2) = (m(1, 0) * m(0, 2) - m(0, 0) * m(1, 2)) * inv_det;
+	m(2, 0) = (m(1, 0) * m(2, 1) - m(2, 0) * m(1, 1)) * inv_det;
+	m(2, 1) = (m(2, 0) * m(0, 1) - m(0, 0) * m(2, 1)) * inv_det;
+	m(2, 2) = (m(0, 0) * m(1, 1) - m(1, 0) * m(0, 1)) * inv_det;
 }
 
 

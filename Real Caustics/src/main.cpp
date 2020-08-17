@@ -12,7 +12,6 @@
 #include "mesh.h"
 #include "Triangle.h"
 #include "ray.h"
-#include "hittable_list.h"
 #include "utils.h"
 #include "Color.h"
 #include "parser.h"
@@ -21,9 +20,6 @@
 #include "matrix.h"
 #include "photon_map.h"
 #include "priority_queue.h"
-#include "trace_photon.h"
-#include "2D\UV_Map.h"
-#include "Gather_photons.h"
 #include "BVH\BVH_mesh.h"
 #include "Camera.h"
 #include "DLL.h"
@@ -46,112 +42,138 @@ extern const float PI2 = 6.28318530718f;
 
 //-------------------------------------------
 //----------------SCENE----------------------
-Scene *scene;
+extern Scene *scene = nullptr;
 //----------------SCENE----------------------
 //-------------------------------------------
 
 
-DLLEXPORT void init(int number_of_photons, int n_closest, float radius, long long* meshes_pointers, unsigned int number_of_meshes,
-					unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris)
+// :number_of_photons - number of emitted photons
+// :n_closest - maximum number of photons used for gathering
+// :radius - maximum gather radius
+// :mesh_pointers - array of pointers to blender meshes
+// :number_of_meshes
+// :meshes_number_of_verts - array of number of vertices
+// :meshes_number_of_tris - array of number of triangles 
+// :camera_x - camera width resolution
+// :camera_y - camera height resolution  
+// :camera_position
+// :camera_corner 0,1,2,3 - top right, boottom right, bottom left, top left corners of camera
+//  4----1
+//	|    |  - Camera corners
+//  |    |
+//  3----2
+// :lights - Lights from Python, need to be converted
+// :number_of_lights
+// :materials - Materials from Python, need to be converted 
+// :number_of_materials
+// :meshes_material_idx - Array with length of number_of_meshes, indices of materials
+DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
+					long long *meshes_pointers,
+					unsigned int number_of_meshes,
+					unsigned int *meshes_number_of_verts,
+					unsigned int *meshes_number_of_tris,
+					unsigned int camera_x,
+					unsigned int camera_y,
+					vec3 camera_position,
+					vec3 camera_corner0,
+					vec3 camera_corner1,
+					vec3 camera_corner2,
+					vec3 camera_corner3,
+					Python_Light *lights,
+					unsigned int number_of_lights,
+					Python_Material *materials,
+					unsigned int number_of_materials,
+					int* meshes_material_idx)
 {
-	scene = new Scene;
 
+	std::cout << number_of_photons << std::endl;
+	std::cout << n_closest << std::endl;
+	std::cout << radius << std::endl;
+	std::cout << meshes_pointers << std::endl;
+	std::cout << number_of_meshes << std::endl;
+	std::cout << meshes_number_of_verts << std::endl;
+	std::cout << meshes_number_of_tris << std::endl;
+	std::cout << camera_x << std::endl;
+	std::cout << camera_y << std::endl;
+	std::cout << lights << std::endl;
+	std::cout << number_of_lights << std::endl;
+	std::cout << materials << std::endl;
+	std::cout << meshes_material_idx << std::endl;
+
+
+	scene = new Scene;
+	//initialize common photon mapping settings
 	scene->number_of_photons = number_of_photons;
+
+	std::cout << "passed" << std::endl;
+
 	scene->number_of_closest_photons = n_closest;
+
+	std::cout << "passed" << std::endl;
+
 	scene->search_radius = radius;
 
-	std::cout << "number of photons = " << number_of_photons << std::endl;
-	std::cout << "number of closest photons = " << n_closest << std::endl;
-	std::cout << "number of photons = " << radius << std::endl;
-
+	std::cout << "passed" << std::endl;
 	scene->number_of_meshes = number_of_meshes;
-	//initiliazes meshes with blender data
-	scene->init_meshes(meshes_pointers, meshes_number_of_verts, meshes_number_of_tris);
+
+	std::cout << "passed" << std::endl;
+	//initialize meshes with blender data
+	scene->init_meshes(meshes_pointers, meshes_number_of_verts, meshes_number_of_tris, meshes_material_idx);
+
+	std::cout << "passed" << std::endl;
+
+	//initialize camera
+	scene->camera = Camera(camera_x, camera_y,
+						   camera_position,
+						   camera_corner0,
+						   camera_corner1,
+						   camera_corner2,
+						   camera_corner3);
+
+	std::cout << "passed" << std::endl;
+
+	//initialize lights and calculate weights for photon emission
+	scene->number_of_lights = number_of_lights;
+
+	std::cout << "passed" << std::endl;
+
+	scene->init_lights(lights);
 	
+	std::cout << "passed" << std::endl;
+	
+	scene->lights.calculate_weights();
+	//initialize photon map (reserve photons)
+	
+	std::cout << "passed" << std::endl;
+	
+	scene->photon_map.init_photon_map(number_of_photons);
+	//initialize materials
+	
+	std::cout << "passed" << std::endl;
+	
+	scene->number_of_materials = number_of_materials;
+	
+	std::cout << "passed" << std::endl;
+	
+	scene->init_materials(materials);
+
+	std::cout << "passed" << std::endl;
+
+	std::cout << *scene;
 }
 
 
 DLLEXPORT int main()
-{
-	
-	
+{	
 	Timer Summary;
-
-	hittable_list world;
-
-	// std::shared_ptr<Mesh> water = std::make_shared<Mesh>();
-	// std::shared_ptr<Mesh> cornel_box = std::make_shared<Mesh>();
-	// std::shared_ptr<Mesh> cube_big = std::make_shared<Mesh>();
-	// std::shared_ptr<Mesh> cube_small = std::make_shared<Mesh>();
-
-	std::shared_ptr<Mesh> water = std::make_shared<Mesh>();
-	std::shared_ptr<Mesh> floor = std::make_shared<Mesh>();
-
-	// BVH_mesh water_bvh;
-	// BVH_mesh cornel_box_bvh;
-	// BVH_mesh cube_big_bvh;
-	// BVH_mesh cube_small_bvh;
-
-	BVH_mesh water_bvh;
-	BVH_mesh floor_bvh;
-
-	// Camera camera(837, 912,
-	// 			  vec3(-3.95455, 0.0, 1.25949),
-	// 			  vec3(-2.5823276042938232, -0.4588816463947296, 1.7594863176345825),
-	// 			  vec3(-2.582327365875244, -0.4588816463947296, 0.7594862580299377),
-	// 			  vec3(-2.582327365875244, 0.45888152718544006, 0.7594862580299377),
-	// 			  vec3(-2.5823276042938232, 0.45888152718544006, 1.7594863176345825));
-
-	Camera camera(915, 1095,
-				  vec3(8.00657, -0.909492, 8.63837),
-				  vec3(6.7962470054626465, -0.31748080253601074, 7.904736518859863),
-				  vec3(7.550374984741211, -0.4234650135040283, 7.256617069244385),
-				  vec3(7.434081077575684, -1.2509496212005615, 7.256617069244385),
-				  vec3(6.679953575134277, -1.144965410232544, 7.904736518859863));
-	Lights_list ligths;
-
-	Photon_map map(number_of_photons);
-	// 0.05
-	// ligths.add(std::make_shared<Area_Light>(vec3(0, 0, 2.33103), 0.03, 0.03, 0, 2));
-	ligths.add(std::make_shared<Area_Light>(vec3(0, 4.91844, 6.53646), vec3(-40, 0, 0), 8.84011, 3.2278, 0, 5));
-	ligths.calculate_weights();
-
-#ifdef REPORT_PROGRESS
-	Timer parser;
-	std::cout << "Parsing Started" << std::endl;
-#endif
-
-	// parse("water.obj", water, std::make_shared<Glass>(1.333, colorf(1, 1, 1)));
-	// parse("cornel_box.obj", cornel_box, std::make_shared<Catcher>());
-	// parse("cube_big.obj", cube_big, std::make_shared<Catcher>());
-	// parse("cube_small.obj", cube_small, std::make_shared<Catcher>());
-
-	parse("water.obj", water, std::make_shared<Glass>(1.333, colorf(1, 1, 1)));
-	parse("everything.obj", floor, std::make_shared<Catcher>());
-
-#ifdef REPORT_PROGRESS
-	std::cout << "Done  :  " << parser.elapsed() << std::endl;
-#endif
 
 #ifdef REPORT_PROGRESS
 	std::cout << "Building BVH" << std::endl;
 	Timer BVH_timer;
 #endif
-	// update_bvh(0, water_bvh, water, "water_bvh.bvh");
-	// update_bvh(0, cornel_box_bvh, cornel_box, "cornel_box_bvh.bvh");
-	// update_bvh(0, cube_big_bvh, cube_big, "cube_big_bvh.bvh");
-	// update_bvh(0, cube_small_bvh, cube_small, "cube_small_bvh.bvh");
 
-	update_bvh(0, water_bvh, water, "water_bvh.bvh");
-	update_bvh(0, floor_bvh, floor, "floor_bvh.bvh");
+	scene->update_bvh(1, "test_scene_bvh");
 
-	// world.add(water_bvh, water);
-	// world.add(cornel_box_bvh, cornel_box);
-	// world.add(cube_big_bvh, cube_big);
-	// world.add(cube_small_bvh, cube_small);
-
-	world.add(water_bvh, water);
-	world.add(floor_bvh, floor);
 #ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 #endif
@@ -159,12 +181,16 @@ DLLEXPORT int main()
 	Timer rendering;
 
 	std::cout << "Tracing started";
-	for (int i = 0; i < number_of_photons; ++i)
+
+	for (int i = 0; i < scene->number_of_photons; ++i)
 	{
-		ray r = ligths.emit_photon();
-		bool was_refracted = false;
-		trace_photon(map, world, r, was_refracted, 5);
+		ray r = scene->lights.emit_photon();
+		
+		scene->trace_photon(r, 5);
+		std::cout << i << "\r" << std::flush;
+		
 	}
+	
 	std::cout << "Tracing finished";
 	std::ofstream ou;
 	ou.open("D:\\test.obj");
@@ -204,22 +230,23 @@ DLLEXPORT int main()
 	Timer balacing;
 	std::cout << "Balacing Started" << std::endl;
 
-	map.update_kdtree(1, "kdtree.kd");
+	scene->photon_map.update_kdtree(1, "kdtree.kd");
 
 	std::cout << "Done " << balacing.elapsed() << std::endl;
+
 	Timer writing;
-	std::ofstream out; //создать и открыть файл
+	std::ofstream out;
 	out.open("D:\\hello.ppm");
 	out << "P3"
 		<< "\n"
-		<< camera.pixel_width << " " << camera.pixel_height << "\n"
+		<< scene->camera.pixel_width << " " << scene->camera.pixel_height << "\n"
 		<< 255 << "\n";
 	
 	// float radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons) * 2;
 	
-	for (int j = camera.pixel_height - 1; j >= 0; --j)
+	for (int j = scene->camera.pixel_height - 1; j >= 0; --j)
 	{
-		int progress = static_cast<int>(float((float(camera.pixel_height) - 1 - j)) / (float(camera.pixel_height) - 1) * 100);
+		int progress = static_cast<int>(float((float(scene->camera.pixel_height) - 1 - j)) / (float(scene->camera.pixel_height) - 1) * 100);
 	
 #ifdef REPORT_PROGRESS
 		std::cout << "Progress writing to image: ";
@@ -227,21 +254,18 @@ DLLEXPORT int main()
 				  << "\r" << std::flush;
 #endif
 
-		for (int i = 0; i < camera.pixel_width; ++i)
+		for (int i = 0; i < scene->camera.pixel_width; ++i)
 		{
-			ray r = camera.get_ray(j, i);
+			ray r = scene->camera.get_ray(j, i);
 			hit_rec rec;
 			color pixel_color;
-			if (trace_ray(r, world, rec, 5))
+			if (scene->trace_ray(r, rec, 5))
 			{
-				//o << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
-				pixel_color = gather_photons(rec.p, map, radius, n_closest, ou);
+				pixel_color = scene->photon_map.gather_photons(rec.p, scene->search_radius, scene->number_of_closest_photons);
 			}
 			else
 			{
-
 				pixel_color = color(0, 0, 0);
-
 			}
 			clamp_color(pixel_color);
 			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
@@ -249,13 +273,13 @@ DLLEXPORT int main()
 	}
 
 	out.close();
+
 #ifdef REPORT_PROGRESS
 	std::cout << "\n";
 	std::cout << "Done  :  " << writing.elapsed() << std::endl;
 
-
 	std::cout << "\n";
 	std::cout << "Summary Time  :  " << Summary.elapsed();
-#endif*/
+#endif
 	return 0;
 }

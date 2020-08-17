@@ -5,6 +5,18 @@
 #include "Hit_rec.h"
 #include "Color.h"
 #include <cmath>
+
+
+class Python_Material
+{
+public:
+	char type;
+
+	float ior;
+	colorf color;
+};
+
+
 class Material
 {
 public:

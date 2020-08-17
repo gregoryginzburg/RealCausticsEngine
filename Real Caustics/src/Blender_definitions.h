@@ -14,10 +14,8 @@ struct MEdge;
 struct MLoopCol;
 struct MLoopTri;
 struct MLoopUV;
-struct MVert;
 struct MPropCol;
 struct Material;
-struct Mesh;
 struct Multires;
 struct SubdivCCG;
 struct MTFace;
@@ -27,7 +25,6 @@ struct Mesh_Runtime;
 struct MSelect;
 struct TFace;
 struct CustomData;
-struct Mvert;
 struct IDProperty;
 struct IDOverrideLibrary;
 
@@ -125,12 +122,12 @@ struct CustomData_MeshMasks {
 	uint64_t pmask;
 	uint64_t lmask;
 };
-
+struct Mesh_blender;
 struct Mesh_Runtime {
 	/* Evaluated mesh for objects which do not have effective modifiers.
 	 * This mesh is used as a result of modifier stack evaluation.
 	 * Since modifier stack evaluation is threaded on object level we need some synchronization. */
-	Mesh* mesh_eval;
+	Mesh_blender* mesh_eval;
 	void* eval_mutex;
 
 	EditMeshData* edit_data;
@@ -204,6 +201,15 @@ struct MPoly {
 	char flag, _pad;
 };
 
+struct MVert {
+	float co[3];
+	/**
+	 * Cache the normal, can always be recalculated from surrounding faces.
+	 * See #CD_CUSTOMLOOPNORMAL for custom normals.
+	 */
+	short no[3];
+	char flag, bweight;
+};
 
 struct Mesh_blender {
 	ID id;
@@ -246,7 +252,7 @@ struct Mesh_blender {
 	/* array of colors for the tessellated faces, must be number of tessellated
 	 * faces * 4 in length */
 	MCol* mcol;
-	Mesh* texcomesh;
+	Mesh_blender* texcomesh;
 
 	/* When the object is available, the preferred access method is: BKE_editmesh_from_object(ob) */
 	/** Not saved in file!. */
@@ -304,14 +310,6 @@ struct Mesh_blender {
 	Mesh_Runtime runtime;
 };
 
-struct MVert {
-	float co[3];
-	/**
-	 * Cache the normal, can always be recalculated from surrounding faces.
-	 * See #CD_CUSTOMLOOPNORMAL for custom normals.
-	 */
-	short no[3];
-	char flag, bweight;
-};
+
 
 #endif

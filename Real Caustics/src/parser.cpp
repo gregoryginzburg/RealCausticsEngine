@@ -6,11 +6,11 @@
 #include <memory>
 #include "vec3.h"
 #include "mesh.h"
-#include "hittable_list.h"
 #include "utils.h"
 #include "vec2.h"
 #include "materials.h"
 #include "Triangle.h"
+
 void parse(std::string path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material_idx)
 {
 	std::ifstream in;

@@ -3,8 +3,8 @@
 #include "../mesh.h"
 #include "BVH_world.h"
 #include "../Triangle.h"
-#include "mesh.h"
-#include "Scene.h"
+#include "../mesh.h"
+#include "../Scene.h"
 #include <memory>
 #include <fstream>
 

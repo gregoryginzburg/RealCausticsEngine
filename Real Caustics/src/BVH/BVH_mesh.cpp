@@ -3,10 +3,10 @@
 #include "../mesh.h"
 #include "BVH_mesh.h"
 #include "../Triangle.h"
-#include "mesh.h"
+#include "../mesh.h"
 #include <memory>
 #include <fstream>
-#include "Blender_definitions.h"
+#include "../Blender_definitions.h"
 
 BVHNode_mesh *recurse(std::vector<aabb_temp_mesh> &triangle_temp_containers)
 {

@@ -1,16 +1,19 @@
-﻿#include <vector>
+﻿#include "photon_map.h"
+
+#include <vector>
 #include <memory>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include "photon_map.h"
 #include "photon.h"
 #include "random_generators.h"
 #include "aabb.h"
+#include "Color.h"
 
-//initialize with element = 1
+
 
 extern const float inf;
+extern const float E;
 int aproximate_biggest_axis(std::vector<temp_photon>& photons, int start_index, int count)
 {
 	vec3 bottom(inf, inf, inf);
@@ -200,7 +203,7 @@ void update_kd_tree(bool was_changed, std::vector<std::shared_ptr<photon>>& phot
 }
 
 
-void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<photon>>& photons, const vec3& point, float search_d, Priority_queue& closest_photons, int element)
+void Photon_map::find_closest_photons(const vec3& point, float search_d, Priority_queue& closest_photons, int element)
 {
 	static float search_distance_squared = search_d;
 	if (kdtree[element].u.inner.index & 0x80000000)
@@ -214,7 +217,7 @@ void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<p
 			dist_to_plane = point.z - kdtree[element].u.inner.split;
 		if (dist_to_plane < 0)
 		{
-			find_photons(kdtree, photons, point, search_distance_squared, closest_photons, 2 * element);
+			find_closest_photons(point, search_distance_squared, closest_photons, 2 * element);
 			if (dist_to_plane * dist_to_plane < search_distance_squared)
 			{
 				if (kdtree[element].u.inner.index & 0x10000000)
@@ -224,13 +227,13 @@ void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<p
 					if (dist_to_point_squared < search_distance_squared)
 						closest_photons.insert_element(photons[index], dist_to_point_squared);
 				}
-				find_photons(kdtree, photons, point, search_distance_squared, closest_photons, 2 * element + 1);
+				find_closest_photons(point, search_distance_squared, closest_photons, 2 * element + 1);
 			}
 
 		}
 		else
 		{
-			find_photons(kdtree, photons, point, search_distance_squared, closest_photons, 2 * element + 1);
+			find_closest_photons(point, search_distance_squared, closest_photons, 2 * element + 1);
 			if (dist_to_plane * dist_to_plane < search_distance_squared)
 			{
 				if (kdtree[element].u.inner.index & 0x10000000)
@@ -240,7 +243,7 @@ void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<p
 					if (dist_to_point_squared < search_distance_squared)
 						closest_photons.insert_element(photons[index], dist_to_point_squared);
 				}
-				find_photons(kdtree, photons, point, search_distance_squared, closest_photons, 2 * element);
+				find_closest_photons(point, search_distance_squared, closest_photons, 2 * element);
 			}
 
 		}
@@ -258,4 +261,36 @@ void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<p
 			}
 		}
 	}
+}
+
+
+color Photon_map::gather_photons(vec3 point, float search_distance, int number_of_closest_photons)
+{
+	Priority_queue closest_photons(number_of_closest_photons);
+
+	find_closest_photons(point, search_distance * search_distance, closest_photons, 1);
+
+	if (closest_photons.photons.size() == 0)
+	{
+		return color(0, 0, 0);	
+	}
+	else
+	{
+		colorf flux(0.f, 0.f, 0.f);
+		float r = closest_photons.priorities[0];
+		float delta_A = PI * r;
+		for (int i = 0; i < closest_photons.photons.size(); ++i)
+		{
+			float weight = 0.918f * (1.f - (1.f - std::pow(E, -1.953f * closest_photons.priorities[i] / 2.f / r)) / 0.85815f);
+			flux += closest_photons.photons[i]->power * weight;
+		}
+		flux /= delta_A;
+		int red = static_cast<int>(flux.r * 255.999);
+		int green = static_cast<int>(flux.g * 255.999);
+		int blue = static_cast<int>(flux.b * 255.999);
+
+		return color(red, green, blue);
+	}
+	
+
 }

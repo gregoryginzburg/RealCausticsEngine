@@ -18,9 +18,8 @@ class Mesh
 public:
 	Mesh() {}
 
-	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris);
+	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx);
 
-	~Mesh();
 
 public:
 	// defined in BVH_mesh.cpp
@@ -34,6 +33,7 @@ public:
 	unsigned int number_of_triangles;
 	//array of blender_vertices
 	MVert *vertices;
+
 	//array of triangles
 	Triangle *triangles;
 

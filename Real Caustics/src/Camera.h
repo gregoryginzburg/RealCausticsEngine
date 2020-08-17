@@ -16,6 +16,8 @@ private:
 	vec3 vertical;
 
 public:
+	Camera() {}
+	
 	Camera(int pixel_x, int pixel_y, vec3 o, vec3 top_right, vec3 bottom_right, vec3 bottom_left, vec3 top_left) : 
 		bottom_left_corner(bottom_left), pixel_width(pixel_x), pixel_height(pixel_y), origin(o)
 	{

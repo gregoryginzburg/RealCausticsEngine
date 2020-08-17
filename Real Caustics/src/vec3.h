@@ -27,6 +27,8 @@ public:
 	//construct from an array
 	vec3(float* arr) : x(arr[0]), y(arr[1]), z(arr[2]){}
 
+
+
 	vec3 &operator+=(const vec3 &other)
 	{
 		x += other.x;
@@ -184,6 +186,20 @@ inline vec3 random_in_hemisphere()
 	auto z = random_float(-1.0f, 1.0f);
 	auto r = sqrtf(1.0f - z * z);
 	return vec3(r * cos(a), r * sin(a), z);
+}
+// :angle - in radians
+inline vec3 random_in_hemisphere(float angle)
+{
+	auto a = random_float(0.0f, PI2);
+	auto z = random_float(cos(angle * PI / 180.f), 1.0f);
+	auto r = sqrtf(1.0f - z * z);
+	return vec3(r * cos(a), r * sin(a), z);
+}
+
+inline vec3 project_onto_plane(const vec3& point, const vec3& center, const vec3& normal)
+{
+	vec3 transformed_point = point - center;
+	return (transformed_point - dot(transformed_point, normal) / normal.length_squared() * normal) + center;
 }
 
 #endif

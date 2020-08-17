@@ -39,10 +39,8 @@ struct temp_photon
 	temp_photon(std::shared_ptr<photon> p, unsigned i) : Photon(p), index(i) {}
 };
 
-//void find_photons(KDTreeNode* root, vec3& point, float search_d, Priority_queue& closest_photons);
 void update_kd_tree(bool was_changed, std::vector<std::shared_ptr<photon>>& photons, std::vector<KDTreeNode>& kdtree, const char* file_path);
 
-void find_photons(std::vector<KDTreeNode>& kdtree, std::vector<std::shared_ptr<photon>>& photons, const vec3& point, float search_d, Priority_queue& closest_photons, int element);
 
 
 class Photon_map
@@ -52,10 +50,12 @@ public:
 	std::vector<KDTreeNode> kdtree;
 
 	Photon_map() {}
-	Photon_map(int number_of_photons)
+
+	void init_photon_map(int number_of_photons)
 	{
 		photons.reserve(number_of_photons);
 	}
+
 
 	void add(const vec3& p, const colorf power)
 	{
@@ -66,10 +66,11 @@ public:
 		photons.clear();
 		photons.shrink_to_fit();
 	}
-	void find_closest_photons(const vec3& point, float search_d, Priority_queue& closest_photons)
-	{
-		return find_photons(kdtree, photons, point, search_d, closest_photons, 1);
-	}
+
+	void find_closest_photons(const vec3 &point, float search_d, Priority_queue &closest_photons, int element);
+
+	color gather_photons(vec3 point, float search_distance, int number_of_closest_photons);
+
 	void update_kdtree(bool was_changed, const char* file_path)
 	{
 		update_kd_tree(was_changed, photons, kdtree, file_path);

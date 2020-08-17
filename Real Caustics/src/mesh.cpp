@@ -1,31 +1,29 @@
 #include "mesh.h"
 
 #include <fstream>
+#include <iostream>
 #include "Blender_definitions.h"
 #include "Triangle.h"
 #include "BVH/BVH_mesh.h"
 #include "aabb.h"
 
-Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris)
+Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx) 
 {
 	number_of_triangles = number_of_tris;
 	vertices = mesh_blender_data->mvert;
-		
+
 	triangles = new Triangle[number_of_tris];
+	
 	for (int i = 0; i < number_of_tris; ++i)
 	{
-
         triangles[i] = Triangle(mesh_blender_data->mloop[mesh_blender_data->mpoly[i].loopstart].v,
                                 mesh_blender_data->mloop[mesh_blender_data->mpoly[i].loopstart + 1].v,
                                 mesh_blender_data->mloop[mesh_blender_data->mpoly[i].loopstart + 2].v,
-                                0);
+								material_idx);
     }
 }
 
-Mesh::~Mesh()
-{
-    delete[] vertices;
-}
+
 
 
 void Mesh::update_bvh(bool was_changed, const char *file_path)
