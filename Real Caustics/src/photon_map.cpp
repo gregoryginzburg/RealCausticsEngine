@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 #include "photon.h"
 #include "random_generators.h"
 #include "aabb.h"
@@ -14,6 +15,9 @@
 
 extern const float inf;
 extern const float E;
+
+extern int radius_estimate_right;
+
 int aproximate_biggest_axis(std::vector<temp_photon>& photons, int start_index, int count)
 {
 	vec3 bottom(inf, inf, inf);
@@ -119,18 +123,18 @@ void recurse_kd_tree(std::vector<temp_photon>& photons, std::vector<KDTreeNode>&
 				photons.begin() + start_index + count, comparator);
 			if (axis == 0)
 			{ 
-				kdtree[element].u.inner.index = photons[(long)start_index + (count / 2)].index | mask;
-				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.x;
+				kdtree[element].u.inner.index = photons[(long)start_index + (long)(count / 2)].index | mask;
+				kdtree[element].u.inner.split = photons[(long)start_index + (long)(count / 2)].Photon->position.x;
 			}
 			else if (axis == 1)
 			{ 
-				kdtree[element].u.inner.index = photons[(long)start_index + (count / 2)].index | mask;
-				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.y;
+				kdtree[element].u.inner.index = photons[(long)start_index + (long)(count / 2)].index | mask;
+				kdtree[element].u.inner.split = photons[(long)start_index + (long)(count / 2)].Photon->position.y;
 			}
 			else
 			{
-				kdtree[element].u.inner.index = photons[(long)start_index + (count / 2)].index | mask;
-				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.z;
+				kdtree[element].u.inner.index = photons[(long)start_index + (long)(count / 2)].index | mask;
+				kdtree[element].u.inner.split = photons[(long)start_index + (long)(count / 2)].Photon->position.z;
 			}
 			recurse_kd_tree(photons, kdtree, start_index, count / 2, 2 * element);
 			recurse_kd_tree(photons, kdtree, start_index + count / 2 + 1, count / 2, 2 * element + 1);
@@ -144,18 +148,18 @@ void recurse_kd_tree(std::vector<temp_photon>& photons, std::vector<KDTreeNode>&
 			if (axis == 0)
 			{
 				kdtree[element].u.inner.index = mask;
-				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.x + 1.175494e-38f;
+				kdtree[element].u.inner.split = photons[(long)start_index + (long)(count / 2)].Photon->position.x + 1.175494e-38f;
 
 			}
 			else if (axis == 1)
 			{
 				kdtree[element].u.inner.index = mask;
-				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.y + 1.175494e-38f;
+				kdtree[element].u.inner.split = photons[(long)start_index + (long)(count / 2)].Photon->position.y + 1.175494e-38f;
 			}
 			else
 			{
 				kdtree[element].u.inner.index = mask;
-				kdtree[element].u.inner.split = photons[(long)start_index + (count / 2)].Photon->position.z + 1.175494e-38f;
+				kdtree[element].u.inner.split = photons[(long)start_index + (long)(count / 2)].Photon->position.z + 1.175494e-38f;
 			}
 			recurse_kd_tree(photons, kdtree, start_index, count / 2, 2 * element);
 			recurse_kd_tree(photons, kdtree, start_index + count / 2, count / 2, 2 * element + 1);
@@ -178,6 +182,10 @@ void create_kd_tree(std::vector<std::shared_ptr<photon>>& photons, std::vector<K
 		temp_photons.emplace_back(photons[i], i);
 	}
 	kdtree.resize(std::pow(2, (int)(std::log2f(photons.size()) + 1)));
+	if (photons.size() == 0)
+	{
+		std::cout << "!!!!!!!!!!Warning!!!!!!    - No photons in the photon map" << std::endl;
+	}
 	recurse_kd_tree(temp_photons, kdtree, 0, photons.size(), 1);	
 }
 void update_kd_tree(bool was_changed, std::vector<std::shared_ptr<photon>>& photons, std::vector<KDTreeNode>& kdtree, const char* file_path)
@@ -203,9 +211,8 @@ void update_kd_tree(bool was_changed, std::vector<std::shared_ptr<photon>>& phot
 }
 
 
-void Photon_map::find_closest_photons(const vec3& point, float search_d, Priority_queue& closest_photons, int element)
+void Photon_map::find_closest_photons(const vec3& point, float& search_d, Priority_queue& closest_photons, int element)
 {
-	static float search_distance_squared = search_d;
 	if (kdtree[element].u.inner.index & 0x80000000)
 	{
 		float dist_to_plane;
@@ -217,79 +224,100 @@ void Photon_map::find_closest_photons(const vec3& point, float search_d, Priorit
 			dist_to_plane = point.z - kdtree[element].u.inner.split;
 		if (dist_to_plane < 0)
 		{
-			find_closest_photons(point, search_distance_squared, closest_photons, 2 * element);
-			if (dist_to_plane * dist_to_plane < search_distance_squared)
+			find_closest_photons(point, search_d, closest_photons, 2 * element);
+			if (dist_to_plane * dist_to_plane < search_d)
 			{
 				if (kdtree[element].u.inner.index & 0x10000000)
 				{
 					int index = kdtree[element].u.inner.index & 0xfffffff;
 					float dist_to_point_squared = (point - photons[index]->position).length_squared();
-					if (dist_to_point_squared < search_distance_squared)
+					if (dist_to_point_squared < search_d)
+					{
 						closest_photons.insert_element(photons[index], dist_to_point_squared);
+						if (closest_photons.is_full())
+						{
+							search_d = closest_photons.priorities[1];
+						}
+					}
+						
 				}
-				find_closest_photons(point, search_distance_squared, closest_photons, 2 * element + 1);
+				find_closest_photons(point, search_d, closest_photons, 2 * element + 1);
 			}
 
 		}
 		else
 		{
-			find_closest_photons(point, search_distance_squared, closest_photons, 2 * element + 1);
-			if (dist_to_plane * dist_to_plane < search_distance_squared)
+			find_closest_photons(point, search_d, closest_photons, 2 * element + 1);
+			if (dist_to_plane * dist_to_plane < search_d)
 			{
 				if (kdtree[element].u.inner.index & 0x10000000)
 				{
 					int index = kdtree[element].u.inner.index & 0xfffffff;
 					float dist_to_point_squared = (point - photons[index]->position).length_squared();
-					if (dist_to_point_squared < search_distance_squared)
+					if (dist_to_point_squared < search_d)
+					{
 						closest_photons.insert_element(photons[index], dist_to_point_squared);
+						if (closest_photons.is_full())
+						{
+							search_d = closest_photons.priorities[1];
+						}
+					}
+						
 				}
-				find_closest_photons(point, search_distance_squared, closest_photons, 2 * element);
+				find_closest_photons(point, search_d, closest_photons, 2 * element);
 			}
 
 		}
 	}
 	else
 	{
-
 		float dist_to_point_squared = (point - photons[kdtree[element].u.leaf.index]->position).length_squared();
-		if (dist_to_point_squared < search_distance_squared)
+		if (dist_to_point_squared < search_d)
 		{
 			closest_photons.insert_element(photons[kdtree[element].u.leaf.index], dist_to_point_squared);
 			if (closest_photons.is_full())
 			{
-				search_distance_squared = (point - closest_photons.photons[0]->position).length_squared();
+				search_d = closest_photons.priorities[1];
 			}
+			
+
 		}
 	}
 }
 
 
-color Photon_map::gather_photons(vec3 point, float search_distance, int number_of_closest_photons)
+void Photon_map::gather_photons(vec3 point, float search_distance, int number_of_closest_photons, float* pixel_color)
 {
 	Priority_queue closest_photons(number_of_closest_photons);
-
-	find_closest_photons(point, search_distance * search_distance, closest_photons, 1);
-
-	if (closest_photons.photons.size() == 0)
+	float search_distance_squared = search_distance;
+	find_closest_photons(point, search_distance_squared, closest_photons, 1);
+	if (closest_photons.number_of_photons < 5)
 	{
-		return color(0, 0, 0);	
+		return;
 	}
 	else
 	{
-		colorf flux(0.f, 0.f, 0.f);
-		float r = closest_photons.priorities[0];
+		
+		float r = closest_photons.priorities[1];
+		if (r < search_distance)
+		{
+			++radius_estimate_right;
+		}
 		float delta_A = PI * r;
-		for (int i = 0; i < closest_photons.photons.size(); ++i)
+		int number_of_closest = closest_photons.number_of_photons + 1;
+		for (int i = 1; i < number_of_closest; ++i)
 		{
 			float weight = 0.918f * (1.f - (1.f - std::pow(E, -1.953f * closest_photons.priorities[i] / 2.f / r)) / 0.85815f);
-			flux += closest_photons.photons[i]->power * weight;
+			pixel_color[0] += (closest_photons.photons[i]->power * weight).r;
+			pixel_color[1] += (closest_photons.photons[i]->power * weight).g;
+			pixel_color[2] += (closest_photons.photons[i]->power * weight).b;
 		}
-		flux /= delta_A;
-		int red = static_cast<int>(flux.r * 255.999);
-		int green = static_cast<int>(flux.g * 255.999);
-		int blue = static_cast<int>(flux.b * 255.999);
+		pixel_color[0] /= delta_A;
+		pixel_color[1] /= delta_A;
+		pixel_color[2] /= delta_A;
 
-		return color(red, green, blue);
+
+		return;
 	}
 	
 

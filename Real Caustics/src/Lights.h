@@ -30,7 +30,7 @@ public:
 class Light
 {
 public:
-	virtual ray emit_photon(size_t i, size_t j, float power) const = 0;
+	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const = 0;
 	virtual float get_power() const = 0;
 	virtual void geyt_i_j(int number_of_rays, int &i, int &j) = 0;
 };
@@ -63,7 +63,7 @@ public:
 	}
 
 public:
-	virtual ray emit_photon(size_t i, size_t j, float power) const;
+	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const;
 	
 	virtual float get_power() const
 	{
@@ -81,7 +81,7 @@ class Point_Light : public Light
 public:
 	Point_Light() {}
 public:
-	virtual ray emit_photon(size_t i, size_t j, float power) const
+	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const
 	{
 		return ray(vec3(0, 0, 0), vec3(0, 0, 0));
 	}
@@ -101,7 +101,7 @@ public:
 	Sun_Light(vec3 p, vec3 r, float a, float pow);
 
 public:
-	virtual ray emit_photon(size_t i, size_t j, float power) const;
+	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const;
 
 	virtual float get_power() const;
 
@@ -119,6 +119,12 @@ public:
 	float angle;
 	//in radians
 	vec3 rotation;
+};
+
+struct helper_light_emit
+{
+	int light = 0;
+	int current_call = -1;
 };
 
 #endif

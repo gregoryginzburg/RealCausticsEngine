@@ -6,6 +6,7 @@
 #include "random_generators.h"
 #include "Blender_definitions.h"
 
+class matrix_4x4;
 extern const float PI;
 extern const float PI2;
 
@@ -18,14 +19,14 @@ public:
 
 public:
 
-	vec3() : x(0), y(0), z(0){}
+	vec3() : x(0.0f), y(0.0f), z(0.0f){}
 
 	vec3(float e0) : x(e0), y(e0), z(e0){}
 
 	vec3(float e0, float e1, float e2) : x(e0), y(e1), z(e2){}
 
 	//construct from an array
-	vec3(float* arr) : x(arr[0]), y(arr[1]), z(arr[2]){}
+	vec3(float arr[3]) : x(arr[0]), y(arr[1]), z(arr[2]){}
 
 
 
@@ -75,6 +76,9 @@ public:
 		z /= t;
 		return *this;
 	}
+
+	//vec3& operator*=(const matrix_4x4& m);
+
 	vec3 operator-() const
 	{
 		return vec3(-x, -y, -z);
@@ -167,14 +171,23 @@ inline vec3 reflect(const vec3 &v, const vec3 &n)
 }
 inline vec3 refract(const vec3 &uv, const vec3 &n, float etai_over_etat)
 {
-	auto cos_theta = dot(-uv, n);
+	float cos_theta = dot(-uv, n);
 	vec3 r_out_parallel = etai_over_etat * (uv + cos_theta * n);
-	vec3 r_out_perp = -std::sqrt(1.0f - r_out_parallel.length_squared()) * n;
+	vec3 r_out_perp = -std::sqrtf(1.0f - r_out_parallel.length_squared()) * n;
 	//float ior = etai_over_etat;
 	//float c = dot(-n, uv);
 	//return ior * uv + (ior * c - std::sqrt(1 - ior * ior * (1- c * c))) * n;
 
 	return r_out_parallel + r_out_perp;
+}
+
+
+inline float schlick(float cosine, float ref_idx) 
+{
+	float r0 = (1.0f - ref_idx) / (1.0f + ref_idx);
+	r0 = r0 * r0;
+	float inv_cosine = 1 - cosine;
+	return r0 + (1 - r0) * inv_cosine * inv_cosine * inv_cosine * inv_cosine * inv_cosine;
 }
 inline float distance(const vec3 &u, const vec3 &v)
 {

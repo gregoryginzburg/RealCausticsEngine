@@ -6,6 +6,7 @@ struct hit_rec;
 class aabb;
 class Material;
 struct MVert;
+class matrix_4x4;
 
 class Triangle
 {
@@ -17,9 +18,9 @@ public:
 	~Triangle();
 
 public:
-	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, MVert *vertices) const;
+	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, MVert *vertices, const matrix_4x4& world_matrix) const;
 	
-	aabb bounding_box(MVert *vertices) const;
+	aabb bounding_box(MVert *vertices, const matrix_4x4& world_matrix) const;
 
 public:
 	

@@ -7,11 +7,12 @@
 #include "BVH/BVH_world.h"
 #include "materials.h"
 #include "Lights.h"
+#include "matrix.h"
 
 
 
 void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris, 
-	int* meshes_material_idx)
+	int* meshes_material_idx, matrix_4x4* mesh_matrices)
 {
 
     meshes = new Mesh[number_of_meshes];
@@ -19,7 +20,7 @@ void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_
     {
         Mesh_blender *mesh_blender_data = (Mesh_blender *)meshes_pointers[i];
 		
-		meshes[i] = Mesh(mesh_blender_data, meshes_number_of_verts[i], meshes_number_of_tris[i], meshes_material_idx[i]);
+		meshes[i] = Mesh(mesh_blender_data, meshes_number_of_verts[i], meshes_number_of_tris[i], meshes_material_idx[i], mesh_matrices[i]);
     }
 }
 
@@ -50,21 +51,12 @@ void Scene::init_lights(Python_Light* python_lights)
 			
 		else if (python_lights[i].type == 'S')
 		{
-			std::cout << "SUN To ADD" << std::endl;
-			auto pos = python_lights[i].position;
-			std::cout << "LIGHT PASSED" << std::endl;
-			auto rot = python_lights[i].rotation;
-			std::cout << "LIGHT PASSED" << std::endl;
-			auto pow = python_lights[i].power;
-			std::cout << "LIGHT PASSED" << std::endl;
-			/*lights.add(std::make_shared<Sun_Light>(python_lights[i].position,
+
+			lights.add(std::make_shared<Sun_Light>(python_lights[i].position,
 				python_lights[i].rotation,
 				0,
-				python_lights[i].power));*/
-			auto eaweaw = std::make_shared<Sun_Light>(pos, rot, 0, pow);
-			std::cout << "LIGHT PASSED" << std::endl;
+				python_lights[i].power));
 
-			lights.add(eaweaw);
 		}	
 		else
 		{
@@ -108,6 +100,7 @@ void Scene::update_bvh(bool was_changed, const char *file_path)
 	}
 	else
 	{
+		/*
 		for (int i = 0; i < number_of_meshes; ++i)
 		{
 			meshes[i].update_bvh(was_changed, file_path);
@@ -120,7 +113,7 @@ void Scene::update_bvh(bool was_changed, const char *file_path)
 		file.read((char *)&BVH.mesh_indices[0], sizeof(int) * (size_t)size1);
 		file.read((char *)&size2, sizeof(int));
 		BVH.bvh_nodes.resize(size2);
-		file.read((char *)&BVH.bvh_nodes[0], sizeof(CacheBVHNode_world) * size2);
+		file.read((char *)&BVH.bvh_nodes[0], sizeof(CacheBVHNode_world) * size2);*/
 	}
 }
 //index = 0
@@ -142,8 +135,9 @@ bool Scene::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int inde
 	{
 		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
 		{
+			
 			bool left_hit = hit(r, tmin, tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxLeft);
-			bool right_hit = hit(r, tmin, tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
+			bool right_hit = hit(r, tmin, left_hit ? hit_inf.t : tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
 			return left_hit | right_hit;
 		}
 		else
@@ -153,9 +147,8 @@ bool Scene::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int inde
 	}
 }
 
-void Scene::trace_photon(const ray &r, int depth)
+void Scene::trace_photon(const ray &r, int depth, bool was_refracted)
 {
-    static bool was_refracted = false;
     if (depth == 0)
 	{
 		return;
@@ -170,10 +163,11 @@ void Scene::trace_photon(const ray &r, int depth)
 			scattered_ray.power = r.power;
 			scattered_ray *= materials[rec.material_idx]->get_color();
 			was_refracted = true;
-			return trace_photon(scattered_ray, depth - 1);
+			return trace_photon(scattered_ray, depth - 1, was_refracted);
 		}
 		else
 		{
+			//photon_map.add(rec.p, r.power);
 			if (was_refracted)
 			{
 				photon_map.add(rec.p, r.power);
@@ -190,7 +184,8 @@ bool Scene::trace_ray(const ray &r, hit_rec &rec, int depth)
 		return false;
 	}
 	ray scattered_ray;
-	if (hit(r, 0.0001f, inf, rec, 1))
+
+	if (hit(r, 0.0001f, inf, rec, 0))
 	{
 		if (materials[rec.material_idx]->scatter(r, rec, scattered_ray))
 		{

@@ -14,6 +14,7 @@ extern "C"
 	DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
 		long long* meshes_pointers,
 		unsigned int number_of_meshes,
+		matrix_4x4* mesh_matrices,
 		unsigned int* meshes_number_of_verts,
 		unsigned int* meshes_number_of_tris,
 		unsigned int camera_x,

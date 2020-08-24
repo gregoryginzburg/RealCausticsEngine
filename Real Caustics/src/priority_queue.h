@@ -16,9 +16,11 @@ public:
 public:
 	Priority_queue(int s) 
 	{
-		photons.reserve(s);
-		priorities.reserve(s);
+		photons.reserve(s + 1);
+		priorities.reserve(s + 1);
 		size = s;
+		photons.resize(1);
+		priorities.resize(1);
 	}
 	Priority_queue()
 	{
@@ -29,10 +31,10 @@ public:
 	{
 		if (number_of_photons == size)
 		{
-			if (priority < priorities[0])
+			if (priority < priorities[1])
 			{
-				photons[0] = insertion_photon;
-				priorities[0] = priority;
+				photons[1] = insertion_photon;
+				priorities[1] = priority;
 				heapify(1);
 			}
 		}
@@ -41,14 +43,14 @@ public:
 			++number_of_photons;
 			photons.push_back(insertion_photon);
 			priorities.push_back(priority);
-			increase_key(number_of_photons - 1);
+			increase_key(number_of_photons);
 		}
 			
 			
 	}
 	void increase_key(int i)
 	{
-		while (i > 0 && priorities[i / 2] < priorities[i])
+		while (i > 1 && priorities[i / 2] < priorities[i])
 		{
 			std::swap(priorities[i / 2], priorities[i]);
 			std::swap(photons[i / 2], photons[i]);
@@ -60,16 +62,23 @@ public:
 		int left = 2 * i;
 		int right = 2 * i + 1;
 		int largest;
-		if (left < (size + 1) && priorities[(long)left - 1] > priorities[(long)i - 1])
+		if (left < (size + 1) && priorities[left] > priorities[i])
+		{
 			largest = left;
+		}	
 		else
+		{
 			largest = i;
-		if (right < (size + 1) && priorities[(long)right - 1] > priorities[(long)i - 1])
+		}
+		if (right < (size + 1) && priorities[right] > priorities[largest])
+		{
 			largest = right;
+		}
+			
 		if (largest != i)
 		{
-			std::swap(photons[(long)i - 1], photons[(long)largest - 1]);
-			std::swap(priorities[(long)i - 1], priorities[(long)largest - 1]);
+			std::swap(photons[i], photons[largest]);
+			std::swap(priorities[i], priorities[largest]);
 			heapify(largest);
 		}
 	}

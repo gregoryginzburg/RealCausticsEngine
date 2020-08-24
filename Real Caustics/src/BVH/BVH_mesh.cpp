@@ -7,6 +7,7 @@
 #include <memory>
 #include <fstream>
 #include "../Blender_definitions.h"
+#include "../matrix.h"
 
 BVHNode_mesh *recurse(std::vector<aabb_temp_mesh> &triangle_temp_containers)
 {
@@ -196,7 +197,7 @@ BVHNode_mesh* Mesh::make_default_bvh()
 
 	for (size_t i = 0; i < number_of_triangles; ++i)
 	{
-		aabb bbox = triangles[i].bounding_box(vertices);
+		aabb bbox = triangles[i].bounding_box(vertices, world_matrix);
 		vec3 center = (bbox.min + bbox.max) / 2.0f;
 		working_list.emplace_back(i, bbox, center);
 	}
@@ -255,7 +256,8 @@ void create_cache_friendly_bvh(BVHNode_mesh *root, BVH_mesh &cache_friendly_bvh,
 	unsigned idxBoxes = 0;
 
 	populate_cache_friendly_bvh(root, idxBoxes, idxTriList, cache_friendly_bvh);
-	
+
+	/*
 	std::ofstream file(file_path, std::ios::binary |  std::ofstream::app);
 	if (!file.is_open())
 		std::cout << "ERROR OPENING A FILE";
@@ -267,13 +269,14 @@ void create_cache_friendly_bvh(BVHNode_mesh *root, BVH_mesh &cache_friendly_bvh,
 	file.write((char *)&size2, sizeof(int));
 	file.write((char *)&cache_friendly_bvh.bvh_nodes[0], sizeof(CacheBVHNode_mesh) * size2);
 	
-	file.close();
+	file.close();*/
 	delete root;
 }
 
 
 
-bool CacheBVHNode_mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_mesh &bvh, Triangle* triangles, MVert* vertices) const
+bool CacheBVHNode_mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_mesh &bvh, Triangle* triangles, MVert* vertices, 
+	const matrix_4x4& world_matrix) const
 {
 	hit_rec temp_rec;
 	bool hit_anything = false;
@@ -281,7 +284,7 @@ bool CacheBVHNode_mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_i
 	int end_index = u.leaf.startIndex + (u.leaf.count & 0x7fffffff) + 1;
 	for (int i = u.leaf.startIndex + 1; i < end_index; ++i)
 	{
-		if (triangles[bvh.tris_indices[i]].hit(r, tmin, closest_so_far, temp_rec, vertices))
+		if (triangles[bvh.tris_indices[i]].hit(r, tmin, closest_so_far, temp_rec, vertices, world_matrix))
 		{
 			hit_anything = true;
 			closest_so_far = temp_rec.t;

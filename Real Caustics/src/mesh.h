@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "BVH\BVH_mesh.h"
+#include "matrix.h"
 
 struct Mesh_blender;
 class ray;
@@ -11,6 +12,7 @@ struct MVert;
 class Triangle;
 struct CacheBVHNode_mesh;
 
+
 extern const float inf;
 
 class Mesh
@@ -18,7 +20,7 @@ class Mesh
 public:
 	Mesh() {}
 
-	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx);
+	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx, const matrix_4x4& matrix);
 
 
 public:
@@ -39,6 +41,7 @@ public:
 
 	BVH_mesh BVH;
 	aabb bounding_box;
+	matrix_4x4 world_matrix;
 };
 
 #endif

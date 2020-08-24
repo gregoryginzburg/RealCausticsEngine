@@ -67,9 +67,9 @@ public:
 		photons.shrink_to_fit();
 	}
 
-	void find_closest_photons(const vec3 &point, float search_d, Priority_queue &closest_photons, int element);
+	void find_closest_photons(const vec3 &point, float& search_d, Priority_queue &closest_photons, int element);
 
-	color gather_photons(vec3 point, float search_distance, int number_of_closest_photons);
+	void gather_photons(vec3 point, float search_distance, int number_of_closest_photons, float* pixel_color);
 
 	void update_kdtree(bool was_changed, const char* file_path)
 	{

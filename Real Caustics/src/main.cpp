@@ -26,6 +26,9 @@
 #include "Blender_definitions.h"
 #include "Scene.h"
 
+#define TINYEXR_IMPLEMENTATION
+#include "../lib/tinyexr.h"
+
 #define DLLEXPORT extern "C" __declspec(dllexport)
 
 #define REPORT_PROGRESS
@@ -39,10 +42,13 @@ extern const float PI = 3.14159265359f;
 extern const float E = 2.71828182846;
 extern const float PI2 = 6.28318530718f;
 
+extern int radius_estimate_right = 0;
 
 //-------------------------------------------
 //----------------SCENE----------------------
-extern Scene *scene = nullptr;
+//extern Scene *scene = nullptr;
+extern Scene* scene = nullptr;
+Python_Light* python_lights = nullptr;
 //----------------SCENE----------------------
 //-------------------------------------------
 
@@ -52,6 +58,7 @@ extern Scene *scene = nullptr;
 // :radius - maximum gather radius
 // :mesh_pointers - array of pointers to blender meshes
 // :number_of_meshes
+// :mesh_matrices - matrix_world matrices 
 // :meshes_number_of_verts - array of number of vertices
 // :meshes_number_of_tris - array of number of triangles 
 // :camera_x - camera width resolution
@@ -70,6 +77,7 @@ extern Scene *scene = nullptr;
 DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
 					long long *meshes_pointers,
 					unsigned int number_of_meshes,
+					matrix_4x4* mesh_matrices,
 					unsigned int *meshes_number_of_verts,
 					unsigned int *meshes_number_of_tris,
 					unsigned int camera_x,
@@ -85,7 +93,7 @@ DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
 					unsigned int number_of_materials,
 					int* meshes_material_idx)
 {
-
+	/*
 	std::cout << number_of_photons << std::endl;
 	std::cout << n_closest << std::endl;
 	std::cout << radius << std::endl;
@@ -99,28 +107,18 @@ DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
 	std::cout << number_of_lights << std::endl;
 	std::cout << materials << std::endl;
 	std::cout << meshes_material_idx << std::endl;
-
+	*/
 
 	scene = new Scene;
 	//initialize common photon mapping settings
 	scene->number_of_photons = number_of_photons;
-
-	std::cout << "passed" << std::endl;
-
 	scene->number_of_closest_photons = n_closest;
-
-	std::cout << "passed" << std::endl;
-
 	scene->search_radius = radius;
 
-	std::cout << "passed" << std::endl;
+	//initialize meshes with blender data
 	scene->number_of_meshes = number_of_meshes;
 
-	std::cout << "passed" << std::endl;
-	//initialize meshes with blender data
-	scene->init_meshes(meshes_pointers, meshes_number_of_verts, meshes_number_of_tris, meshes_material_idx);
-
-	std::cout << "passed" << std::endl;
+	scene->init_meshes(meshes_pointers, meshes_number_of_verts, meshes_number_of_tris, meshes_material_idx, mesh_matrices);
 
 	//initialize camera
 	scene->camera = Camera(camera_x, camera_y,
@@ -130,41 +128,28 @@ DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
 						   camera_corner2,
 						   camera_corner3);
 
-	std::cout << "passed" << std::endl;
-
 	//initialize lights and calculate weights for photon emission
 	scene->number_of_lights = number_of_lights;
+	python_lights = lights;
 
-	std::cout << "passed" << std::endl;
-
-	scene->init_lights(lights);
-	
-	std::cout << "passed" << std::endl;
-	
-	scene->lights.calculate_weights();
 	//initialize photon map (reserve photons)
-	
-	std::cout << "passed" << std::endl;
-	
 	scene->photon_map.init_photon_map(number_of_photons);
 	//initialize materials
-	
-	std::cout << "passed" << std::endl;
-	
 	scene->number_of_materials = number_of_materials;
-	
-	std::cout << "passed" << std::endl;
-	
-	scene->init_materials(materials);
 
-	std::cout << "passed" << std::endl;
+	scene->init_materials(materials);
 
 	std::cout << *scene;
 }
 
 
 DLLEXPORT int main()
-{	
+{
+	
+
+	int depth = 5;
+	radius_estimate_right = 0;
+	
 	Timer Summary;
 
 #ifdef REPORT_PROGRESS
@@ -177,55 +162,63 @@ DLLEXPORT int main()
 #ifdef REPORT_PROGRESS
 	std::cout << "BVH Built  :  " << BVH_timer.elapsed() << std::endl;
 #endif
-
+	// 
+	// scene bounding bbox is availibale adter building bvh
+	scene->init_lights(python_lights);
+	scene->lights.calculate_weights();
 	Timer rendering;
+	hit_rec rec;
+
+	bool was = false;
+	//scene->trace_photon(ray(vec3(-0.759, -0.597, 5), vec3(0, 0, -1)), 5, was);
 
 	std::cout << "Tracing started";
-
+	helper_light_emit helper;
 	for (int i = 0; i < scene->number_of_photons; ++i)
 	{
-		ray r = scene->lights.emit_photon();
-		
-		scene->trace_photon(r, 5);
-		std::cout << i << "\r" << std::flush;
-		
+		ray r = scene->lights.emit_photon(helper);
+		if (i % 100000 == 0)
+		{
+			std::cout << i << std::endl;
+		}
+		bool was_refracted = false;
+		scene->trace_photon(r, depth, was_refracted);
 	}
-	
+
+#ifdef REPORT_PROGRESS
 	std::cout << "Tracing finished";
+	std::cout << "\n";
+	std::cout << "Done  :  " << rendering.elapsed() << std::endl;
+#endif
 	std::ofstream ou;
 	ou.open("D:\\test.obj");
 
 	std::ofstream o;
 	o.open("D:\\photon_locs.obj");
-	// for (int i = 0; i < map.photons.size(); i++)
-	// {
-	// 	o << "v " << map.photons[i]->position.x << " " << map.photons[i]->position.y << " " << map.photons[i]->position.z << "\n";
-	// }
+	
+	for (int i = 0; i < scene->photon_map.photons.size(); i++)
+	{
+	 	o << "v " << scene->photon_map.photons[i]->position.x << " " << scene->photon_map.photons[i]->position.y << " " << scene->photon_map.photons[i]->position.z << "\n";
+	}
 
 	std::cout << "\n";
-	// for (int j = camera.pixel_height - 1; j >= 0; --j)
-	// {
-	// 	int progress = static_cast<int>(float((float(camera.pixel_height) - 1 - j)) / (float(camera.pixel_height) - 1) * 100);
-	// 	std::cout << progress << "%" << "\r" << std::flush;
-	// 	for (int i = 0; i < camera.pixel_width; ++i)
-	// 	{
+	
+	
+	/*for (int j = scene->camera.pixel_height - 1; j >= 0; --j)
+	{
+		for (int i = 0; i < scene->camera.pixel_width; ++i)
+		{
 
-	// 		ray r = camera.get_ray(j, i);
-	// 		hit_rec rec;
-	// 		trace_ray(r, world, rec, 3);
+			ray r = scene->camera.get_ray(i, j);
+			hit_rec rec;
+			scene->trace_ray(r, rec, depth);
 			
-	// 		ou << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
-	// 	}	
-	// }
-	// for (int i = 0; i < map.photons.size(); i++)
-	// {
-	// 	map.photons[i]->power /= (float)number_of_photons;
-	// }
+			ou << "v " << rec.p.x << " " << rec.p.y << " " << rec.p.z << "\n";
+		}	
+	}*/
 
-#ifdef REPORT_PROGRESS
-	std::cout << "\n";
-	std::cout << "Done  :  " << rendering.elapsed() << std::endl;
-#endif
+
+
 
 	Timer balacing;
 	std::cout << "Balacing Started" << std::endl;
@@ -233,53 +226,76 @@ DLLEXPORT int main()
 	scene->photon_map.update_kdtree(1, "kdtree.kd");
 
 	std::cout << "Done " << balacing.elapsed() << std::endl;
-
-	Timer writing;
-	std::ofstream out;
-	out.open("D:\\hello.ppm");
-	out << "P3"
-		<< "\n"
-		<< scene->camera.pixel_width << " " << scene->camera.pixel_height << "\n"
-		<< 255 << "\n";
+	/*
 	
-	// float radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons) * 2;
-	
-	for (int j = scene->camera.pixel_height - 1; j >= 0; --j)
+	int number_closest = 1000;
+	Priority_queue closest_photons(number_closest);
+	float search_distance_squared = 0.5f;
+	scene->photon_map.find_closest_photons(vec3(-1, 0, -2.15805), search_distance_squared, closest_photons, 1);
+	for (int i = 1; i < closest_photons.number_of_photons + 1; ++i)
 	{
-		int progress = static_cast<int>(float((float(scene->camera.pixel_height) - 1 - j)) / (float(scene->camera.pixel_height) - 1) * 100);
+		ou << "v " << closest_photons.photons[i]->position.x << " " << closest_photons.photons[i]->position.y << " " << closest_photons.photons[i]->position.z << "\n";
+	}*/
+
 	
-#ifdef REPORT_PROGRESS
-		std::cout << "Progress writing to image: ";
-		std::cout << progress << "%"
-				  << "\r" << std::flush;
-#endif
 
-		for (int i = 0; i < scene->camera.pixel_width; ++i)
+	
+	Timer writing;
+
+	#ifdef REPORT_PROGRESS
+	
+	#endif
+	int number_of_pixels = scene->camera.pixel_height * scene->camera.pixel_width;
+	float* image = new float[number_of_pixels * 3];
+
+	float search_radius = scene->search_radius * scene->search_radius;
+	// float search_radius = 1.4f * std::sqrtf(n_closest * ligths.lights[0]->get_power() / number_of_photons) * 2;
+	float number_of_closest_photons = scene->number_of_closest_photons;
+	
+	int i = 0;
+	int number_of_channels = number_of_pixels * 3;
+	int x = scene->camera.pixel_width;
+	int y = scene->camera.pixel_height;
+	int ii = 0;
+	while (i < number_of_channels)
+	{
+		#ifdef REPORT_PROGRESS
+		if (i % (scene->camera.pixel_height * 3) == 0)
 		{
-			ray r = scene->camera.get_ray(j, i);
-			hit_rec rec;
-			color pixel_color;
-			if (scene->trace_ray(r, rec, 5))
-			{
-				pixel_color = scene->photon_map.gather_photons(rec.p, scene->search_radius, scene->number_of_closest_photons);
-			}
-			else
-			{
-				pixel_color = color(0, 0, 0);
-			}
-			clamp_color(pixel_color);
-			out << pixel_color.r << " " << pixel_color.g << " " << pixel_color.b << "\n";
+			std::cout << "Progress writing to image: ";
+			std::cout << (i / (float)number_of_channels) * 100.0f << "%"  << std::flush << "\r";
+		}	
+		#endif
+		//ii% x, ii / y
+		ray r = scene->camera.get_ray(ii % x, (y - (ii / x) - 1));
+		hit_rec rec;
+		float pixel_color[3]{ 0.0f };
+		if (scene->trace_ray(r, rec, depth))
+		{
+			scene->photon_map.gather_photons(rec.p, search_radius, number_of_closest_photons, pixel_color);
 		}
+		image[i] = pixel_color[0];
+		image[i + 1] = pixel_color[1];
+		image[i + 2] = pixel_color[2];
+		i += 3;
+		++ii;
 	}
+	const char* err = nullptr;
+	SaveEXR(image, scene->camera.pixel_width, scene->camera.pixel_height, 3, 0, "D:\\caustics.exr", &err);
 
-	out.close();
+	
 
 #ifdef REPORT_PROGRESS
 	std::cout << "\n";
 	std::cout << "Done  :  " << writing.elapsed() << std::endl;
 
 	std::cout << "\n";
-	std::cout << "Summary Time  :  " << Summary.elapsed();
+	std::cout << "Summary Time  :  " << Summary.elapsed() << std::endl;
+	int all_pixels = scene->camera.pixel_width * scene->camera.pixel_height;
+	std::cout << "Radius Estimate Was Wrong in  " << ((float)all_pixels - (float)radius_estimate_right) / float(all_pixels) * 100.0f << "%" << std::endl;
+	std::cout << "was wrong times " << all_pixels - radius_estimate_right << "    out of " << all_pixels;
 #endif
+	delete scene;
+	scene = nullptr;
 	return 0;
 }

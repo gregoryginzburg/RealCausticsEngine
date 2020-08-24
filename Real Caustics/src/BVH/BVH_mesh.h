@@ -7,6 +7,7 @@
 struct hit_rec;
 class ray;
 class Triangle;
+class matrix_4x4;
 
 extern const float inf;
 
@@ -64,7 +65,8 @@ struct CacheBVHNode_mesh
 		} leaf;
 	} u;
 
-	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_mesh &bvh, Triangle *triangles, MVert* vertices) const;
+	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_mesh &bvh, Triangle *triangles, MVert* vertices,
+		const matrix_4x4& world_matrix) const;
 };
 struct aabb_temp_mesh
 {

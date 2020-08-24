@@ -13,7 +13,7 @@
 class Mesh;
 class Python_Light;
 class Python_Material;
-
+class matrix_4x4;
 class Scene
 {
 public:
@@ -26,13 +26,13 @@ public:
 	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int index) const;
 
 	void init_meshes(long long* meshes_pointers, unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris, 
-		int* meshes_material_idx);
+		int* meshes_material_idx, matrix_4x4* mesh_matrices);
 
 	void init_lights(Python_Light* python_lights);
 
 	void init_materials(Python_Material* python_materials);
 
-	void trace_photon(const ray &r, int depth);
+	void trace_photon(const ray &r, int depth, bool was_refracted);
 
 	bool trace_ray(const ray &r, hit_rec &rec, int depth);
 

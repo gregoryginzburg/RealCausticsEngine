@@ -52,18 +52,30 @@ public:
 public:
 	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered)
 	{
-		if (!rec.front_face) ior = 1.0f / ior;
+		float ior_local = ior;
+		if (rec.front_face)
+		{
+			ior_local = 1.0f / ior;
+		}
 		vec3 direction_normalized = normalize(r.direction);
 		float cos_theta = std::fmin(dot(-direction_normalized, rec.normal), 1.0);
 		float sin_theta = std::sqrt(1.0f - cos_theta * cos_theta);
-		if (ior * sin_theta > 1.0f)
+		if (ior_local * sin_theta > 1.0f)
 		 {
 		 	vec3 reflected = reflect(direction_normalized, rec.normal);
 		 	scattered = ray(rec.p, reflected);
 			return true;
 		}
+		/*
+		float reflection_prob = schlick(cos_theta, ior_local);
 
-		vec3 refracted = refract(direction_normalized, rec.normal, ior);
+		if (random_float_0_1() < reflection_prob)
+		{
+			vec3 reflected = reflect(direction_normalized, rec.normal);
+			scattered = ray(rec.p, reflected);
+			return true;
+		}*/
+		vec3 refracted = refract(direction_normalized, rec.normal, ior_local);
 		scattered = ray(rec.p, refracted);
 
 		return true;

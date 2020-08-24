@@ -6,7 +6,7 @@
 
 class ray;
 class Light;
-
+struct helper_light_emit;
 class Lights_list
 {
 public:
@@ -28,7 +28,7 @@ public:
 	}
 
 public:
-	ray emit_photon() const;
+	ray emit_photon(helper_light_emit& helper) const;
 
 	void calculate_weights();
 

@@ -26,9 +26,9 @@ public:
 	}
 
 public:
-	ray get_ray(int j, int i)
+	ray get_ray(int i, int j)
 	{
-		vec3 dir = bottom_left_corner + (j / (float)pixel_height) * vertical + (i / (float)pixel_width) * horizontal;
+		vec3 dir = bottom_left_corner + (i / (float)pixel_width) * horizontal + (j / (float)pixel_height) * vertical;
 		dir -= origin;
 		return ray(origin, normalize(dir));
 	}

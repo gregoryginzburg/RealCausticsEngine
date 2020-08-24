@@ -6,12 +6,13 @@
 #include "Triangle.h"
 #include "BVH/BVH_mesh.h"
 #include "aabb.h"
+#include "matrix.h"
 
-Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx) 
+Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx, const matrix_4x4& matrix)
 {
 	number_of_triangles = number_of_tris;
 	vertices = mesh_blender_data->mvert;
-
+	world_matrix = matrix;
 	triangles = new Triangle[number_of_tris];
 	
 	for (int i = 0; i < number_of_tris; ++i)
@@ -49,6 +50,7 @@ void Mesh::update_bvh(bool was_changed, const char *file_path)
 	}
 	else
 	{
+		/*
 		static std::ifstream file(file_path, std::ios::binary);
 		int size1;
 		int size2;
@@ -57,7 +59,7 @@ void Mesh::update_bvh(bool was_changed, const char *file_path)
 		file.read((char *)&BVH.tris_indices[0], sizeof(int) * (size_t)size1);
 		file.read((char *)&size2, sizeof(int));
 		BVH.bvh_nodes.resize(size2);
-		file.read((char *)&BVH.bvh_nodes[0], sizeof(CacheBVHNode_mesh) * size2);
+		file.read((char *)&BVH.bvh_nodes[0], sizeof(CacheBVHNode_mesh) * size2);*/
 	}
 }
 //index = 0
@@ -69,7 +71,7 @@ bool Mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int index
 
 		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
 		{
-			return BVH.bvh_nodes[index].hit(r, tmin, tmax, hit_inf, BVH, triangles, vertices);
+			return BVH.bvh_nodes[index].hit(r, tmin, tmax, hit_inf, BVH, triangles, vertices, world_matrix);
 		}
 		else
 		{
@@ -81,7 +83,7 @@ bool Mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int index
 		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
 		{
 			bool left_hit = hit(r, tmin, tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxLeft);
-			bool right_hit = hit(r, tmin, tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
+			bool right_hit = hit(r, tmin, left_hit ? hit_inf.t : tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
 
 			return left_hit | right_hit;
 		}

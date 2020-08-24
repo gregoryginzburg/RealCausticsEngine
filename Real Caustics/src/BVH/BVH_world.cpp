@@ -255,7 +255,7 @@ void create_cache_friendly_bvh(BVHNode_world *root, BVH_world &cache_friendly_bv
 	unsigned idxBoxes = 0;
 
 	populate_cache_friendly_bvh(root, idxBoxes, idxTriList, cache_friendly_bvh);
-	
+	/*
 	std::ofstream file(file_path, std::ios::binary);
 	int size1 = cache_friendly_bvh.mesh_indices.size();
 	int size2 = cache_friendly_bvh.bvh_nodes.size();
@@ -265,7 +265,7 @@ void create_cache_friendly_bvh(BVHNode_world *root, BVH_world &cache_friendly_bv
 	file.write((char *)&size2, sizeof(int));
 	file.write((char *)&cache_friendly_bvh.bvh_nodes[0], sizeof(CacheBVHNode_world) * size2);
 	
-	file.close();
+	file.close();*/
 	delete root;
 }
 
@@ -279,7 +279,7 @@ bool CacheBVHNode_world::hit(const ray &r, float tmin, float tmax, hit_rec &hit_
 	int end_index = u.leaf.startIndex + (u.leaf.count & 0x7fffffff) + 1;
 	for (int i = u.leaf.startIndex + 1; i < end_index; ++i)
 	{
-		if (meshes[bvh.mesh_indices[i]].hit(r, tmin, closest_so_far, temp_rec, 1))
+		if (meshes[bvh.mesh_indices[i]].hit(r, tmin, closest_so_far, temp_rec, 0))
 		{
 			hit_anything = true;
 			closest_so_far = temp_rec.t;
