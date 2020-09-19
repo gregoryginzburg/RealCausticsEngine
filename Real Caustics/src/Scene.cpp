@@ -11,8 +11,8 @@
 
 
 
-void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris, 
-	int* meshes_material_idx, matrix_4x4* mesh_matrices)
+void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris,
+	matrix_4x4* mesh_matrices, int** materials_indices)
 {
 
     meshes = new Mesh[number_of_meshes];
@@ -20,7 +20,7 @@ void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_
     {
         Mesh_blender *mesh_blender_data = (Mesh_blender *)meshes_pointers[i];
 		
-		meshes[i] = Mesh(mesh_blender_data, meshes_number_of_verts[i], meshes_number_of_tris[i], meshes_material_idx[i], mesh_matrices[i]);
+		meshes[i] = Mesh(mesh_blender_data, meshes_number_of_verts[i], meshes_number_of_tris[i], mesh_matrices[i], materials_indices[i]);
     }
 }
 
@@ -31,11 +31,13 @@ void Scene::init_materials(Python_Material* python_materials)
 	for (size_t i = 0; i < number_of_materials; ++i)
 	{
 		if (python_materials[i].type == 'C')
-			materials[i] = new Catcher();
+			materials[i] = new Catcher(python_materials[i].color, python_materials[i].roughness, python_materials[i].specular);
 		else if (python_materials[i].type == 'G')
-			materials[i] = new Glass(python_materials[i].ior, python_materials[i].color);
+			materials[i] = new Glass(python_materials[i].color, python_materials[i].ior, python_materials[i].roughness);
+		else if (python_materials[i].type == 'M')
+			materials[i] = new Metal(python_materials[i].color, python_materials[i].roughness);
 		else
-			materials[i] = new Metal(python_materials[i].color);
+			materials[i] = new None();
 	}
 }
 
@@ -46,7 +48,10 @@ void Scene::init_lights(Python_Light* python_lights)
 		std::cout << python_lights[i].type << std::endl;
 		if (python_lights[i].type == 'P')
 		{
-			lights.add(std::make_shared<Point_Light>());
+			lights.add(std::make_shared<Point_Light>(python_lights[i].position, 
+				python_lights[i].radius, 
+				python_lights[i].power,
+				python_lights[i].color));
 		}
 			
 		else if (python_lights[i].type == 'S')
@@ -54,8 +59,9 @@ void Scene::init_lights(Python_Light* python_lights)
 
 			lights.add(std::make_shared<Sun_Light>(python_lights[i].position,
 				python_lights[i].rotation,
-				0,
-				python_lights[i].power));
+				python_lights[i].angle,
+				python_lights[i].power,
+				python_lights[i].color));
 
 		}	
 		else
@@ -64,7 +70,9 @@ void Scene::init_lights(Python_Light* python_lights)
 				python_lights[i].rotation,
 				python_lights[i].width,
 				python_lights[i].height,
-				python_lights[i].power));
+				python_lights[i].power,
+				python_lights[i].spread,
+				python_lights[i].color));
 		}
 			
 
@@ -158,7 +166,8 @@ void Scene::trace_photon(const ray &r, int depth, bool was_refracted)
 
 	if (hit(r, 0.0001f, inf, rec, 0))
 	{
-		if (materials[rec.material_idx]->scatter(r, rec, scattered_ray))
+		char type;
+		if (materials[rec.material_idx]->scatter(r, rec, scattered_ray, type))
 		{
 			scattered_ray.power = r.power;
 			scattered_ray *= materials[rec.material_idx]->get_color();
@@ -168,9 +177,13 @@ void Scene::trace_photon(const ray &r, int depth, bool was_refracted)
 		else
 		{
 			//photon_map.add(rec.p, r.power);
+			if (!type)
+			{
+				return;
+			}
 			if (was_refracted)
 			{
-				photon_map.add(rec.p, r.power);
+				photon_map.add(rec.p, r.power, r.direction);
 			}
 				
 		}		
@@ -187,18 +200,55 @@ bool Scene::trace_ray(const ray &r, hit_rec &rec, int depth)
 
 	if (hit(r, 0.0001f, inf, rec, 0))
 	{
-		if (materials[rec.material_idx]->scatter(r, rec, scattered_ray))
+		char type;
+		if (materials[rec.material_idx]->scatter(r, rec, scattered_ray, type))
 		{
 			return trace_ray(scattered_ray, rec, depth - 1);
 		}
 		else
 		{
-			return true;
+			if (type)
+			{
+				rec.direction = normalize(r.direction);
+				return true;
+			}
+			return false;
+			
 		}
 	}
 	return false;    
 }
 
+
+void Scene::trace_photons_from_lights()
+{
+	int number_of_photons_emitted = 0;
+	int total_number_of_photons = 0;
+	int number_of_lights = lights.lights.size();
+
+	// Count total number of photons to be emitted
+	for (int i = 0; i < number_of_lights; ++i)
+	{
+		total_number_of_photons += number_of_photons * lights.weights[i];
+	}
+	std::cout << "\n";
+	
+	for (int i = 0; i < number_of_lights; ++i)
+	{
+		int number_of_photons_current_light = number_of_photons * lights.weights[i];
+		for (int ii = 0; ii < number_of_photons_current_light; ++ii)
+		{
+			if (!(number_of_photons_emitted % 10000))
+			{
+				std::cout << "Progress Tracing  " << (number_of_photons_emitted / (float)total_number_of_photons) * 100.0f << "\r";
+			}
+			ray r = lights.lights[i]->emit_photon(ii, total_number_of_photons);
+			bool was_refracted = false;
+			trace_photon(r, 5, was_refracted);
+			++number_of_photons_emitted;
+		}
+	}
+}
 
 std::ostream &operator<<(std::ostream &stream, const Scene &scene)
 {
@@ -224,7 +274,8 @@ std::ostream &operator<<(std::ostream &stream, const Scene &scene)
 	stream << "\n";
 
 	stream << "    Lights:                    " << std::endl;
-	stream << "Number of lights               " << scene.number_of_lights << std::endl;
+	stream << "Number of lights               " << scene.number_of_lights << std::endl;	
+	
 	stream << "\n";
 
 	stream << "    Materials:                 " << std::endl;

@@ -10,13 +10,17 @@
 #include "random_generators.h"
 #include "aabb.h"
 #include "Color.h"
-
+#include "materials.h"
 
 
 extern const float inf;
 extern const float E;
 
 extern int radius_estimate_right;
+
+extern std::ofstream test_out;
+
+
 
 int aproximate_biggest_axis(std::vector<temp_photon>& photons, int start_index, int count)
 {
@@ -182,10 +186,7 @@ void create_kd_tree(std::vector<std::shared_ptr<photon>>& photons, std::vector<K
 		temp_photons.emplace_back(photons[i], i);
 	}
 	kdtree.resize(std::pow(2, (int)(std::log2f(photons.size()) + 1)));
-	if (photons.size() == 0)
-	{
-		std::cout << "!!!!!!!!!!Warning!!!!!!    - No photons in the photon map" << std::endl;
-	}
+
 	recurse_kd_tree(temp_photons, kdtree, 0, photons.size(), 1);	
 }
 void update_kd_tree(bool was_changed, std::vector<std::shared_ptr<photon>>& photons, std::vector<KDTreeNode>& kdtree, const char* file_path)
@@ -284,13 +285,18 @@ void Photon_map::find_closest_photons(const vec3& point, float& search_d, Priori
 		}
 	}
 }
+void Photon_map::photon_direction(vec3& dir, unsigned char theta, unsigned char phi)
+{
+	dir.x = sintheta[theta] * cosphi[phi];
+	dir.y = sintheta[theta] * sinphi[phi];
+	dir.z = costheta[theta];
+}
 
-
-void Photon_map::gather_photons(vec3 point, float search_distance, int number_of_closest_photons, float* pixel_color)
+void Photon_map::gather_photons(hit_rec& rec, Catcher* material, float search_distance, int number_of_closest_photons, float* pixel_color)
 {
 	Priority_queue closest_photons(number_of_closest_photons);
 	float search_distance_squared = search_distance;
-	find_closest_photons(point, search_distance_squared, closest_photons, 1);
+	find_closest_photons(rec.p, search_distance_squared, closest_photons, 1);
 	if (closest_photons.number_of_photons < 5)
 	{
 		return;
@@ -305,12 +311,24 @@ void Photon_map::gather_photons(vec3 point, float search_distance, int number_of
 		}
 		float delta_A = PI * r;
 		int number_of_closest = closest_photons.number_of_photons + 1;
+		
 		for (int i = 1; i < number_of_closest; ++i)
 		{
-			float weight = 0.918f * (1.f - (1.f - std::pow(E, -1.953f * closest_photons.priorities[i] / 2.f / r)) / 0.85815f);
-			pixel_color[0] += (closest_photons.photons[i]->power * weight).r;
-			pixel_color[1] += (closest_photons.photons[i]->power * weight).g;
-			pixel_color[2] += (closest_photons.photons[i]->power * weight).b;
+			//test_out << "v " << closest_photons.photons[i]->direction.x << " " << closest_photons.photons[i]->direction.y << " " << closest_photons.photons[i]->direction.z << "\n";
+			//if (dot(closest_photons.photons[i]->direction, rec.direction) > 0.0f)
+			//{
+				float weight = 0.918f * (1.f - (1.f - std::pow(E, -1.953f * closest_photons.priorities[i] / 2.f / r)) / 0.85815f);
+				colorf brdf = material->brdf(
+					-normalize(rec.direction), -normalize(closest_photons.photons[i]->direction), rec.normal);
+				//test_out << "v " << brdf.r << " " << brdf.g << " " << brdf.b << "\n";
+				//test_out << brdf.r << " " << brdf.g << " " << brdf.b << "\n";
+				colorf color = closest_photons.photons[i]->power * brdf;
+				
+				pixel_color[0] += color.r;
+				pixel_color[1] += color.g;
+				pixel_color[2] += color.b;
+			//}
+			
 		}
 		pixel_color[0] /= delta_A;
 		pixel_color[1] /= delta_A;

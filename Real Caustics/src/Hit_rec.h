@@ -19,6 +19,8 @@ struct hit_rec
 	vec2 tex_coord_v1;
 	vec2 tex_coord_v2;
 
+	vec3 direction;
+
 	unsigned int material_idx;
 };
 

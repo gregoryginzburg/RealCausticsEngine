@@ -151,15 +151,18 @@
     <ClCompile Include="src\BVH\BVH_mesh.cpp" />
     <ClCompile Include="src\BVH\BVH_world.cpp" />
     <ClCompile Include="src\Lights.cpp" />
+    <ClCompile Include="src\materials.cpp" />
     <ClCompile Include="src\matrix.cpp" />
     <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\photon_map.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\hdri.cpp" />
     <ClCompile Include="src\Triangle.cpp" />
     <ClCompile Include="src\vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\stb_image.h" />
     <ClInclude Include="lib\tinyexr.h" />
     <ClInclude Include="src\aabb.h" />
     <ClInclude Include="src\BVH\BVH_mesh.h" />
@@ -168,6 +171,7 @@
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\DLL.h" />
     <ClInclude Include="src\Blender_definitions.h" />
+    <ClInclude Include="src\hdri.h" />
     <ClInclude Include="src\Light_list.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Hit_rec.h" />

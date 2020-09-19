@@ -1,26 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-class color
-{
-public:
-	short int r;
-	short int g;
-	short int b;
-public:
-	color() : r(0), g(0), b(0) {}
-	color(short int c) : r(c), g(c), b(c) {}
-	color(short int c0, short int c1, short int c2) : r(c0), g(c1), b(c2) {}
 
-	color& operator+=(const color& other)
-	{
-		r += other.r;
-		g += other.g;
-		b += other.b;
-		return *this;
-	}
-
-};
 class colorf
 {
 public:
@@ -29,6 +10,7 @@ public:
 	float b;
 public:
 	colorf() : r(0.f), g(0.f), b(0.f) {}
+	colorf(float c) : r(c), g(c), b(c) {}
 	colorf(float red, float green, float blue) : r(red), g(green), b(blue) {}
 public:
 	inline colorf& operator*=(const colorf& other)
@@ -61,33 +43,28 @@ inline colorf operator*(const colorf& a, float t)
 {
 	return colorf(a.r * t, a.g * t, a.b * t);
 }
-inline color clamp(color& c)
+inline colorf operator*(float t, const colorf& a)
 {
-	if (c.r > 255)
-	{
-		c.r = 255;
-	}
-	if (c.g > 255)
-	{
-		c.g = 255;
-	}
-	if (c.b > 255)
-	{
-		c.b = 255;
-	}
-	if (c.r < 0)
-	{
-		c.r = 0;
-	}
-	if (c.g < 0)
-	{
-		c.g = 0;
-	}
-	if (c.b < 0)
-	{
-		c.b = 0;
-	}
-	return c;
+	return a * t;
+}
+
+inline colorf operator/(const colorf& a, float t)
+{
+	return colorf(a.r / t, a.g / t, a.b / t);
+}
+inline colorf operator/(float t, const colorf& a)
+{
+	return a / t;
+}
+
+inline colorf operator+(const colorf& a, float t)
+{
+	return colorf(a.r + t, a.g + t, a.b + t);
+}
+
+inline colorf operator+(float t, const colorf& a)
+{
+	return a + t;
 }
 
 #endif

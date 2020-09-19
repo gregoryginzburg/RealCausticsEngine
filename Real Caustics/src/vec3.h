@@ -193,13 +193,48 @@ inline float distance(const vec3 &u, const vec3 &v)
 {
 	return (u - v).length();
 }
-inline vec3 random_in_hemisphere()
+inline vec3 random_in_hemisphere_test()
 {
 	auto a = random_float(0.0f, PI2);
 	auto z = random_float(-1.0f, 1.0f);
 	auto r = sqrtf(1.0f - z * z);
 	return vec3(r * cos(a), r * sin(a), z);
 }
+
+inline vec3 random_in_hemisphere()
+{
+	vec3 probe(2, 2, 2);
+	while (probe.length_squared() > 1.0f)
+	{
+		probe.x = random_float_0_1() * 2.0f - 1.0f;
+		probe.y = random_float_0_1() * 2.0f - 1.0f;
+		probe.z = random_float_0_1() * 2.0f - 1.0f;
+	}
+	return probe;
+}
+
+inline vec3 random_point_in_sphere_test(float radius)
+{
+	float phi = random_float(0.0f, PI2);
+	float cos_theta = random_float(-1.0f, 1.0f);
+	float sin_theta = sin(acos(cos_theta));
+	float r = radius * std::powf(random_float(0.0f, 1.0f), 0.33333f);
+
+	return vec3(r * sin_theta * cos(phi), r * sin_theta * sin(phi), r * cos_theta);
+}
+inline vec3 random_point_in_sphere(float radius)
+{
+	float radius_sqr = radius * radius;
+	vec3 probe(radius_sqr + 1000.0f, radius_sqr, radius_sqr);
+	while (probe.length_squared() > radius_sqr)
+	{
+		probe.x = (random_float_0_1() * 2.0f - 1.0f) * radius;
+		probe.y = (random_float_0_1() * 2.0f - 1.0f) * radius;
+		probe.z = (random_float_0_1() * 2.0f - 1.0f) * radius;
+	}
+	return probe;
+}
+/*
 // :angle - in radians
 inline vec3 random_in_hemisphere(float angle)
 {
@@ -207,7 +242,7 @@ inline vec3 random_in_hemisphere(float angle)
 	auto z = random_float(cos(angle * PI / 180.f), 1.0f);
 	auto r = sqrtf(1.0f - z * z);
 	return vec3(r * cos(a), r * sin(a), z);
-}
+}*/
 
 inline vec3 project_onto_plane(const vec3& point, const vec3& center, const vec3& normal)
 {

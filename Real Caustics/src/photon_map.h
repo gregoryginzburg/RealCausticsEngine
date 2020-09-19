@@ -8,6 +8,8 @@
 #include "aabb.h"
 
 extern const float inf;
+extern const float PI;
+class Catcher;
 
 struct KDTreeNode
 {
@@ -48,18 +50,36 @@ class Photon_map
 public:
 	std::vector<std::shared_ptr<photon>> photons;
 	std::vector<KDTreeNode> kdtree;
+	std::vector<float> costheta;
+	std::vector<float> sintheta;
+	std::vector<float> cosphi;
+	std::vector<float> sinphi;
 
+
+public:
 	Photon_map() {}
 
 	void init_photon_map(int number_of_photons)
 	{
 		photons.reserve(number_of_photons);
+		costheta.resize(256);
+		sintheta.resize(256);
+		cosphi.resize(256);
+		sinphi.resize(256);
+		for (int i = 0; i < 256; ++i)
+		{
+			float angle = float(i) * (1.0f / 256.0f) * PI;
+			costheta[i] = std::cos(angle);
+			sintheta[i] = std::sin(angle);
+			cosphi[i] = std::cos(2.0f * angle);
+			sinphi[i] = std::sin(2.0f * angle);
+		}
 	}
 
 
-	void add(const vec3& p, const colorf power)
+	void add(const vec3& p, const colorf power, const vec3& direction)
 	{
-		photons.emplace_back(std::make_shared<photon>(p, power));
+		photons.emplace_back(std::make_shared<photon>(p, power, direction));
 	}
 	void erase_photons()
 	{
@@ -69,12 +89,14 @@ public:
 
 	void find_closest_photons(const vec3 &point, float& search_d, Priority_queue &closest_photons, int element);
 
-	void gather_photons(vec3 point, float search_distance, int number_of_closest_photons, float* pixel_color);
+	void gather_photons(hit_rec& rec, Catcher* material, float search_distance, int number_of_closest_photons, float* pixel_color);
 
 	void update_kdtree(bool was_changed, const char* file_path)
 	{
 		update_kd_tree(was_changed, photons, kdtree, file_path);
 	}
+
+	void photon_direction(vec3& dir, unsigned char phi, unsigned char theta);
 	
 
 };

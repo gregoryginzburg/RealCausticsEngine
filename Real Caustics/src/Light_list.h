@@ -28,7 +28,8 @@ public:
 	}
 
 public:
-	ray emit_photon(helper_light_emit& helper) const;
+	//ray emit_photon(helper_light_emit& helper) const;
+	
 
 	void calculate_weights();
 

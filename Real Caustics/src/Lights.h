@@ -17,20 +17,30 @@ extern const float negative_inf;
 class Python_Light
 {
 public:
+	// "S"(83) - Sun, "P"(80) - Point light, "A"(65) - Area Light
 	char type;
 
+	colorf color;
 	vec3 position;
+	// for area light
 	float width;
 	float height;
+	float spread;
+	// ---------- 
 	vec3 rotation;
 	float power;
+	// for sun light
 	float angle;
+	// ----------
+	// for point light 
+	float radius;
+	// ----------
 };
 
 class Light
 {
 public:
-	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const = 0;
+	virtual ray emit_photon(size_t ii, int total_number_of_photons) const = 0;
 	virtual float get_power() const = 0;
 	virtual void geyt_i_j(int number_of_rays, int &i, int &j) = 0;
 };
@@ -38,6 +48,7 @@ public:
 class Area_Light : public Light
 {
 public:
+	colorf color;
 	vec3 position;
 	vec3 bottom_left_corner;
 	vec3 horizontal;
@@ -46,24 +57,13 @@ public:
 	float power;
 	float width;
 	float height;
+	float spread;
+
+public:	
+	Area_Light(vec3 p, vec3 rot, float w, float h, float pow, float spr, colorf c);	
 
 public:
-	Area_Light(vec3 p, float w, float h, float pow) : position(p), power(pow)
-	{
-		bottom_left_corner = position - vec3(w / 2.f, h / 2.f, 0.f);
-		horizontal = vec3(w, 0., 0.);
-		vertical = vec3(0., h, 0.);
-		width = w;
-		height = h;
-	}
-	
-	Area_Light(vec3 p, vec3 rot, float w, float h, float pow) : Area_Light(p, w, h, pow)
-	{
-		rotate(rot);
-	}
-
-public:
-	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const;
+	virtual ray emit_photon(size_t ii, int total_number_of_photons) const;
 	
 	virtual float get_power() const
 	{
@@ -76,38 +76,39 @@ public:
 	
 };
 
+
 class Point_Light : public Light
 {
 public:
-	Point_Light() {}
+	Point_Light(const vec3& p, float r, float pow, colorf c);
 public:
-	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const
-	{
-		return ray(vec3(0, 0, 0), vec3(0, 0, 0));
-	}
-	virtual float get_power() const
-	{
-		return 0.0f;
-	}
-	virtual void geyt_i_j(int number_of_rays, int &i, int &j)
-	{
+	virtual ray emit_photon(size_t ii, int total_number_of_photons) const;
 
-	}
+	virtual float get_power() const;
+
+	virtual void geyt_i_j(int number_of_rays, int& i, int& j);
+
+public:
+	vec3 position;
+	float radius;
+	float power;
+	colorf color;
 };
 
 class Sun_Light : public Light
 {
 public:
-	Sun_Light(vec3 p, vec3 r, float a, float pow);
+	Sun_Light(vec3 p, vec3 r, float a, float pow, colorf c);
 
 public:
-	virtual ray emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const;
+	virtual ray emit_photon(size_t ii, int total_number_of_photons) const;
 
 	virtual float get_power() const;
 
 	virtual void geyt_i_j(int number_of_rays, int &i, int &j);
 
 public:
+	colorf color;
 	vec3 position;
 	vec3 bottom_left_corner;
 	vec3 horizontal;
@@ -116,7 +117,7 @@ public:
 	float power;
 	float width;
 	float height;
-	float angle;
+	float spread;
 	//in radians
 	vec3 rotation;
 };

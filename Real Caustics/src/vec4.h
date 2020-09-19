@@ -15,6 +15,18 @@ public:
 	vec4(float e0) : x(e0), y(e0), z(e0), w(e0) {};
 	// дефолт конструктор для вектора
 	vec4(float e0, float e1, float e2, float e3) : x(e0), y(e1), z(e2), w(e3) { }
+	float get_length()
+	{
+		return std::sqrtf(x * x + y * y + z * z);
+	}
+	vec4& operator/=(float t)
+	{
+		x /= t;
+		y /= t;
+		z /= t;
+		w /= t;
+		return *this;
+	}
 };
 
 inline vec4 operator+(const vec4& u, const vec4& v)

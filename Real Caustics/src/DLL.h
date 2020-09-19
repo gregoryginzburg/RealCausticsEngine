@@ -28,7 +28,8 @@ extern "C"
 		unsigned int number_of_lights,
 		Python_Material* materials,
 		unsigned int number_of_materials,
-		int* meshes_material_idx);
+		int** materials_indices,
+		const char* hdri_path);
 
 
     #ifdef  __cplusplus

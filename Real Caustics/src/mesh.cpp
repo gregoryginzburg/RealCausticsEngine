@@ -8,7 +8,9 @@
 #include "aabb.h"
 #include "matrix.h"
 
-Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx, const matrix_4x4& matrix)
+
+Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const matrix_4x4& matrix,
+	int* material_indices)
 {
 	number_of_triangles = number_of_tris;
 	vertices = mesh_blender_data->mvert;
@@ -20,7 +22,7 @@ Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, uns
         triangles[i] = Triangle(mesh_blender_data->mloop[mesh_blender_data->mpoly[i].loopstart].v,
                                 mesh_blender_data->mloop[mesh_blender_data->mpoly[i].loopstart + 1].v,
                                 mesh_blender_data->mloop[mesh_blender_data->mpoly[i].loopstart + 2].v,
-								material_idx);
+								material_indices[mesh_blender_data->mpoly[i].mat_nr]);
     }
 }
 

@@ -5,12 +5,14 @@
 #include "BVH\BVH_mesh.h"
 #include "matrix.h"
 
+
 struct Mesh_blender;
 class ray;
 struct hit_rec;
 struct MVert;
 class Triangle;
 struct CacheBVHNode_mesh;
+class Object_Materials;
 
 
 extern const float inf;
@@ -20,7 +22,8 @@ class Mesh
 public:
 	Mesh() {}
 
-	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, int material_idx, const matrix_4x4& matrix);
+	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const matrix_4x4& matrix,
+		int* material_indices);
 
 
 public:

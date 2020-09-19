@@ -14,7 +14,7 @@
 
 inline void normal_short_to_float(const short in[3], float out[3])
 {
-    out[0] = in[0] * (1.0f / 32767.0f);
+    out[0]= in[0] * (1.0f / 32767.0f);
     out[1] = in[1] * (1.0f / 32767.0f);
     out[2] = in[2] * (1.0f / 32767.0f);
 	return;
@@ -35,12 +35,38 @@ bool Triangle::hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf, MVert
 	float v_normal0[3];
 	float v_normal1[3];
 	float v_normal2[3];
+	//vec3 vertex_normal0;
+	//vec3 vertex_normal1;
+	//vec3 vertex_normal2;
 	normal_short_to_float(vertices[vertex0_idx].no, v_normal0);
 	normal_short_to_float(vertices[vertex1_idx].no, v_normal1);
 	normal_short_to_float(vertices[vertex2_idx].no, v_normal2);
+	/*
+	vertex_normal0.x = vertices[vertex0_idx].no[0]  / 32767.0f;
+	vertex_normal0.y = vertices[vertex0_idx].no[1]  / 32767.0f;
+	vertex_normal0.z = vertices[vertex0_idx].no[2]  / 32767.0f;
+
+	vertex_normal1.x = vertices[vertex1_idx].no[0]  / 32767.0f;
+	vertex_normal1.y = vertices[vertex1_idx].no[1]  / 32767.0f;
+	vertex_normal1.z = vertices[vertex1_idx].no[2]  / 32767.0f;
+
+	vertex_normal2.x = vertices[vertex2_idx].no[0]  / 32767.0f;
+	vertex_normal2.y = vertices[vertex2_idx].no[1]  / 32767.0f;
+	vertex_normal2.z = vertices[vertex2_idx].no[2]  / 32767.0f;*/
+
 	vec3 vertex_normal0 = v_normal0;
     vec3 vertex_normal1 = v_normal1;
 	vec3 vertex_normal2 = v_normal2;
+	
+	matrix_4x4 m = world_matrix;
+	m.w = vec4(0, 0, 0, 1);
+	vec3 scale = vec3(m.i.get_length(), m.j.get_length(), m.k.get_length());
+	m.i /= scale.x;
+	m.j /= scale.y;
+	m.k /= scale.z;
+	vertex_normal0 = vertex_normal0 * m;
+	vertex_normal1 = vertex_normal1 * m;
+	vertex_normal2 = vertex_normal2 * m;
 
 	vec3 v0v1 = vertice1 - vertice0;
 	vec3 v0v2 = vertice2 - vertice0;
@@ -100,6 +126,9 @@ aabb Triangle::bounding_box(MVert *vertices, const matrix_4x4& world_matrix) con
 	vertice0 = vertice0 * world_matrix;
 	vertice1 = vertice1 * world_matrix;
 	vertice2 = vertice2 * world_matrix;
+
+
+
 
 	return aabb(point3(std::fmin(std::fmin(vertice0.x, vertice1.x), vertice2.x),
 		std::fmin(std::fmin(vertice0.y, vertice1.y), vertice2.y),

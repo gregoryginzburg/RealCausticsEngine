@@ -12,34 +12,9 @@
 extern Scene* scene;
 extern const float inf;
 
-ray Area_Light::emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const
-{
-	vec3 origin = bottom_left_corner + halton_sequnce(i, 2) * horizontal + halton_sequnce(j, 3) * vertical;
-	vec3 target = origin + normal + random_in_hemisphere();
 
-	return ray(origin, target - origin, colorf(power, power, power));
-}
 
-void Area_Light::rotate(vec3 rotation)
-{
-	vec3 top_left_corner = bottom_left_corner + vertical;
-	vec3 bottom_rigth_corner = bottom_left_corner + horizontal;
-	rotate_vec(bottom_left_corner, position, rotation);
-	rotate_vec(top_left_corner, position, rotation);
-	rotate_vec(bottom_rigth_corner, position, rotation);
-	rotate_vec(normal, vec3(0, 0, 0), rotation);
-	horizontal = bottom_rigth_corner - bottom_left_corner;
-	vertical = top_left_corner - bottom_left_corner;
-}
-
-void Area_Light::geyt_i_j(int number_of_rays, int& i, int& j)
-{
-	float k = std::sqrt(number_of_rays / (1.0f + width / height));
-	i = (int)k;
-	j = (int)(number_of_rays / k);
-}
-
-ray Lights_list::emit_photon(helper_light_emit& h) const
+/*ray Lights_list::emit_photon(helper_light_emit& h) const
 {
 	float numbers_photons_light = (int)(weights[h.light] * scene->number_of_photons); 
 
@@ -63,7 +38,7 @@ ray Lights_list::emit_photon(helper_light_emit& h) const
 
 	h.current_call += 1;
 	return lights[h.light]->emit_photon(h.current_call, h.current_call % x, h.current_call / x, current_power, x, y);
-}
+}*/
 
 void Lights_list::calculate_weights()
 {
@@ -85,8 +60,10 @@ void Lights_list::calculate_weights()
 
 
 // : r - in radians (gets converted into rotation - radians)
-Sun_Light::Sun_Light(vec3 p, vec3 r, float a, float pow) : position(p), angle(a), power(pow), rotation(r)
+// : a - angle in radians
+Sun_Light::Sun_Light(vec3 p, vec3 r, float a, float pow, colorf c) : position(p), power(pow), rotation(r), color(c)
 {
+	//spread = 1.0f - (cos(a) + 1.0f) / 2.0f;
 	rotate_vec_rad(normal, vec3(0, 0, 0), r);
 	matrix_3x3 matrix(rotation);
 	matrix_3x3 inverted_matrix = matrix;
@@ -147,13 +124,13 @@ Sun_Light::Sun_Light(vec3 p, vec3 r, float a, float pow) : position(p), angle(a)
 
 }
 
-ray Sun_Light::emit_photon(size_t ii, size_t i, size_t j, float power, float total_i, float total_j) const
+ray Sun_Light::emit_photon(size_t ii, int total_number_of_photons) const
 {
 	//vec3 origin = bottom_left_corner + (i / total_i) * horizontal + (j/ total_j) * vertical;
 	//vec3 origin = bottom_left_corner + random_float_0_1() * horizontal + random_float_0_1() * vertical;
 	vec3 origin = bottom_left_corner + halton_sequnce(ii, 2) * horizontal + halton_sequnce(ii, 3) * vertical;
-	//vec3 target = origin + normal + random_in_hemisphere(angle);
-	return ray(origin, normal, colorf(power, power, power));
+	//vec3 target = origin + normal + random_in_hemisphere();
+	return ray(origin, normal, color * (power / total_number_of_photons));
 }
 
 float Sun_Light::get_power() const
@@ -167,4 +144,69 @@ void Sun_Light::geyt_i_j(int number_of_rays, int &i, int &j)
 	float k = std::sqrt(number_of_rays / (width / height));
 	i = (int)k;
 	j = (int)(number_of_rays / k);
+}
+
+
+// :rot in radians
+Area_Light::Area_Light(vec3 p, vec3 rot, float w, float h, float pow, float spr, colorf c) : color(c), power(pow), width(w), height(h), position(p), spread(spr)
+{
+	// :rot - in degress
+	bottom_left_corner = p - vec3(w / 2.f, h / 2.f, 0.f);
+	horizontal = vec3(w, 0., 0.);
+	vertical = vec3(0., h, 0.);
+	rotate(rot);
+}
+
+
+ray Area_Light::emit_photon(size_t ii, int total_number_of_photons) const
+{
+	vec3 origin = bottom_left_corner + halton_sequnce(ii, 2) * horizontal + halton_sequnce(ii, 3) * vertical;
+	vec3 target = origin + normal + spread * random_in_hemisphere();
+
+	return ray(origin, target - origin, color * (power / total_number_of_photons));
+}
+
+void Area_Light::rotate(vec3 rotation)
+{
+	// :rotation - in degress
+	vec3 top_left_corner = bottom_left_corner + vertical;
+	vec3 bottom_rigth_corner = bottom_left_corner + horizontal;
+	rotate_vec_rad(bottom_left_corner, position, rotation);
+	rotate_vec_rad(top_left_corner, position, rotation);
+	rotate_vec_rad(bottom_rigth_corner, position, rotation);
+	rotate_vec_rad(normal, vec3(0, 0, 0), rotation);
+	horizontal = bottom_rigth_corner - bottom_left_corner;
+	vertical = top_left_corner - bottom_left_corner;
+}
+
+void Area_Light::geyt_i_j(int number_of_rays, int& i, int& j)
+{
+	float k = std::sqrt(number_of_rays / (1.0f + width / height));
+	i = (int)k;
+	j = (int)(number_of_rays / k);
+}
+
+
+
+
+Point_Light::Point_Light(const vec3& p, float r, float pow, colorf c) : position(p), radius(r), power(pow), color(c)
+{
+
+}
+
+
+ray Point_Light::emit_photon(size_t ii, int total_number_of_photons) const
+{
+	return ray(position + random_point_in_sphere(radius), random_in_hemisphere(), color * (power / total_number_of_photons));
+}
+
+float Point_Light::get_power() const
+{
+	return power;
+}
+
+void Point_Light::geyt_i_j(int number_of_rays, int& i, int& j)
+{
+	i = 10;
+	j = 10;
 }
