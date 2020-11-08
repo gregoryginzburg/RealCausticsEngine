@@ -2,7 +2,7 @@
 #define _DLL_H_
 #include <iostream>
 #define DLLEXPORT extern "C" __declspec(dllexport)
-
+struct Debug_stuff;
 
 #ifdef  __cplusplus
 extern "C"
@@ -11,7 +11,7 @@ extern "C"
 
 
     DLLEXPORT int main();
-	DLLEXPORT void init(int number_of_photons, int n_closest, float radius,
+	DLLEXPORT void init(int samples, float base_radius, float radius_reduction,
 		long long* meshes_pointers,
 		unsigned int number_of_meshes,
 		matrix_4x4* mesh_matrices,
@@ -29,7 +29,8 @@ extern "C"
 		Python_Material* materials,
 		unsigned int number_of_materials,
 		int** materials_indices,
-		const char* hdri_path);
+		int debug_test,
+		Debug_stuff debug_stuff);
 
 
     #ifdef  __cplusplus

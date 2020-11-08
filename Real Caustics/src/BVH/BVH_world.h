@@ -4,7 +4,7 @@
 #include <vector>
 #include "../aabb.h"
 
-struct hit_rec;
+struct Isect;
 class ray;
 class Triangle;
 class Mesh;
@@ -63,7 +63,7 @@ struct CacheBVHNode_world
 			unsigned startIndex;
 		} leaf;
 	} u;
-	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_world &bvh, Mesh *meshes) const;
+	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, const BVH_world &bvh, Mesh *meshes) const;
 };
 struct aabb_temp_world
 {

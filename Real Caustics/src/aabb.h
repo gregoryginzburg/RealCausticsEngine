@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "Hit_rec.h"
 class Hittable;
+extern long long BVH_Intersection_TESTS;
+
 class aabb
 {
 public:
@@ -15,6 +17,8 @@ public:
 
 	bool hit(const ray& r, float tmin, float tmax) const
 	{
+		++BVH_Intersection_TESTS;
+
 		auto invD = 1 / r.direction.x;
 		auto t0 = (min.x - r.origin.x) * invD;
 		auto t1 = (max.x - r.origin.x) * invD;

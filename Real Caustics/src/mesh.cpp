@@ -10,7 +10,7 @@
 
 
 Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const matrix_4x4& matrix,
-	int* material_indices)
+	int* material_indices, bool smooth_shade) : shade_smooth(smooth_shade)
 {
 	number_of_triangles = number_of_tris;
 	vertices = mesh_blender_data->mvert;
@@ -65,7 +65,7 @@ void Mesh::update_bvh(bool was_changed, const char *file_path)
 	}
 }
 //index = 0
-bool Mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int index) const
+bool Mesh::hit(const ray &r, float tmin, float tmax, Isect &hit_inf, int index) const
 {
 	//1 - leaf node
 	if (BVH.bvh_nodes[index].u.leaf.count & 0x80000000)
@@ -85,7 +85,7 @@ bool Mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int index
 		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
 		{
 			bool left_hit = hit(r, tmin, tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxLeft);
-			bool right_hit = hit(r, tmin, left_hit ? hit_inf.t : tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
+			bool right_hit = hit(r, tmin, left_hit ? hit_inf.distance : tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
 
 			return left_hit | right_hit;
 		}

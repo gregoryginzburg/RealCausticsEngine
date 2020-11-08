@@ -12,6 +12,9 @@
 #include "Blender_definitions.h"
 #include "matrix.h"
 
+extern long long Triangle_Intersection_TESTS;
+
+
 inline void normal_short_to_float(const short in[3], float out[3])
 {
     out[0]= in[0] * (1.0f / 32767.0f);
@@ -22,8 +25,10 @@ inline void normal_short_to_float(const short in[3], float out[3])
 
 //inline void apply_matrix_transformation(vec3& v, const matrix_4x4 
 
-bool Triangle::hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf, MVert *vertices, const matrix_4x4& world_matrix) const
+bool Triangle::hit(const ray& r, float tmin, float tmax, Isect& hit_inf, MVert *vertices, const matrix_4x4& world_matrix, bool use_smooth_shading) const
 {
+	++Triangle_Intersection_TESTS;
+
     vec3 vertice0 = vertices[vertex0_idx].co;
     vec3 vertice1 = vertices[vertex1_idx].co;
 	vec3 vertice2 = vertices[vertex2_idx].co;
@@ -67,6 +72,7 @@ bool Triangle::hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf, MVert
 	vertex_normal0 = vertex_normal0 * m;
 	vertex_normal1 = vertex_normal1 * m;
 	vertex_normal2 = vertex_normal2 * m;
+	
 
 	vec3 v0v1 = vertice1 - vertice0;
 	vec3 v0v2 = vertice2 - vertice0;
@@ -93,16 +99,16 @@ bool Triangle::hit(const ray& r, float tmin, float tmax, hit_rec& hit_inf, MVert
 
 	if (t > tmin && t < tmax)
 	{
-		hit_inf.t = t;
+		hit_inf.distance = t;
 		hit_inf.u = u;
 		hit_inf.v = v;
-		hit_inf.normal = vertex_normal0 * (1 - u - v) + vertex_normal1 * u + vertex_normal2 * v;
-		hit_inf.front_face = dot(hit_inf.normal, r.direction) < 0 ? true : false;
-		if (!hit_inf.front_face)
-		{
-			hit_inf.normal = -hit_inf.normal;
-		}
-		hit_inf.p = r.origin + r.direction * hit_inf.t;
+
+		hit_inf.geometric_normal = normalize(cross(v0v1, v0v2));
+		hit_inf.shade_normal = vertex_normal0 * (1 - u - v) + vertex_normal1 * u + vertex_normal2 * v;
+		hit_inf.front_face = dot(hit_inf.shade_normal, r.direction) < 0 ? true : false;
+
+		hit_inf.position = r.origin + r.direction * hit_inf.distance;
+		hit_inf.direction = r.direction;
 		hit_inf.material_idx = material_idx;
 
 		// hit_inf.tex_coord_v0 = 0;

@@ -6,11 +6,14 @@ class aabb;
 class vec3;
 class vec2;
 
-struct hit_rec
+#include "materials.h"
+
+struct Isect
 {
-	vec3 normal;
-	vec3 p;
-	float t = 0;	
+	vec3 geometric_normal;
+	vec3 shade_normal;
+	vec3 position;
+	float distance = 0;	
 	bool front_face = false;
 	float u = 0;
 	float v = 0;
@@ -22,6 +25,12 @@ struct hit_rec
 	vec3 direction;
 
 	unsigned int material_idx;
+
+	void compute_scattering_functions(BxDF** brdf, Material** materials, TransportMode mode)
+	{
+		materials[material_idx]->compute_scattering_functions(brdf, *this, mode);
+	}
+
 };
 
 

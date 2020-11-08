@@ -9,7 +9,6 @@
 #include "Color.h"
 #include "vec3.h"
 #include "matrix.h"
-#include "photon.h"
 #include <memory>
 
 
@@ -129,7 +128,32 @@ inline bool visible_in_frustum(const matrix_4x4& camera_matrix, std::vector<vec3
     }
     return true;
 }
+inline int ClampI(int value, int low, int high)
+{
+    if (value < low)
+        return low;
+    else if (value > high)
+        return high;
+    else
+        return value;
+}
 
+inline int find_interval(const std::vector<float>& cdf, float u)
+{
+    int first = 0, len = cdf.size();
+    while (len > 0) 
+    {
+        int half = len >> 1, middle = first + half;
+            if (cdf[middle] < u)
+            {
+                first = middle + 1;
+                len -= half + 1;
+            }
+            else
+                len = half;
+    }
+    return ClampI(first - 1, 0, cdf.size() - 2);
+}
 
 
 #endif

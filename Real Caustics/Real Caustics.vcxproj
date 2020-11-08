@@ -148,31 +148,40 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\aabb.cpp" />
+    <ClCompile Include="src\BXDF.cpp" />
     <ClCompile Include="src\BVH\BVH_mesh.cpp" />
     <ClCompile Include="src\BVH\BVH_world.cpp" />
+    <ClCompile Include="src\Debug_scene.cpp" />
     <ClCompile Include="src\Lights.cpp" />
+    <ClCompile Include="src\Light_list.cpp" />
     <ClCompile Include="src\materials.cpp" />
     <ClCompile Include="src\matrix.cpp" />
     <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\photon_map.cpp" />
+    <ClCompile Include="src\KD_Tree.cpp" />
+    <ClCompile Include="src\MLT_Sampler.cpp" />
+    <ClCompile Include="src\Sampling.cpp" />
     <ClCompile Include="src\Scene.cpp" />
-    <ClCompile Include="src\hdri.cpp" />
     <ClCompile Include="src\Triangle.cpp" />
     <ClCompile Include="src\vec3.cpp" />
+    <ClCompile Include="src\Vertex_Merging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\stb_image.h" />
     <ClInclude Include="lib\tinyexr.h" />
     <ClInclude Include="src\aabb.h" />
+    <ClInclude Include="src\BXDF.h" />
     <ClInclude Include="src\BVH\BVH_mesh.h" />
     <ClInclude Include="src\BVH\BVH_world.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\DLL.h" />
     <ClInclude Include="src\Blender_definitions.h" />
-    <ClInclude Include="src\hdri.h" />
+    <ClInclude Include="src\Frame.h" />
+    <ClInclude Include="src\Image_Buffer.h" />
     <ClInclude Include="src\Light_list.h" />
+    <ClInclude Include="src\MLT_Sampler.h" />
+    <ClInclude Include="src\Sampling.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Hit_rec.h" />
     <ClInclude Include="src\hittable_list.h" />
@@ -181,9 +190,8 @@
     <ClInclude Include="src\matrix.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\parser.h" />
-    <ClInclude Include="src\photon.h" />
-    <ClInclude Include="src\photon_map.h" />
-    <ClInclude Include="src\priority_queue.h" />
+    <ClInclude Include="src\Path_Vertices.h" />
+    <ClInclude Include="src\KD_Tree.h" />
     <ClInclude Include="src\random_generators.h" />
     <ClInclude Include="src\ray.h" />
     <ClInclude Include="src\timer.h" />
@@ -192,6 +200,7 @@
     <ClInclude Include="src\vec2.h" />
     <ClInclude Include="src\vec3.h" />
     <ClInclude Include="src\vec4.h" />
+    <ClInclude Include="src\Vertex_Merging.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

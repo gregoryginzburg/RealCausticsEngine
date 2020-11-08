@@ -91,6 +91,10 @@ public:
 	{
 		return std::sqrt(length_squared());
 	}
+	float Max() const
+	{
+		return std::max(std::max(x, y), z);
+	}
 };
 using point3 = vec3; //point 3d
 
@@ -155,6 +159,12 @@ inline float dot(const vec3 &u, const vec3 &v)
 {
 	return u.x * v.x + u.y * v.y + u.z * v.z;
 }
+
+inline float abs_dot(const vec3& u, const vec3& v)
+{
+	return std::abs(u.x * v.x + u.y * v.y + u.z * v.z);
+}
+
 inline vec3 cross(const vec3 &u, const vec3 &v)
 {
 	return vec3(u.y * v.z - u.z * v.y,
@@ -169,16 +179,31 @@ inline vec3 reflect(const vec3 &v, const vec3 &n)
 {
 	return v - 2 * dot(v, n) * n;
 }
-inline vec3 refract(const vec3 &uv, const vec3 &n, float etai_over_etat)
+// wi - view local dir  wo - out direction
+inline bool refract(const vec3 &wi, const vec3 &n, float etai_over_etat, vec3& wo)
 {
-	float cos_theta = dot(-uv, n);
-	vec3 r_out_parallel = etai_over_etat * (uv + cos_theta * n);
+	
+	float cos_theta_i = dot(n, wi);
+	float sin2_theta_i = std::max(0.0f, 1.0f - cos_theta_i * cos_theta_i);
+	float sin2_theta_t = etai_over_etat * etai_over_etat * sin2_theta_i;
+
+	// Total Internal Reflection
+	if (sin2_theta_t >= 1.0f)
+		return false;
+	float cos_theta_t = std::sqrt(1.0f - sin2_theta_t);
+	wo = etai_over_etat * -wi + (etai_over_etat * cos_theta_i - cos_theta_t) * n;
+	return true;
+	
+
+	/*
+	float cos_theta = dot(-wi, n);
+	vec3 r_out_parallel = etai_over_etat * (wi + cos_theta * n);
 	vec3 r_out_perp = -std::sqrtf(1.0f - r_out_parallel.length_squared()) * n;
 	//float ior = etai_over_etat;
 	//float c = dot(-n, uv);
 	//return ior * uv + (ior * c - std::sqrt(1 - ior * ior * (1- c * c))) * n;
-
-	return r_out_parallel + r_out_perp;
+	wo = r_out_parallel + r_out_perp;
+	return true;*/
 }
 
 

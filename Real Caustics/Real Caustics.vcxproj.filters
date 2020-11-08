@@ -21,9 +21,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\photon_map.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\BVH\BVH_mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,7 +48,25 @@
     <ClCompile Include="src\materials.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\hdri.cpp">
+    <ClCompile Include="src\KD_Tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vertex_Merging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Light_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sampling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BXDF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Debug_scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MLT_Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,19 +110,10 @@
     <ClInclude Include="src\vec4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\photon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\random_generators.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\photon_map.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\priority_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hit_rec.h">
@@ -143,7 +149,28 @@
     <ClInclude Include="lib\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hdri.h">
+    <ClInclude Include="src\KD_Tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vertex_Merging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Path_Vertices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Image_Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sampling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BXDF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MLT_Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

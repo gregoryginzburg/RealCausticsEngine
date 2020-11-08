@@ -34,6 +34,7 @@ BVHNode_mesh *recurse(std::vector<aabb_temp_mesh> &triangle_temp_containers)
 		float min_cost = inf;
 		float best_split = inf;
 		bool is_better_split = false;
+
 		int count_left;
 		int count_right;
 		int best_left_amount;
@@ -275,19 +276,19 @@ void create_cache_friendly_bvh(BVHNode_mesh *root, BVH_mesh &cache_friendly_bvh,
 
 
 
-bool CacheBVHNode_mesh::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_mesh &bvh, Triangle* triangles, MVert* vertices, 
+bool CacheBVHNode_mesh::hit(const ray &r, float tmin, float tmax, Isect &hit_inf, const BVH_mesh &bvh, Triangle* triangles, MVert* vertices, 
 	const matrix_4x4& world_matrix) const
 {
-	hit_rec temp_rec;
+	Isect temp_rec;
 	bool hit_anything = false;
 	auto closest_so_far = tmax;
 	int end_index = u.leaf.startIndex + (u.leaf.count & 0x7fffffff) + 1;
 	for (int i = u.leaf.startIndex + 1; i < end_index; ++i)
 	{
-		if (triangles[bvh.tris_indices[i]].hit(r, tmin, closest_so_far, temp_rec, vertices, world_matrix))
+		if (triangles[bvh.tris_indices[i]].hit(r, tmin, closest_so_far, temp_rec, vertices, world_matrix, true))
 		{
 			hit_anything = true;
-			closest_so_far = temp_rec.t;
+			closest_so_far = temp_rec.distance;
 			hit_inf = temp_rec;
 		}
 	}

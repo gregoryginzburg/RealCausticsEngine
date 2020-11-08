@@ -8,7 +8,7 @@
 
 struct Mesh_blender;
 class ray;
-struct hit_rec;
+struct Isect;
 struct MVert;
 class Triangle;
 struct CacheBVHNode_mesh;
@@ -23,12 +23,12 @@ public:
 	Mesh() {}
 
 	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const matrix_4x4& matrix,
-		int* material_indices);
+		int* material_indices, bool smooth_shade);
 
 
 public:
 	// defined in BVH_mesh.cpp
-	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, int index) const;
+	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, int index) const;
 
 	BVHNode_mesh *make_default_bvh();
 
@@ -45,6 +45,8 @@ public:
 	BVH_mesh BVH;
 	aabb bounding_box;
 	matrix_4x4 world_matrix;
+
+	bool shade_smooth;
 };
 
 #endif

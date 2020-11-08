@@ -2,15 +2,15 @@
 #define MATERIALS_H
 #include "ray.h"
 #include "vec3.h"
-#include "Hit_rec.h"
 #include "Color.h"
+#include "BXDF.h"
 #include <cmath>
 
 
 class Python_Material
 {
 public:
-	// "C"(67) - Catcher, "G"(71) - Caustics Glass, "M"(77) - Caustics Metal, "NULL"(0) - None 
+	// "P"(80) - Plastic, "G"(71) - Glass, "M"(77) - Caustics Metal
 	char type;
 
 	float ior;
@@ -19,117 +19,94 @@ public:
 	colorf color;
 };
 
+/*
+switch (type)
+{
+case DIFFUSE:
+	brdf = new Lambertian_Reflection(color);
+	break;
+case GLOSSY_SHARP:
+	brdf = new Specular_Reflection(color);
+	break;
+case TRANSMISSION_SHARP:
+	brdf = new Fresnel_Specular(color, ior);
+	break;
+}
+*/
+class Isect;
 
 class Material
 {
 public:
-	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered, char& type) = 0;
-	virtual colorf get_color() = 0;
+	Material() {}
+public:
+	virtual void compute_scattering_functions(BxDF** brdf, const Isect& intersection, TransportMode mode) = 0;
 };
-class Metal : public Material
-{
-public:
-	colorf color;
-	float roughness;
-public:
-	Metal(const colorf& c, float r) : color(c), roughness(r) {}
-public:
-	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered, char& type)
-	{
-		vec3 scattered_dir = reflect(r.direction, rec.normal);
-		scattered = ray(rec.p, scattered_dir);
 
-		type = 'M';
-		return true;
-	}
-	virtual colorf get_color()
-	{
-		return color;
-	}
-};
-class Glass : public Material
+class Plastic_Material : public Material
 {
 public:
-	float ior = 1.0;
-	float roughness;
-	colorf color;
+	Plastic_Material(const vec3& color, float r, float s) : R(color), roughness(r * r), specular(s * 0.08f) {}
 public:
-	Glass() {}
-	Glass(const colorf& c, float ref_idx, float r) : ior(ref_idx), color(c), roughness(r) {}
-public:
-	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered, char& type)
+	virtual void compute_scattering_functions(BxDF** brdf, const Isect& intersection, TransportMode mode)
 	{
-		float ior_local = ior;
-		if (rec.front_face)
+		if (roughness < 0.01f)
 		{
-			ior_local = 1.0f / ior;
+			*brdf = new Fresnel_Specular_Microfacet_GGX(R, specular, intersection, mode);		
 		}
-		vec3 direction_normalized = normalize(r.direction);
-		float cos_theta = std::fmin(dot(-direction_normalized, rec.normal), 1.0);
-		float sin_theta = std::sqrt(1.0f - cos_theta * cos_theta);
-		if (ior_local * sin_theta > 1.0f)
+		else
 		{
-			vec3 reflected = reflect(direction_normalized, rec.normal);
-			scattered = ray(rec.p, reflected);
-			return true;
+			*brdf = new Fresnel_Microfacet_GGX(R, roughness, specular, intersection, mode);
 		}
-		/*
-		float reflection_prob = schlick(cos_theta, ior_local);
 
-		if (random_float_0_1() < reflection_prob)
+		//*brdf = new Lambertian_Reflection(R, intersection, mode);
+	}
+
+public:
+	vec3 R;
+	float roughness;
+	float specular;
+};
+
+
+class Glass_Material : public Material
+{
+public:
+	Glass_Material(const vec3& color, float i) : T(color), ior(i) {}
+public:
+	virtual void compute_scattering_functions(BxDF** brdf, const Isect& intersection, TransportMode mode)
+	{
+		*brdf = new Fresnel_Specular(T, ior, intersection, mode);
+	}
+
+public:
+	vec3 T;
+	float ior;
+};
+
+class Metal_Material : public Material
+{
+public:
+	Metal_Material(const vec3& color, float r) : R(color), roughness(r) {}
+
+public:
+	virtual void compute_scattering_functions(BxDF** brdf, const Isect& intersection, TransportMode mode)
+	{
+		if (roughness < 0.01f)
 		{
-			vec3 reflected = reflect(direction_normalized, rec.normal);
-			scattered = ray(rec.p, reflected);
-			return true;
-		}*/
-		vec3 refracted = refract(direction_normalized, rec.normal, ior_local);
-		scattered = ray(rec.p, refracted);
-		
-		type = 'G';
-		return true;
+			*brdf = new Specular_Reflection(R, intersection, mode);
+		}
+		else
+		{
+			*brdf = new Microfacet_Reflection_GGX(R, roughness, intersection, mode);
+		}
+	}
 
-	}
-	virtual colorf get_color()
-	{
-		return color;
-	}
+public:
+	vec3 R;
+	float roughness;
 };
 
-class Catcher : public Material
-{
-public:
-	colorf catcher_color = colorf(1.0, 1.0, 1.0);
-	float roughness = 1.0;
-	float specular = 0.5;
-public:
-	Catcher(const colorf& color, float r, float s);
-public:
-	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered, char& type)
-	{
-		type = 'C';
-		return false;
-	}
-	virtual colorf get_color() 
-	{
-		return colorf(0, 0, 0);
-	}
-	colorf brdf(const vec3& light_dir, const vec3& view_dir, const vec3& normal);
-
-};
-
-class None : public Material
-{
-public:
-	virtual bool scatter(const ray& r, const hit_rec& rec, ray& scattered, char& type)
-	{
-		type = 0;
-		return false;
-	}
-	virtual colorf get_color()
-	{
-		return colorf(0, 0, 0);
-	}
-};
 
 
 

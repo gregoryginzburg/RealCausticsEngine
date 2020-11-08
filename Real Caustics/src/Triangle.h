@@ -2,7 +2,7 @@
 #define TRIANGLE_H 
 
 class ray;
-struct hit_rec;
+struct Isect;
 class aabb;
 class Material;
 struct MVert;
@@ -18,7 +18,7 @@ public:
 	~Triangle();
 
 public:
-	bool hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, MVert *vertices, const matrix_4x4& world_matrix) const;
+	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, MVert *vertices, const matrix_4x4& world_matrix, bool use_smooth_shading) const;
 	
 	aabb bounding_box(MVert *vertices, const matrix_4x4& world_matrix) const;
 

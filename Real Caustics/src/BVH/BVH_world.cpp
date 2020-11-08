@@ -271,9 +271,9 @@ void create_cache_friendly_bvh(BVHNode_world *root, BVH_world &cache_friendly_bv
 
 
 
-bool CacheBVHNode_world::hit(const ray &r, float tmin, float tmax, hit_rec &hit_inf, const BVH_world &bvh, Mesh *meshes) const
+bool CacheBVHNode_world::hit(const ray &r, float tmin, float tmax, Isect &hit_inf, const BVH_world &bvh, Mesh *meshes) const
 {
-	hit_rec temp_rec;
+	Isect temp_rec;
 	bool hit_anything = false;
 	auto closest_so_far = tmax;
 	int end_index = u.leaf.startIndex + (u.leaf.count & 0x7fffffff) + 1;
@@ -282,7 +282,7 @@ bool CacheBVHNode_world::hit(const ray &r, float tmin, float tmax, hit_rec &hit_
 		if (meshes[bvh.mesh_indices[i]].hit(r, tmin, closest_so_far, temp_rec, 0))
 		{
 			hit_anything = true;
-			closest_so_far = temp_rec.t;
+			closest_so_far = temp_rec.distance;
 			hit_inf = temp_rec;
 		}
 	}

@@ -26,11 +26,15 @@ public:
 	}
 
 public:
-	ray get_ray(int i, int j)
+	ray get_ray(float i, float j) const
 	{
 		vec3 dir = bottom_left_corner + (i / (float)pixel_width) * horizontal + (j / (float)pixel_height) * vertical;
 		dir -= origin;
 		return ray(origin, normalize(dir));
+	}
+	vec3 get_origin() const
+	{
+		return origin;
 	}
 };
 
