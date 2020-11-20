@@ -4,6 +4,7 @@
 #include <vector>
 #include "BVH\BVH_mesh.h"
 #include "matrix.h"
+#include "Transform.h"
 
 
 struct Mesh_blender;
@@ -22,7 +23,7 @@ class Mesh
 public:
 	Mesh() {}
 
-	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const matrix_4x4& matrix,
+	Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const Matrix4x4& matrix,
 		int* material_indices, bool smooth_shade);
 
 
@@ -44,7 +45,8 @@ public:
 
 	BVH_mesh BVH;
 	aabb bounding_box;
-	matrix_4x4 world_matrix;
+	Transform WorldTransformation;
+
 
 	bool shade_smooth;
 };

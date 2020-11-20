@@ -72,10 +72,14 @@ public:
 class Glass_Material : public Material
 {
 public:
-	Glass_Material(const vec3& color, float i) : T(color), ior(i) {}
+	Glass_Material(const vec3& color, float i) : T(color), ior(i) 
+	{
+		std::cout << "IOR     " << ior << "\n";
+	}
 public:
 	virtual void compute_scattering_functions(BxDF** brdf, const Isect& intersection, TransportMode mode)
 	{
+		//*brdf = new Specular_Transmission(T, ior, intersection, mode);
 		*brdf = new Fresnel_Specular(T, ior, intersection, mode);
 	}
 

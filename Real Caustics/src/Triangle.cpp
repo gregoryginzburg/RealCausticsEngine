@@ -1,31 +1,23 @@
 #include "Triangle.h"
-#include <vector>
-#include <string>
-#include <cmath>
-#include <memory>
 #include "vec3.h"
-#include "Hit_rec.h"
-#include "vec2.h"
-#include "materials.h"
 #include "aabb.h"
-#include "Scene.h"
+#include "Hit_rec.h"
 #include "Blender_definitions.h"
-#include "matrix.h"
+#include "Transform.h"
 
 extern long long Triangle_Intersection_TESTS;
 
 
-inline void normal_short_to_float(const short in[3], float out[3])
+inline void normal_short_to_float(const short in[3], vec3& out)
 {
-    out[0]= in[0] * (1.0f / 32767.0f);
-    out[1] = in[1] * (1.0f / 32767.0f);
-    out[2] = in[2] * (1.0f / 32767.0f);
-	return;
+    out.x = in[0] * (1.0f / 32767.0f);
+    out.y = in[1] * (1.0f / 32767.0f);
+    out.z = in[2] * (1.0f / 32767.0f);
 }
 
 //inline void apply_matrix_transformation(vec3& v, const matrix_4x4 
 
-bool Triangle::hit(const ray& r, float tmin, float tmax, Isect& hit_inf, MVert *vertices, const matrix_4x4& world_matrix, bool use_smooth_shading) const
+bool Triangle::hit(const ray& r, float tmin, float tmax, Isect& hit_inf, MVert *vertices, const Transform& WorldTransformation, bool use_smooth_shading) const
 {
 	++Triangle_Intersection_TESTS;
 
@@ -33,47 +25,22 @@ bool Triangle::hit(const ray& r, float tmin, float tmax, Isect& hit_inf, MVert *
     vec3 vertice1 = vertices[vertex1_idx].co;
 	vec3 vertice2 = vertices[vertex2_idx].co;
 
-	vertice0 = vertice0 * world_matrix;
-	vertice1 = vertice1 * world_matrix;
-	vertice2 = vertice2 * world_matrix;
+	vertice0 = WorldTransformation.ApplyToPoint(vertice0);
+	vertice1 = WorldTransformation.ApplyToPoint(vertice1);
+	vertice2 = WorldTransformation.ApplyToPoint(vertice2);
 
-	float v_normal0[3];
-	float v_normal1[3];
-	float v_normal2[3];
-	//vec3 vertex_normal0;
-	//vec3 vertex_normal1;
-	//vec3 vertex_normal2;
-	normal_short_to_float(vertices[vertex0_idx].no, v_normal0);
-	normal_short_to_float(vertices[vertex1_idx].no, v_normal1);
-	normal_short_to_float(vertices[vertex2_idx].no, v_normal2);
-	/*
-	vertex_normal0.x = vertices[vertex0_idx].no[0]  / 32767.0f;
-	vertex_normal0.y = vertices[vertex0_idx].no[1]  / 32767.0f;
-	vertex_normal0.z = vertices[vertex0_idx].no[2]  / 32767.0f;
+	vec3 vertex_normal0;
+	vec3 vertex_normal1;
+	vec3 vertex_normal2;
 
-	vertex_normal1.x = vertices[vertex1_idx].no[0]  / 32767.0f;
-	vertex_normal1.y = vertices[vertex1_idx].no[1]  / 32767.0f;
-	vertex_normal1.z = vertices[vertex1_idx].no[2]  / 32767.0f;
+	normal_short_to_float(vertices[vertex0_idx].no, vertex_normal0);
+	normal_short_to_float(vertices[vertex1_idx].no, vertex_normal1);
+	normal_short_to_float(vertices[vertex2_idx].no, vertex_normal2);
 
-	vertex_normal2.x = vertices[vertex2_idx].no[0]  / 32767.0f;
-	vertex_normal2.y = vertices[vertex2_idx].no[1]  / 32767.0f;
-	vertex_normal2.z = vertices[vertex2_idx].no[2]  / 32767.0f;*/
-
-	vec3 vertex_normal0 = v_normal0;
-    vec3 vertex_normal1 = v_normal1;
-	vec3 vertex_normal2 = v_normal2;
+	vertex_normal0 = normalize(WorldTransformation.ApplyToNormal(vertex_normal0));
+	vertex_normal1 = normalize(WorldTransformation.ApplyToNormal(vertex_normal1));
+	vertex_normal2 = normalize(WorldTransformation.ApplyToNormal(vertex_normal2));
 	
-	matrix_4x4 m = world_matrix;
-	m.w = vec4(0, 0, 0, 1);
-	vec3 scale = vec3(m.i.get_length(), m.j.get_length(), m.k.get_length());
-	m.i /= scale.x;
-	m.j /= scale.y;
-	m.k /= scale.z;
-	vertex_normal0 = vertex_normal0 * m;
-	vertex_normal1 = vertex_normal1 * m;
-	vertex_normal2 = vertex_normal2 * m;
-	
-
 	vec3 v0v1 = vertice1 - vertice0;
 	vec3 v0v2 = vertice2 - vertice0;
 	vec3 pvec = cross(r.direction, v0v2);
@@ -111,46 +78,31 @@ bool Triangle::hit(const ray& r, float tmin, float tmax, Isect& hit_inf, MVert *
 		hit_inf.direction = r.direction;
 		hit_inf.material_idx = material_idx;
 
-		// hit_inf.tex_coord_v0 = 0;
-		// hit_inf.tex_coord_v1 = 0;
-		// hit_inf.tex_coord_v2 = 0;
 		return true;
 	}
 	else
     {
         return false;
-    }		
+    }	
 
 }
 
-aabb Triangle::bounding_box(MVert *vertices, const matrix_4x4& world_matrix) const
+aabb Triangle::bounding_box(MVert *vertices, const Transform& WorldTransformation) const
 {
 	vec3 vertice0 = vertices[vertex0_idx].co;
 	vec3 vertice1 = vertices[vertex1_idx].co;
 	vec3 vertice2 = vertices[vertex2_idx].co;
 
-	vertice0 = vertice0 * world_matrix;
-	vertice1 = vertice1 * world_matrix;
-	vertice2 = vertice2 * world_matrix;
+	vertice0 = WorldTransformation.ApplyToPoint(vertice0);
+	vertice1 = WorldTransformation.ApplyToPoint(vertice1);
+	vertice2 = WorldTransformation.ApplyToPoint(vertice2);
 
+	return aabb(point3(std::min(std::min(vertice0.x, vertice1.x), vertice2.x),
+		std::min(std::min(vertice0.y, vertice1.y), vertice2.y),
+		std::min(std::min(vertice0.z, vertice1.z), vertice2.z)),
 
-
-
-	return aabb(point3(std::fmin(std::fmin(vertice0.x, vertice1.x), vertice2.x),
-		std::fmin(std::fmin(vertice0.y, vertice1.y), vertice2.y),
-		std::fmin(std::fmin(vertice0.z, vertice1.z), vertice2.z)),
-
-		point3(std::fmax(std::fmax(vertice0.x, vertice1.x), vertice2.x),
-			std::fmax(std::fmax(vertice0.y, vertice1.y), vertice2.y),
-			std::fmax(std::fmax(vertice0.z, vertice1.z), vertice2.z)));
+		point3(std::max(std::max(vertice0.x, vertice1.x), vertice2.x),
+			std::max(std::max(vertice0.y, vertice1.y), vertice2.y),
+			std::max(std::max(vertice0.z, vertice1.z), vertice2.z)));
 }
 
-
-
-
-
-
-Triangle::~Triangle()
-{
-
-} 

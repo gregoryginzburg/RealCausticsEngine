@@ -7,7 +7,7 @@
 struct Isect;
 class ray;
 class Triangle;
-class matrix_4x4;
+class Transform;
 
 extern const float inf;
 
@@ -66,7 +66,7 @@ struct CacheBVHNode_mesh
 	} u;
 
 	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, const BVH_mesh &bvh, Triangle *triangles, MVert* vertices,
-		const matrix_4x4& world_matrix) const;
+		const Transform& WorldTransformation) const;
 };
 struct aabb_temp_mesh
 {

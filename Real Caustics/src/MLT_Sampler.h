@@ -29,7 +29,7 @@ public:
 	MLT_Sampler(int max_path_length, float mut_size) : mutation_size(mut_size)
 	{
 		index = 0;
-		samples.resize((max_path_length + 1) * 3 + 2);
+		samples.resize((max_path_length + 2) * 3 + 2);
 		for (int i = 0; i < samples.size(); ++i)
 		{
 			float e = random_float_0_1();
@@ -56,7 +56,8 @@ public:
 	int index;
 	float mutation_size;
 	bool is_last_uniform;
-
+	int generating_small_mutations = 0;
+	int generating_big_mutations = 0;
 };
 
 

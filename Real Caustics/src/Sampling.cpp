@@ -37,11 +37,10 @@ vec2 sample_uniform_disk(const vec2& e)
 }
 
 
-vec3 sample_cos_hemisphere(float& pdf, const vec2& e)
+vec3 sample_cos_hemisphere(const vec2& e)
 {
 	vec2 d = sample_uniform_disk(e);
 	float z = std::sqrt(std::max(0.0f, 1.0f - d.x * d.x - d.y * d.y));
 	// z = cos(theta)
-	pdf = z * Inv_PI;
 	return vec3(d.x, d.y, z);
 }

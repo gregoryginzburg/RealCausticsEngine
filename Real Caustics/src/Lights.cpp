@@ -44,9 +44,10 @@ vec3 Area_Light::sample_light(vec3& origin, vec3& direction, float& pdf, MLT_Sam
 	origin = bottom_left_corner + horizontal * area_sample.x + vertical * area_sample.y;
 
 	float direction_pdf;
-	vec3 local_dir = sample_cos_hemisphere(direction_pdf, Sampler.Get2D());
+	vec3 local_dir = sample_cos_hemisphere(Sampler.Get2D());
 	direction = frame.to_world(local_dir);
 	
+	direction_pdf = local_dir.z;
 	pdf = inv_area * direction_pdf;
 
 	return color * PI;

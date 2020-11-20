@@ -74,6 +74,10 @@ bool Sample_Scattering_light(BxDF* brdf, const Isect& hit_point, Light_Sub_Path_
 	light_state.throughput *= brdf_factor; //* correct_shading_normal(-hit_point.direction, new_direction, hit_point);
 	light_state.last_interaction = sampled_event;
 
+	//if (brdf_factor.x < 0 || brdf_factor.y < 0 || brdf_factor.z < 0)
+	//{
+	//	std::cout << "BAD IN BRDF_FACTOR";
+	//}
 	if (!vertex_was_stored)
 	{
 		// brdf.local_dir.z  - cos theta view vector with normal
@@ -83,7 +87,11 @@ bool Sample_Scattering_light(BxDF* brdf, const Isect& hit_point, Light_Sub_Path_
 	{
 		light_state.dVM = (cos_theta_out / forward_pdf) * (1.0f + reverse_pdf * light_state.dVM);
 	}
-
+	//if (light_state.dVM < 0)
+	//{
+	//	std::cout << light_state.dVM << " ";
+	//	std::cout << forward_pdf << "\n";
+	//}
 	return true;
 }
 
@@ -148,9 +156,13 @@ void Vertex_Merging::trace_light_path(bool& visible, Path_Vertices& path_vertice
 		BxDF* brdf = nullptr;
 
 		hit_inf.compute_scattering_functions(&brdf, scene->materials, TransportMode::Importance);
+		if (!brdf->IsValid())
+			break;
+
 		{
 			// divide by cos_theta - not down in sample scattering
 			light_state.dVM /= fabs(brdf->cos_theta_in());
+
 		}
 
 		bool vertex_is_stored = false;
@@ -158,7 +170,7 @@ void Vertex_Merging::trace_light_path(bool& visible, Path_Vertices& path_vertice
 		{
 			Path_Vertex light_vertex;
 			light_vertex.position = hit_inf.position;
-			light_vertex.throughput = light_state.throughput * (path_vertices.light_vertices.size() / (float)index);
+			light_vertex.throughput = light_state.throughput;
 			light_vertex.direction_world = -hit_inf.direction;
 			light_vertex.dVM = light_state.dVM;
 			visible = true;
@@ -190,9 +202,11 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 	radius /= std::pow(float(iteration + 1), 0.5f * (1.0f - radius_alpha));
 	radius = std::max(radius, 1e-7f);
 
-	const float radius_sqr = radius * radius;
+	std::cout << "Radius:  " << radius << "\n";
 
-	const float VM_normalization = 1.0f / (PI * radius_sqr * light_paths_count);
+	float radius_sqr = radius * radius;
+
+	float VM_normalization = 1.0f / (PI * radius_sqr * light_paths_count);
 
 	Path_Vertices path_vertices;
 
@@ -205,6 +219,7 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 	int accepted = 1;
 	int mutated = 0;
 
+	int visible_uniform_paths = 0;
 	/*
 	std::ofstream uniform_path;
 	uniform_path.open("D:\\Uniform_paths.obj");
@@ -214,7 +229,7 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 	{
 		if (random_float_0_1() < 0.00001)
 		{
-			std::cout << (path_idx / light_paths_count) * 100.0f << "%" << std::flush << "\r";
+			std::cout << (path_idx / light_paths_count) * 100.0f << "%";
 		}
 	
 		Sampler.Init_Uniform();
@@ -226,6 +241,7 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 
 		if (visible)
 		{
+			++visible_uniform_paths;
 			/*
 			vec3 p = path_vertices.light_vertices[path_vertices.light_vertices.size() - 1].position;
 			uniform_path << "v " << p.x << " " << p.y << " " << p.z << "\n";
@@ -250,11 +266,19 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 			float R = (float)accepted / (float)mutated;
 			Sampler.mutation_size += (R - 0.234f) / (float)mutated;
 
-			if (random_float_0_1() < 0.00001 || path_idx == 0)
-				std::cout << "Mutation Size:    " << Sampler.mutation_size << std::flush << "\r";
+			//if (random_float_0_1() < 0.00001 || path_idx == 0)
+			//	std::cout << "Mutation Size:    " << Sampler.mutation_size << std::flush << "\r";
 		}
 
 	}
+	int total_number_of_vertices = path_vertices.light_vertices.size();
+	float visibility_normalization_constant = (float)visible_uniform_paths / (float)light_paths_count;
+	for (int i = 0; i < total_number_of_vertices; ++i)
+	{
+		path_vertices.light_vertices[i].throughput *= visibility_normalization_constant;
+	}
+
+	std::cout << "100 %";
 	std::cout << "\n";
 	std::cout << "Tracing finished" << std::endl;
 
@@ -264,15 +288,15 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 	std::cout << "KDTREE Finished" << std::endl;
 
 
-	/*std::ofstream o;
-	o.open("D:\\photon_locs.obj");
-	std::ofstream out_colors;
-	out_colors.open("D:\\colors.obj");
-
+	//std::ofstream o;
+	//o.open("D:\\photon_locs.obj");
+	//std::ofstream out_colors;
+	//out_colors.open("D:\\colors.obj");
+	/*
 	for (int i = 0; i < path_vertices.light_vertices.size(); ++i)
 	{
 		o << "v " << path_vertices.light_vertices[i].position.x << " " << path_vertices.light_vertices[i].position.y << " " << path_vertices.light_vertices[i].position.z << "\n";
-		out_colors << "v " << path_vertices.light_vertices[i].throughput.x << " " << path_vertices.light_vertices[i].throughput.y << " " << path_vertices.light_vertices[i].throughput.z << "\n";
+		//out_colors << "v " << path_vertices.light_vertices[i].throughput.x << " " << path_vertices.light_vertices[i].throughput.y << " " << path_vertices.light_vertices[i].throughput.z << "\n";
 	}*/
 	std::cout << "SUCCSEFUL PHOTON EMISSION:      " << path_vertices.light_vertices.size() / (float)light_paths_count << "\n";
 	std::cout << "Camera Tracing started" << std::endl;
@@ -283,7 +307,7 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 	{
 		if (random_float_0_1() < 0.00001)
 		{
-			std::cout << (path_idx / (float)camera_path_count) * 100.0f << "%" << std::flush << "\r";
+			std::cout << (path_idx / (float)camera_path_count) * 100.0f << "%";
 		}
 			
 		Camera_Sub_Path_State camera_state;
@@ -306,6 +330,8 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 			BxDF* brdf = nullptr;
 
 			hit_inf.compute_scattering_functions(&brdf, scene->materials, TransportMode::Radiance);
+			if (!brdf->IsValid())
+				break;
 			
 
 			{
@@ -327,9 +353,11 @@ float Vertex_Merging::run_iteration(int iteration, float mut_size)
 			}
 			delete brdf;
 		}
+
+		
 		image_buffer.add_color(screen_sample, color);
 	}
-	
+	std::cout << "100 %";
 	std::cout << "Camera Tracing finished" << std::endl;
 	return Sampler.mutation_size;
 }
@@ -344,7 +372,7 @@ void Vertex_Merging::run()
 		mut_size = run_iteration(sample, mut_size);
 	}
 
-	image_buffer.scale(1.0f / ((float)samples * 6));
+	image_buffer.scale(1.0f / (float)samples);
 }
 
 

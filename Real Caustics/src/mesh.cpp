@@ -6,15 +6,15 @@
 #include "Triangle.h"
 #include "BVH/BVH_mesh.h"
 #include "aabb.h"
-#include "matrix.h"
+#include "Transform.h"
 
 
-Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const matrix_4x4& matrix,
+Mesh::Mesh(Mesh_blender *mesh_blender_data, unsigned int number_of_vertices, unsigned int number_of_tris, const Matrix4x4& matrix,
 	int* material_indices, bool smooth_shade) : shade_smooth(smooth_shade)
 {
 	number_of_triangles = number_of_tris;
 	vertices = mesh_blender_data->mvert;
-	world_matrix = matrix;
+	WorldTransformation = Transform(matrix);
 	triangles = new Triangle[number_of_tris];
 	
 	for (int i = 0; i < number_of_tris; ++i)
@@ -73,7 +73,7 @@ bool Mesh::hit(const ray &r, float tmin, float tmax, Isect &hit_inf, int index) 
 
 		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
 		{
-			return BVH.bvh_nodes[index].hit(r, tmin, tmax, hit_inf, BVH, triangles, vertices, world_matrix);
+			return BVH.bvh_nodes[index].hit(r, tmin, tmax, hit_inf, BVH, triangles, vertices, WorldTransformation);
 		}
 		else
 		{

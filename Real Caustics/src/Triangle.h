@@ -6,7 +6,7 @@ struct Isect;
 class aabb;
 class Material;
 struct MVert;
-class matrix_4x4;
+class Transform;
 
 class Triangle
 {
@@ -15,12 +15,11 @@ public:
 
 	Triangle(unsigned int vert0_idx, unsigned int vert1_idx, unsigned int vert2_idx, unsigned int mat_idx) :
 		vertex0_idx(vert0_idx), vertex1_idx(vert1_idx), vertex2_idx(vert2_idx), material_idx(mat_idx) {}
-	~Triangle();
 
 public:
-	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, MVert *vertices, const matrix_4x4& world_matrix, bool use_smooth_shading) const;
+	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, MVert *vertices, const Transform& WorldTransformation, bool use_smooth_shading) const;
 	
-	aabb bounding_box(MVert *vertices, const matrix_4x4& world_matrix) const;
+	aabb bounding_box(MVert *vertices, const Transform& WorldTransformation) const;
 
 public:
 	

@@ -12,7 +12,7 @@
 
 
 void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris,
-	matrix_4x4* mesh_matrices, int** materials_indices)
+	PythonMatrix4x4* mesh_matrices, int** materials_indices)
 {
 
     meshes = new Mesh[number_of_meshes];
@@ -20,7 +20,25 @@ void Scene::init_meshes(long long* meshes_pointers, unsigned int* meshes_number_
     {
         Mesh_blender *mesh_blender_data = (Mesh_blender *)meshes_pointers[i];
 		
-		meshes[i] = Mesh(mesh_blender_data, meshes_number_of_verts[i], meshes_number_of_tris[i], mesh_matrices[i], materials_indices[i], true);
+		Matrix4x4 mat;
+		mat.m[0][0] = mesh_matrices[i].t00;
+		mat.m[0][1] = mesh_matrices[i].t01;
+		mat.m[0][2] = mesh_matrices[i].t02;
+		mat.m[0][3] = mesh_matrices[i].t03;
+		mat.m[1][0] = mesh_matrices[i].t10;
+		mat.m[1][1] = mesh_matrices[i].t11;
+		mat.m[1][2] = mesh_matrices[i].t12;
+		mat.m[1][3] = mesh_matrices[i].t13;
+		mat.m[2][0] = mesh_matrices[i].t20;
+		mat.m[2][1] = mesh_matrices[i].t21;
+		mat.m[2][2] = mesh_matrices[i].t22;
+		mat.m[2][3] = mesh_matrices[i].t23;
+		mat.m[3][0] = mesh_matrices[i].t30;
+		mat.m[3][1] = mesh_matrices[i].t31;
+		mat.m[3][2] = mesh_matrices[i].t32;
+		mat.m[3][3] = mesh_matrices[i].t33;
+
+		meshes[i] = Mesh(mesh_blender_data, meshes_number_of_verts[i], meshes_number_of_tris[i], mat, materials_indices[i], true);
     }
 }
 

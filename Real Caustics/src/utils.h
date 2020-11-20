@@ -98,6 +98,7 @@ inline float clamp(float n, float min, float max)
     return n;
 }
 //camera_matrix - obj.matrix_world.normalized().inverted()
+/*
 inline bool visible_in_frustum(const matrix_4x4& camera_matrix, std::vector<vec3>& frame, bool is_perspective, const vec3& point, float treshold)
 {
     vec3 co_local = camera_matrix * point;
@@ -127,7 +128,7 @@ inline bool visible_in_frustum(const matrix_4x4& camera_matrix, std::vector<vec3
         return false;
     }
     return true;
-}
+}*/
 inline int ClampI(int value, int low, int high)
 {
     if (value < low)

@@ -89,7 +89,7 @@ Python_Light* python_lights = nullptr;
 DLLEXPORT void init(int samples, float base_radius, float radius_reduction,
 					long long *meshes_pointers,
 					unsigned int number_of_meshes,
-					matrix_4x4* mesh_matrices,
+					PythonMatrix4x4* mesh_matrices,
 					unsigned int *meshes_number_of_verts,
 					unsigned int *meshes_number_of_tris,
 					unsigned int camera_x,
@@ -109,7 +109,7 @@ DLLEXPORT void init(int samples, float base_radius, float radius_reduction,
 {
 	scene = new Scene;
 	//initialize common photon mapping settings
-	scene->integrator.max_path_length = 7;
+	scene->integrator.max_path_length = 6;
 	scene->integrator.samples = samples;
 	scene->integrator.base_radius = base_radius;
 	scene->integrator.radius_alpha = radius_reduction;
@@ -163,8 +163,12 @@ DLLEXPORT int main()
 	scene->init_lights(python_lights);
 	scene->lights.update_pdf_distribution();
 	
+	float SceneRadius = (scene->bounding_box.min - (scene->bounding_box.min + scene->bounding_box.max) * 0.5f).length();
+	std::cout << "SCENE RADIUS     " << SceneRadius << "\n";
+	scene->integrator.base_radius *= SceneRadius;
 	Timer rendering;
 
+	bool image_output = true;
 	if (scene->debug_test == 1)
 		scene->integrator.run();
 	else if (scene->debug_test == 2)
@@ -172,27 +176,36 @@ DLLEXPORT int main()
 	else if (scene->debug_test == 3)
 		scene->integrator.run_debug_facing();
 	else if (scene->debug_test == 4)
+	{
 		scene->integrator.run_debug_materials();
+	}		
 	else if (scene->debug_test == 5)
+	{
 		scene->integrator.run_debug_bvh();
+		image_output = false;
+	}
+		
 		
 	std::cout << "Rendering took:    " << rendering.elapsed();
 	//scene->integrator.run_debug_brdf();
 
-	
-	int count = scene->camera.pixel_width * scene->camera.pixel_height * 3;
-	float* image = new float[count];
-	int j = 0;
-	for (int i = 0; i < count; i+=3)
+	if (image_output)
 	{
-		image[i] = scene->integrator.image_buffer.color[j].x;
-		image[i + 1] = scene->integrator.image_buffer.color[j].y;
-		image[i + 2] = scene->integrator.image_buffer.color[j].z;
-		++j;
-	}
+		int count = scene->camera.pixel_width * scene->camera.pixel_height * 3;
+		float* image = new float[count];
+		int j = 0;
+		for (int i = 0; i < count; i += 3)
+		{
+			image[i] = scene->integrator.image_buffer.color[j].x;
+			image[i + 1] = scene->integrator.image_buffer.color[j].y;
+			image[i + 2] = scene->integrator.image_buffer.color[j].z;
+			++j;
+		}
 
-	const char* err = nullptr;
-	SaveEXR(image, scene->camera.pixel_width, scene->camera.pixel_height, 3, 0, "D:\\caustics.exr", &err);
+		const char* err = nullptr;
+		SaveEXR(image, scene->camera.pixel_width, scene->camera.pixel_height, 3, 0, "D:\\caustics.exr", &err);
+	}
+	
 	
 #ifdef REPORT_PROGRESS
 

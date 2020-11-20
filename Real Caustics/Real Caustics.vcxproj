@@ -162,6 +162,7 @@
     <ClCompile Include="src\MLT_Sampler.cpp" />
     <ClCompile Include="src\Sampling.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Triangle.cpp" />
     <ClCompile Include="src\vec3.cpp" />
     <ClCompile Include="src\Vertex_Merging.cpp" />
@@ -195,11 +196,11 @@
     <ClInclude Include="src\random_generators.h" />
     <ClInclude Include="src\ray.h" />
     <ClInclude Include="src\timer.h" />
+    <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\Triangle.h" />
     <ClInclude Include="src\utils.h" />
     <ClInclude Include="src\vec2.h" />
     <ClInclude Include="src\vec3.h" />
-    <ClInclude Include="src\vec4.h" />
     <ClInclude Include="src\Vertex_Merging.h" />
   </ItemGroup>
   <ItemGroup>

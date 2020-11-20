@@ -54,6 +54,8 @@ public:
 
 	virtual float ContinuationProb(const vec3& wi) const = 0;
 
+	virtual bool IsValid() const = 0;
+
 };
 
 
@@ -95,7 +97,10 @@ public:
 	{
 		return mContiniationProb;
 	}
-	
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	// Reflection coeeficient(color)
 	const vec3 R;
@@ -104,6 +109,7 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 
 };
 
@@ -143,6 +149,10 @@ public:
 	{
 		return mContiniationProb;
 	}
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	// Transmissions coeeficient(color)
 	const vec3 T;
@@ -153,6 +163,7 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 };
 
 class Fresnel_Specular : public BxDF
@@ -192,6 +203,10 @@ public:
 	{
 		return mContiniationProb;
 	}
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	// Transmissions coeeficient(color)
 	const vec3 T;
@@ -202,6 +217,7 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 };
 
 
@@ -247,6 +263,10 @@ public:
 	{
 		return mContiniationProb;
 	}
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	// albedo
 	const vec3 R;
@@ -255,6 +275,7 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 };
 
 
@@ -298,6 +319,10 @@ public:
 	{
 		return mContiniationProb;
 	}
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	const vec3 R;
 	const float a2;
@@ -306,6 +331,7 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 };
 
 
@@ -349,7 +375,10 @@ public:
 	{
 		return mContiniationProb;
 	}
-
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	const vec3 R;
 	const float a2;
@@ -359,6 +388,7 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 };
 
 
@@ -402,6 +432,10 @@ public:
 	{
 		return mContiniationProb;
 	}
+	virtual bool IsValid() const
+	{
+		return mIsValid;
+	}
 public:
 	const vec3 R;
 	const float s;
@@ -410,13 +444,14 @@ public:
 
 	vec3 wo_local;
 	Frame frame;
+	bool mIsValid;
 };
 
 
 
 
 float correct_shading_normal(const vec3& wo, const vec3& wi, const Isect& intersection);
-
+float fresnel_dielectric_eta(float cos_theta, float eta);
 
 #endif // !BXDF_H
 

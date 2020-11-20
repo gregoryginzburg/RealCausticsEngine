@@ -48,7 +48,7 @@ public:
 
 		std::vector<Path_Vertex> closest_light_vertices;
 		kd_tree.find_closest_in_radius(intersection.position, radius_sqr, light_vertices, closest_light_vertices, 1);
-		assert(!isnan(dVM));
+
 		vec3 color(0.0f);
 
 		for (int i = 0; i < closest_light_vertices.size(); ++i)
@@ -59,16 +59,22 @@ public:
 			camera_brdf->pdf(path_incomin_dir, forward_pdf, reverse_pdf);
 
 			float weight = (1.0f / (1.0f + camera_dVM * reverse_pdf + light_dVM * forward_pdf));
-			/*
-			if (random_float_0_1() < 0.001f)
+
+
+
+			vec3 camera_eval = camera_brdf->evaluate(path_incomin_dir, intersection.geometric_normal);
+			/*if (weight < 0 || camera_eval.x < 0 ||camera_eval.y < 0 || camera_eval.z < 0 || closest_light_vertices[i].throughput.x < 0 || closest_light_vertices[i].throughput.y < 0 || closest_light_vertices[i].throughput.z < 0)
 			{
-				std::cout << weight << "  " << camera_dVM << " " << light_dVM << "\n";
+				std::cout << "BAD WEIGHT";
+				std::cout << weight << " ";
+				std::cout << camera_eval << " ";
+				std::cout << light_dVM << " ";
+				std::cout << camera_dVM << " ";
+				std::cout << reverse_pdf << " " << forward_pdf << "\n";
+
 			}*/
-			color += camera_brdf->evaluate(path_incomin_dir, intersection.geometric_normal) * closest_light_vertices[i].throughput * weight;
+			color += camera_eval * closest_light_vertices[i].throughput * weight;
 		}
-		assert(!isnan(color.x));
-		assert(!isnan(color.y));
-		assert(!isnan(color.z));
 		return color;
 	}
 public:

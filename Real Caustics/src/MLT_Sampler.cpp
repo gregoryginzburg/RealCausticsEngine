@@ -39,6 +39,8 @@ void MLT_Sampler::Mutate()
 		X.value -= std::floor(X.value);
 	}
 	is_last_uniform = false;
+	generating_small_mutations++;
+	generating_big_mutations = 0;
 }
 void MLT_Sampler::Init_Uniform()
 {
@@ -48,6 +50,8 @@ void MLT_Sampler::Init_Uniform()
 		samples[i].value = random_float_0_1();
 	}
 	is_last_uniform = true;
+	generating_small_mutations = 0;
+	generating_big_mutations++;
 
 }
 void MLT_Sampler::Reject()

@@ -198,7 +198,7 @@ BVHNode_mesh* Mesh::make_default_bvh()
 
 	for (size_t i = 0; i < number_of_triangles; ++i)
 	{
-		aabb bbox = triangles[i].bounding_box(vertices, world_matrix);
+		aabb bbox = triangles[i].bounding_box(vertices, WorldTransformation);
 		vec3 center = (bbox.min + bbox.max) / 2.0f;
 		working_list.emplace_back(i, bbox, center);
 	}
@@ -277,15 +277,16 @@ void create_cache_friendly_bvh(BVHNode_mesh *root, BVH_mesh &cache_friendly_bvh,
 
 
 bool CacheBVHNode_mesh::hit(const ray &r, float tmin, float tmax, Isect &hit_inf, const BVH_mesh &bvh, Triangle* triangles, MVert* vertices, 
-	const matrix_4x4& world_matrix) const
+	const Transform& WorldTransformation) const
 {
 	Isect temp_rec;
 	bool hit_anything = false;
 	auto closest_so_far = tmax;
 	int end_index = u.leaf.startIndex + (u.leaf.count & 0x7fffffff) + 1;
+
 	for (int i = u.leaf.startIndex + 1; i < end_index; ++i)
 	{
-		if (triangles[bvh.tris_indices[i]].hit(r, tmin, closest_so_far, temp_rec, vertices, world_matrix, true))
+		if (triangles[bvh.tris_indices[i]].hit(r, tmin, closest_so_far, temp_rec, vertices, WorldTransformation, true))
 		{
 			hit_anything = true;
 			closest_so_far = temp_rec.distance;

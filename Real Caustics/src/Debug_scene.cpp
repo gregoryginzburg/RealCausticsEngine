@@ -10,6 +10,7 @@
 #include "BVH\BVH_mesh.h"
 #include "BVH\BVH_world.h"
 #include "mesh.h"
+#include <string>
 
 
 extern const float PI;
@@ -56,7 +57,7 @@ void Vertex_Merging::run_debug_normals()
 			if (!scene->hit(r, 0.0001f, inf, hit_inf, 0))
 				break;
 
-			image_buffer.add_color(sample, hit_inf.geometric_normal);
+			image_buffer.add_color(sample, hit_inf.shade_normal);
 			break;
 		}
 
@@ -124,21 +125,12 @@ void Vertex_Merging::run_debug_brdf()
 	intersection.geometric_normal = vec3(0, 0, 1); 
 	intersection.shade_normal = vec3(0, 0, 1);
 	intersection.direction = -debug.direction;
-
-	BxDF* brdf = new Fresnel_Microfacet_GGX(vec3(1, 1, 1), debug.roughness * debug.roughness, debug.specular * 0.08, intersection, TransportMode::Importance);
-	Fresnel_Microfacet_GGX* new_brdf = dynamic_cast<Fresnel_Microfacet_GGX*>(brdf);
+	BxDF* brdf = new Fresnel_Specular(vec3(1, 1, 1), debug.specular, intersection, TransportMode::Importance);
+	Fresnel_Specular * new_brdf = dynamic_cast<Fresnel_Specular*>(brdf);
 
 	std::ofstream o;
 	o.open("D:\\BRDF\\brdf.obj");
 
-	std::ofstream normals;
-	normals.open("D:\\BRDF\\normals.obj");
-
-	std::ofstream all_directions;
-	all_directions.open("D:\\BRDF\\all_directions.obj");
-
-	std::ofstream scaled_by_pdf;
-	scaled_by_pdf.open("D:\\BRDF\\scaled_by_pdf.obj");
 
 	float f_pdf;
 	float r_pdf;
@@ -149,13 +141,11 @@ void Vertex_Merging::run_debug_brdf()
 	{
 		vec3 wi;
 		vec3 half_vector;
-		//vec3 color = new_brdf->sample(wi, intersection.geometric_normal, f_pdf, r_pdf, cos_thet_out, sampled_event);
-
-		all_directions << "v " << wi.x << " " << wi.y << " " << wi.z << "\n";
-
-		//wi *= color;
-		o << "v " << wi.x << " " << wi.y << " " << wi.z << "\n";
-		normals << "v " << half_vector.x << " " << half_vector.y << " " << half_vector.z << "\n";
+		MLT_Sampler Sampler(5, 1.0f);
+		float cont;
+		vec3 color = new_brdf->sample(wi, intersection.geometric_normal, f_pdf, r_pdf, cos_thet_out, cont, sampled_event, Sampler);
+		if (color.x != 0.0f)
+			o << "v " << wi.x << " " << wi.y << " " << wi.z << "\n";
 
 	}
 
@@ -211,35 +201,94 @@ void Vertex_Merging::run_debug_materials()
 			float ior = debug.specular;
 			float etai_over_etat = ior;
 			// if entering from normal side(in the substance)
-			//if (hit_inf.front_face)
-				//etai_over_etat = 1.0f / ior;
 
 			//float u = random_float(0.0f, 1.0f);
-			float f = 0.0f;//fresnel_dielectric_cos(std::abs(dir_local.z), etai_over_etat);
-
-			//float factor = std::abs(dot(r.direction, hit_inf.normal));
+			
+			//fresnel_dielectric_cos(std::abs(dir_local.z), etai_over_etat);
+			if (dir_local.z > 0)
+				etai_over_etat = 1.0f / ior;
+			float f = fresnel_dielectric_eta(fabs(dir_local.z), etai_over_etat);
 			image_buffer.add_color(sample, f);
 			break;
 		}
 
 	}
 }
-inline std::ofstream& write_vec3(std::ofstream& out, const vec3& a)
+inline std::ofstream& write_bounding_box(std::ofstream& out, const vec3& min, const vec3& max, int i)
 {
-	out << "v " << a.x << " " << a.y << " " << a.z << "\n";
+	vec3 v1 = vec3(max.x, max.y, max.z);
+	vec3 v2 = vec3(max.x, max.y, min.z);
+	vec3 v3 = vec3(max.x, min.y, max.z);
+	vec3 v4 = vec3(max.x, min.y, min.z);
+	vec3 v5 = vec3(min.x, max.y, max.z);
+	vec3 v6 = vec3(min.x, max.y, min.z);
+	vec3 v7 = vec3(min.x, min.y, max.z);
+	vec3 v8 = vec3(min.x, min.y, min.z);
+
+	out << "v " << v1.x << " " << v1.y << " " << v1.z << "\n";
+	out << "v " << v2.x << " " << v2.y << " " << v2.z << "\n";
+	out << "v " << v3.x << " " << v3.y << " " << v3.z << "\n";
+	out << "v " << v4.x << " " << v4.y << " " << v4.z << "\n";
+	out << "v " << v5.x << " " << v5.y << " " << v5.z << "\n";
+	out << "v " << v6.x << " " << v6.y << " " << v6.z << "\n";
+	out << "v " << v7.x << " " << v7.y << " " << v7.z << "\n";
+	out << "v " << v8.x << " " << v8.y << " " << v8.z << "\n";
+
+	out << "f " << 1 + i << "/ " << 5 + i << "/ " << 7 + i << "/ " << 3 + i << "/\n";
+	out << "f " << 4 + i << "/ " << 3 + i << "/ " << 7 + i << "/ " << 8 + i << "/\n";
+	out << "f " << 8 + i << "/ " << 7 + i << "/ " << 5 + i << "/ " << 6 + i << "/\n";
+	out << "f " << 6 + i << "/ " << 2 + i << "/ " << 4 + i << "/ " << 8 + i << "/\n";
+	out << "f " << 2 + i << "/ " << 1 + i << "/ " << 3 + i << "/ " << 4 + i << "/\n";
+	out << "f " << 6 + i << "/ " << 5 + i << "/ " << 1 + i << "/ " << 2 + i << "/\n";
 	return out;
 }
 
+void write_bvh(BVH_mesh& BVH, int index, int depth, std::vector<std::ofstream>& files, std::vector<int>& indices)
+{
+	//1 - leaf node
+	if (BVH.bvh_nodes[index].u.leaf.count & 0x80000000)
+	{
+		//leaf
+		aabb& bbox = BVH.bvh_nodes[index].bounding_box;		
+		write_bounding_box(files[depth], bbox.min, bbox.max, indices[depth]);
+		indices[depth]+=8;
+	}
+	else
+	{
+		aabb& bbox = BVH.bvh_nodes[index].bounding_box;
+		write_bounding_box(files[depth], bbox.min, bbox.max, indices[depth]);
+		indices[depth]+=8;
+		write_bvh(BVH, BVH.bvh_nodes[index].u.inner.idxLeft, depth + 1, files, indices);
+		write_bvh(BVH, BVH.bvh_nodes[index].u.inner.idxRight, depth + 1, files, indices);
+	}
+}
+
+
+void calc_max_depth(BVH_mesh& BVH, int index, int depth, int& max_depth)
+{
+	//1 - leaf node
+	if (BVH.bvh_nodes[index].u.leaf.count & 0x80000000)
+	{
+		//leaf
+		if (depth > max_depth)
+			max_depth = depth;
+	}
+	else
+	{
+		calc_max_depth(BVH, BVH.bvh_nodes[index].u.inner.idxLeft, depth + 1, max_depth);
+		calc_max_depth(BVH, BVH.bvh_nodes[index].u.inner.idxRight, depth + 1, max_depth);
+	}
+}
+
+
 void Vertex_Merging::run_debug_bvh()
 {
-	std::ofstream meshes;
-	meshes.open("D:\\bvh\\meshes.obj");
-
-	std::ofstream triangles;
-	triangles.open("D:\\bvh\\triangles.obj");
-
 	auto& bvh = scene->BVH;
+	int bbox = 0;
 
+	std::vector<std::vector<std::ofstream>> files;
+	int mesh_idx = 0;
+	files.resize(scene->number_of_meshes);
 
 	for (int i = 0; i < bvh.bvh_nodes.size(); ++i)
 	{
@@ -251,20 +300,27 @@ void Vertex_Merging::run_debug_bvh()
 		for (int i = bvh_node.u.leaf.startIndex + 1; i < end_index; ++i)
 		{
 			BVH_mesh& bvh_mesh = scene->meshes[bvh.mesh_indices[i]].BVH;
-			for (int j = 0; j < bvh_mesh.bvh_nodes.size(); ++j)
+			int max_depth = -1;
+			calc_max_depth(bvh_mesh, 0, 1, max_depth);
+			files[mesh_idx].resize(max_depth);
+			for (int i = 0; i < files[mesh_idx].size(); ++i)
 			{
-				auto& bvh_mesh_node = bvh_mesh.bvh_nodes[j];
-				vec3 min_mesh = bvh_mesh_node.bounding_box.min;
-				vec3 max_mesh = bvh_mesh_node.bounding_box.max;
-
-				//triangles << "v " << min_mesh.x << " " << min_mesh.y << " " << min_mesh.z << "\n";
-				//triangles << "v " << max_mesh.x << " " << max_mesh.y << " " << max_mesh.z << "\n";
-				write_vec3(triangles, min_mesh);
-				write_vec3(triangles, max_mesh);
+				std::string s = "D:\\bvh\\Mesh_";
+				s += std::to_string(mesh_idx + 1);
+				s += "_";
+				s += std::to_string(i + 1);
+				s += ".obj";
+				files[mesh_idx][i].open(s);
 			}
+			std::vector<int> indices;
+			indices.resize(max_depth, 0);
+			write_bvh(bvh_mesh, 0, 0, files[mesh_idx], indices);
+
+			mesh_idx++;
+
 		}
-		write_vec3(meshes, min_world);
-		write_vec3(meshes, max_world);
+		//write_vec3(meshes, min_world);
+		//write_vec3(meshes, max_world);
 		
 	}
 	
@@ -272,3 +328,14 @@ void Vertex_Merging::run_debug_bvh()
 
 
 }
+/*
+for (int j = 0; j < bvh_mesh.bvh_nodes.size(); ++j)
+{
+	auto& bvh_mesh_node = bvh_mesh.bvh_nodes[j];
+	vec3 min_mesh = bvh_mesh_node.bounding_box.min;
+	vec3 max_mesh = bvh_mesh_node.bounding_box.max;
+
+	write_bounding_box(meshes, min_mesh, max_mesh, bbox);
+
+	bbox += 8;
+}*/

@@ -13,7 +13,7 @@
 class Mesh;
 class Python_Light;
 class Python_Material;
-class matrix_4x4;
+class Matrix4x4;
 class Object_Materials;
 class Scene
 {
@@ -27,7 +27,7 @@ public:
 	bool hit(const ray &r, float tmin, float tmax, Isect &hit_inf, int index) const;
 
 	void init_meshes(long long* meshes_pointers, unsigned int* meshes_number_of_verts, unsigned int* meshes_number_of_tris,
-		matrix_4x4* mesh_matrices, int** materials_indices);
+		PythonMatrix4x4* mesh_matrices, int** materials_indices);
 
 	void init_lights(Python_Light* python_lights);
 
