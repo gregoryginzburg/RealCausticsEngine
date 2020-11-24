@@ -6,6 +6,8 @@ class aabb;
 class vec3;
 class vec2;
 
+extern const float inf;
+
 #include "materials.h"
 
 struct Isect
@@ -13,7 +15,7 @@ struct Isect
 	vec3 geometric_normal;
 	vec3 shade_normal;
 	vec3 position;
-	float distance = 0;	
+	float distance = inf;
 	bool front_face = false;
 	float u = 0;
 	float v = 0;
@@ -28,6 +30,7 @@ struct Isect
 
 	void compute_scattering_functions(BxDF** brdf, Material** materials, TransportMode mode)
 	{
+		//return materials[material_idx]->MaterialProperties();
 		materials[material_idx]->compute_scattering_functions(brdf, *this, mode);
 	}
 

@@ -46,6 +46,7 @@ struct BVH_mesh
 {
 	std::vector<int> tris_indices;
 	std::vector<CacheBVHNode_mesh> bvh_nodes;
+	float cost;
 };
 struct CacheBVHNode_mesh
 {
@@ -77,6 +78,16 @@ struct aabb_temp_mesh
 	aabb_temp_mesh(unsigned int i, aabb &box, vec3 &c) : index(i), bbox(box), center(c) {}
 };
 
+struct BucketInfo
+{
+	int count = 0;
+	aabb bbox;
+
+	float SumTraversCosts = 0;
+};
+
 void create_cache_friendly_bvh(BVHNode_mesh *root, BVH_mesh &cache_friendly_bvh, const char *file_path);
+
+float CostOfTraversing(const BVH_mesh& bvh, int index);
 
 #endif

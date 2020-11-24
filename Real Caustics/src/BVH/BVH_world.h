@@ -71,8 +71,11 @@ struct aabb_temp_world
 	aabb bbox;
 	vec3 center;
 
-	aabb_temp_world(unsigned int i, aabb &box, vec3 &c) : index(i), bbox(box), center(c) {}
+	int cost;
+
+	aabb_temp_world(unsigned int i, aabb &box, vec3 &c, int co) : index(i), bbox(box), center(c), cost(co) {}
 };
+
 
 void create_cache_friendly_bvh(BVHNode_world *root, BVH_world &cache_friendly_bvh, const char *file_path);
 

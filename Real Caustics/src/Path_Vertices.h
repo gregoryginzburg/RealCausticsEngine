@@ -60,19 +60,8 @@ public:
 
 			float weight = (1.0f / (1.0f + camera_dVM * reverse_pdf + light_dVM * forward_pdf));
 
-
-
 			vec3 camera_eval = camera_brdf->evaluate(path_incomin_dir, intersection.geometric_normal);
-			/*if (weight < 0 || camera_eval.x < 0 ||camera_eval.y < 0 || camera_eval.z < 0 || closest_light_vertices[i].throughput.x < 0 || closest_light_vertices[i].throughput.y < 0 || closest_light_vertices[i].throughput.z < 0)
-			{
-				std::cout << "BAD WEIGHT";
-				std::cout << weight << " ";
-				std::cout << camera_eval << " ";
-				std::cout << light_dVM << " ";
-				std::cout << camera_dVM << " ";
-				std::cout << reverse_pdf << " " << forward_pdf << "\n";
 
-			}*/
 			color += camera_eval * closest_light_vertices[i].throughput * weight;
 		}
 		return color;

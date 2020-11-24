@@ -154,31 +154,63 @@ void Scene::update_bvh(bool was_changed, const char *file_path)
 bool Scene::hit(const ray &r, float tmin, float tmax, Isect &hit_inf, int index) const
 {
 	//1 - leaf node
-	if (BVH.bvh_nodes[index].u.leaf.count & 0x80000000)
+	
+	constexpr int BVH_STACK_SIZE = 64;
+
+	int stack[BVH_STACK_SIZE];
+
+	int stackIdx = 0;
+	stack[stackIdx++] = 0;
+
+	bool hit = false;
+	while (stackIdx)
 	{
-		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
+		int boxID = stack[stackIdx - 1];
+
+		stackIdx--;
+
+		const CacheBVHNode_world& node = BVH.bvh_nodes[boxID];
+
+		if (node.bounding_box.hit(r, tmin, hit_inf.distance))
 		{
-			return BVH.bvh_nodes[index].hit(r, tmin, tmax, hit_inf, BVH, meshes);
+			//Leaf
+			if (node.u.leaf.count & 0x80000000)
+			{
+				hit |= node.hit(r, tmin, hit_inf.distance, hit_inf, BVH, meshes);
+			}
+			else
+			{
+				stack[stackIdx++] = node.u.inner.idxRight;
+				stack[stackIdx++] = node.u.inner.idxLeft;
+			}
+		}
+
+	}
+	return hit;
+
+	/*
+	//1 - leaf node
+	const CacheBVHNode_world& node = BVH.bvh_nodes[index];
+
+	if (node.bounding_box.hit(r, tmin, tmax))
+	{
+		if (node.u.leaf.count & 0x80000000)
+		{
+			return node.hit(r, tmin, tmax, hit_inf, BVH, meshes);
 		}
 		else
 		{
-			return false;
+			bool left_hit = hit(r, tmin, tmax, hit_inf, node.u.inner.idxLeft);
+			bool right_hit = hit(r, tmin, left_hit ? hit_inf.distance : tmax, hit_inf, node.u.inner.idxRight);
+
+			return left_hit || right_hit;			
 		}
 	}
 	else
 	{
-		if (BVH.bvh_nodes[index].bounding_box.hit(r, tmin, tmax))
-		{
-			
-			bool left_hit = hit(r, tmin, tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxLeft);
-			bool right_hit = hit(r, tmin, left_hit ? hit_inf.distance : tmax, hit_inf, BVH.bvh_nodes[index].u.inner.idxRight);
-			return left_hit | right_hit;
-		}
-		else
-		{
-			return false;
-		}
-	}
+		return false;
+	}*/
+	
 }
 
 

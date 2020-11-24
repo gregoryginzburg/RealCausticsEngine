@@ -28,7 +28,14 @@ public:
 	//construct from an array
 	vec3(float arr[3]) : x(arr[0]), y(arr[1]), z(arr[2]){}
 
-
+	float operator[](int i) const
+	{
+		if (i == 0)
+			return x;
+		if (i == 1)
+			return y;
+		return z;
+	}
 
 	vec3 &operator+=(const vec3 &other)
 	{

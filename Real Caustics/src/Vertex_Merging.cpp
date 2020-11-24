@@ -154,8 +154,11 @@ void Vertex_Merging::trace_light_path(bool& visible, Path_Vertices& path_vertice
 			break;
 
 		BxDF* brdf = nullptr;
-
+		
+		//MaterialInfo MatInf = hit_inf.compute_scattering_functions(scene->materials);
 		hit_inf.compute_scattering_functions(&brdf, scene->materials, TransportMode::Importance);
+
+
 		if (!brdf->IsValid())
 			break;
 

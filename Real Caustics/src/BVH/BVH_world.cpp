@@ -8,163 +8,156 @@
 #include <memory>
 #include <fstream>
 
-BVHNode_world *recurse(std::vector<aabb_temp_world> &mesh_temp_containers)
+bool x_comparator(const aabb_temp_world& a, const aabb_temp_world& b)
 {
-	if (mesh_temp_containers.size() < 4)
+	return a.center.x < b.center.x;
+}
+bool y_comparator(const aabb_temp_world& a, const aabb_temp_world& b)
+{
+	return a.center.y < b.center.y;
+}
+bool z_comparator(const aabb_temp_world& a, const aabb_temp_world& b)
+{
+	return a.center.z < b.center.z;
+}
+
+
+BVHNode_world* recurse(std::vector<aabb_temp_world>& meshes_info, int start, int end)
+{
+	aabb Bbox;
+	for (int i = start; i < end; ++i)
 	{
-		aabb temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
-		BVHLeaf_world *leaf = new BVHLeaf_world;
-		for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
-		{
-			temp = surrounding_box(temp, mesh_temp_containers[i].bbox);
-			leaf->mesh_indices.push_back(mesh_temp_containers[i].index);
-		}
-		leaf->bbox = temp;
+		Bbox = Union(Bbox, meshes_info[i].bbox);
+	}
+
+	int nMeshes = end - start;
+	// One Triangle left
+	if (nMeshes == 1)
+	{
+		BVHLeaf_world* leaf = new BVHLeaf_world;
+		leaf->bbox = Bbox;
+		leaf->mesh_indices.push_back(meshes_info[start].index);
 		return leaf;
+	}
+
+	aabb CentroidsBbox;
+	for (int i = start; i < end; ++i)
+	{
+		CentroidsBbox = Union(CentroidsBbox, meshes_info[i].center);
+	}
+	int dim = CentroidsBbox.MaximumExtent();
+
+	int mid = (start + end) / 2;
+	// All Triangles are packed in the same place
+	if (CentroidsBbox.max[dim] == CentroidsBbox.min[dim])
+	{
+		BVHLeaf_world* leaf = new BVHLeaf_world;
+		leaf->bbox = Bbox;
+		for (int i = start; i < end; ++i)
+		{
+			leaf->mesh_indices.push_back(meshes_info[i].index);
+		}
+		return leaf;
+	}
+	// Partition
+	auto comparator = dim == 0 ? x_comparator : dim == 1 ? y_comparator : z_comparator;
+	if (nMeshes == 2)
+	{
+		if (!comparator(meshes_info[start], meshes_info[end - 1]))
+		{
+			std::swap(meshes_info[start], meshes_info[end - 1]);
+		}
 	}
 	else
 	{
-		aabb bbox_temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
-		for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
+		constexpr int nBuckets = 12;
+		BucketInfo buckets[nBuckets];
+
+		for (int i = start; i < end; ++i)
 		{
-			bbox_temp = surrounding_box(bbox_temp, mesh_temp_containers[i].bbox);
+			int b = nBuckets * CentroidsBbox.Offset(meshes_info[i].center)[dim];
+			if (b == nBuckets)
+				b = nBuckets - 1;
+
+			buckets[b].count++;
+			buckets[b].bbox = Union(buckets[b].bbox, meshes_info[i].bbox);
+			buckets[b].SumTraversCosts += meshes_info[i].cost;
 		}
 
-		float min_cost = inf;
-		float best_split = inf;
-		bool is_better_split = false;
-		int count_left;
-		int count_right;
-		int best_left_amount;
-		int best_right_amount;
-
-		float side1 = bbox_temp.max.x - bbox_temp.min.x;
-		float side2 = bbox_temp.max.y - bbox_temp.min.y;
-		float side3 = bbox_temp.max.z - bbox_temp.min.z;
-
-		float max_side = std::fmax(std::fmax(side1, side2), side3);
-		int axis = max_side == side1 ? 0 : max_side == side2 ? 1 : 2;
-
-		float start;
-		float stop;
-
-		if (axis == 0)
+		// Computing Costs
+		float cost[nBuckets - 1];
+		for (int i = 0; i < nBuckets - 1; ++i)
 		{
-			start = bbox_temp.min.x;
-			stop = bbox_temp.max.x;
+			aabb bbox0, bbox1;
+			int count0 = 0, count1 = 0;
+			int TraversCosts0 = 0, TraversCosts1 = 0;
+			for (int j = 0; j <= i; ++j)
+			{
+				bbox0 = Union(bbox0, buckets[j].bbox);
+				count0 += buckets[j].count;
+				TraversCosts0 += buckets[j].SumTraversCosts;
+			}
+			for (int j = i + 1; j < nBuckets; ++j)
+			{
+				bbox1 = Union(bbox1, buckets[j].bbox);
+				count1 += buckets[j].count;
+				TraversCosts1 += buckets[j].SumTraversCosts;
+			}
+
+			cost[i] = 0.16874 + (bbox0.SurfaceArea() * TraversCosts0 + bbox1.SurfaceArea() * TraversCosts1) / Bbox.SurfaceArea();
 		}
-		else if (axis == 1)
+
+		// Find split with minimum cost
+		float minCost = cost[0];
+		float minCostBucket = 0;
+
+		// Calculate leaf travers cost and minimum cost for splitting
+		float leaf_cost = 0;
+		for (int i = 0; i < nBuckets - 1; ++i)
 		{
-			start = bbox_temp.min.y;
-			stop = bbox_temp.max.y;
+			leaf_cost += buckets[i].SumTraversCosts;
+			if (cost[i] < minCost)
+			{
+				minCost = cost[i];
+				minCostBucket = i;
+			}
+		}
+
+		// Create leaf or interior node
+		if (minCost < leaf_cost)
+		{
+			// create interior node (partition triangles based on slelected bucket
+			aabb_temp_world* triMid = std::partition(
+				&meshes_info[start], &meshes_info[end - 1] + 1,
+				[=](const aabb_temp_world& tri)
+				{
+					int b = nBuckets * CentroidsBbox.Offset(tri.center)[dim];
+					if (b == nBuckets)
+						b = nBuckets - 1;
+					return b <= minCostBucket;
+				}
+			);
+			mid = triMid - &meshes_info[0];
 		}
 		else
 		{
-			start = bbox_temp.min.z;
-			stop = bbox_temp.max.z;
-		}
-		float step = (stop - start) / 16.f;
-
-		for (float testSplit = start + step; testSplit < stop - step; testSplit += step)
-		{
-			aabb left(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
-			aabb right(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
-			count_left = 0;
-			count_right = 0;
-
-			for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
+			// create leaf node
+			BVHLeaf_world* leaf = new BVHLeaf_world;
+			leaf->bbox = Bbox;
+			for (int i = start; i < end; ++i)
 			{
-				float bbox_center_axis;
-				if (axis == 0)
-					bbox_center_axis = mesh_temp_containers[i].center.x;
-				else if (axis == 1)
-					bbox_center_axis = mesh_temp_containers[i].center.y;
-				else
-					bbox_center_axis = mesh_temp_containers[i].center.z;
-
-				if (bbox_center_axis < testSplit)
-				{
-					left = surrounding_box(left, mesh_temp_containers[i].bbox);
-					count_left += 1;
-				}
-				else
-				{
-					right = surrounding_box(right, mesh_temp_containers[i].bbox);
-					count_right += 1;
-				}
+				leaf->mesh_indices.push_back(meshes_info[i].index);
 			}
-			if (count_left < 1 || count_right < 1)
-			{
-				continue;
-			}
-			float lside1 = left.max.x - left.min.x;
-			float lside2 = left.max.y - left.min.y;
-			float lside3 = left.max.z - left.min.z;
-
-			float rside1 = right.max.x - right.min.x;
-			float rside2 = right.max.y - right.min.y;
-			float rside3 = right.max.z - right.min.z;
-
-			float lsurface_area = lside1 * lside2 + lside2 * lside3 + lside3 * lside1;
-			float rsurface_area = rside1 * rside2 + rside2 * rside3 + rside3 * rside1;
-
-			float total_cost = lsurface_area * count_left + rsurface_area * count_right;
-
-			if (total_cost < min_cost)
-			{
-				min_cost = total_cost;
-				best_split = testSplit;
-				is_better_split = true;
-				best_left_amount = count_left;
-				best_right_amount = count_right;
-			}
-		}
-		if (!is_better_split)
-		{
-			aabb temp(vec3(inf, inf, inf), vec3(-inf, -inf, -inf));
-			BVHLeaf_world *leaf = new BVHLeaf_world;
-			for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
-			{
-				temp = surrounding_box(temp, mesh_temp_containers[i].bbox);
-				leaf->mesh_indices.push_back(mesh_temp_containers[i].index);
-			}
-			leaf->bbox = temp;
 			return leaf;
 		}
-		else
-		{
-			std::vector<aabb_temp_world> left_objects;
-			left_objects.reserve(best_left_amount);
-			std::vector<aabb_temp_world> right_objects;
-			right_objects.reserve(best_right_amount);
-
-			for (size_t i = 0; i < mesh_temp_containers.size(); ++i)
-			{
-				float bbox_center_axis;
-				if (axis == 0)
-					bbox_center_axis = mesh_temp_containers[i].center.x;
-				else if (axis == 1)
-					bbox_center_axis = mesh_temp_containers[i].center.y;
-				else
-					bbox_center_axis = mesh_temp_containers[i].center.z;
-
-				if (bbox_center_axis < best_split)
-				{
-					left_objects.push_back(mesh_temp_containers[i]);
-				}
-				else
-				{
-					right_objects.push_back(mesh_temp_containers[i]);
-				}
-			}
-			BVHInner_world *inner = new BVHInner_world;
-			inner->bbox = bbox_temp;
-			inner->_left = recurse(left_objects);
-			inner->_right = recurse(right_objects);
-			return inner;
-		}
 	}
+	BVHInner_world* inner_node = new BVHInner_world;
+	inner_node->bbox = Bbox;
+	inner_node->_left = recurse(meshes_info, start, mid);
+	inner_node->_right = recurse(meshes_info, mid, end);
+	return inner_node;
 }
+
 unsigned int CountTriangles(BVHNode_world *root)
 {
 	if (!root->IsLeaf())
@@ -198,10 +191,10 @@ BVHNode_world* Scene::make_default_bvh()
 	{
 		aabb bbox = meshes[i].bounding_box;
 		vec3 center = (bbox.min + bbox.max) / 2.0f;
-		working_list.emplace_back(i, bbox, center);
+		working_list.emplace_back(i, bbox, center, meshes[i].BVH.cost);
 	}
 
-	BVHNode_world *root = recurse(working_list);
+	BVHNode_world *root = recurse(working_list, 0, working_list.size());
 
 	return root;
 

@@ -450,8 +450,59 @@ public:
 
 
 
-float correct_shading_normal(const vec3& wo, const vec3& wi, const Isect& intersection);
-float fresnel_dielectric_eta(float cos_theta, float eta);
+// used when tracing particles (importance)
+/*
+inline float correct_shading_normal(const vec3& wo, const vec3& wi, const Isect& intersection)
+{
+	return (fabs(dot(wo, intersection.shade_normal)) * fabs(dot(wi, intersection.geometric_normal))) /
+		(fabs(dot(wo, intersection.geometric_normal)) * fabs(dot(wi, intersection.shade_normal)));
+}*/
+
+inline float fresnel_dielectric_eta(float cos_theta, float etai_over_etat)
+{
+	/* compute fresnel reflectance without explicitly computing
+	 * the refracted direction */
+	float g = etai_over_etat * etai_over_etat - 1.0f + cos_theta * cos_theta;
+	float result;
+
+	if (g > 0.0f) {
+		g = sqrt(g);
+		float A = (g - cos_theta) / (g + cos_theta);
+		float B = (cos_theta * (g + cos_theta) - 1.0f) / (cos_theta * (g - cos_theta) + 1.0f);
+		result = 0.5f * A * A * (1.0f + B * B);
+	}
+	else
+		result = 1.0f; /* TIR (no refracted component) */
+
+	return result;
+}
+
+inline float fresnel_dielectric_reflectance(float cos_theta, float reflectance)
+{
+	/* compute fresnel reflectance without explicitly computing
+	 * the refracted direction */
+	if (reflectance >= 1.0f)
+		return 1.0f;
+	float n = (1.0f + sqrt(reflectance)) / (1.0f - sqrt(reflectance));
+	float g = n * n - 1 + cos_theta * cos_theta;
+
+	if (g > 0.0f) {
+		g = sqrt(g);
+		float A = (g - cos_theta) / (g + cos_theta);
+		float B = (cos_theta * (g + cos_theta) - 1.0f) / (cos_theta * (g - cos_theta) + 1.0f);
+		return 0.5f * A * A * (1.0f + B * B);
+	}
+	else
+		return 1.0f; /* TIR (no refracted component) */
+
+}
+
+
+inline vec3 convert_from_spherical_coordinates(float theta, float phi)
+{
+	float sin_theta = sin(theta);
+	return vec3(sin_theta * cos(phi), sin_theta * sin(phi), cos(theta));
+}
 
 #endif // !BXDF_H
 

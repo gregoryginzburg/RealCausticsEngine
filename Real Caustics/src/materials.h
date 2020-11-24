@@ -7,6 +7,17 @@
 #include <cmath>
 
 
+enum MaterialType
+{
+	SpecularReflection,
+	SpecularTransmission,
+	FresnelSpecular,
+	LambertianReflection,
+	MicrofacetReflectionGGX,
+	FresnelMicrofacetGGX,
+	FresnelSpecularMicrofacetGGX,
+};
+
 class Python_Material
 {
 public:
@@ -17,22 +28,22 @@ public:
 	float roughness;
 	float specular;
 	colorf color;
+
 };
 
-/*
-switch (type)
+
+struct MaterialInfo
 {
-case DIFFUSE:
-	brdf = new Lambertian_Reflection(color);
-	break;
-case GLOSSY_SHARP:
-	brdf = new Specular_Reflection(color);
-	break;
-case TRANSMISSION_SHARP:
-	brdf = new Fresnel_Specular(color, ior);
-	break;
-}
-*/
+	MaterialInfo(const vec3& c, float i, float s, float r, MaterialType t) : color(c), ior(i), specular(s), roughness(r), type(t) {}
+
+	vec3 color;
+	float ior;
+	float specular;
+	float roughness;
+
+	MaterialType type;
+};
+
 class Isect;
 
 class Material
@@ -41,6 +52,8 @@ public:
 	Material() {}
 public:
 	virtual void compute_scattering_functions(BxDF** brdf, const Isect& intersection, TransportMode mode) = 0;
+
+	virtual MaterialInfo MaterialProperties() const = 0;
 };
 
 class Plastic_Material : public Material
@@ -60,6 +73,14 @@ public:
 		}
 
 		//*brdf = new Lambertian_Reflection(R, intersection, mode);
+	}
+
+	virtual MaterialInfo MaterialProperties() const
+	{
+		if (roughness < 0.01f)
+			return MaterialInfo(R, -1, specular, -1, MaterialType::FresnelSpecularMicrofacetGGX);
+		else
+			return MaterialInfo(R, -1, specular, roughness, MaterialType::FresnelMicrofacetGGX);
 	}
 
 public:
@@ -83,6 +104,11 @@ public:
 		*brdf = new Fresnel_Specular(T, ior, intersection, mode);
 	}
 
+	virtual MaterialInfo MaterialProperties() const
+	{
+		return MaterialInfo(T, ior, -1, -1, MaterialType::FresnelSpecular);
+	}
+
 public:
 	vec3 T;
 	float ior;
@@ -104,6 +130,14 @@ public:
 		{
 			*brdf = new Microfacet_Reflection_GGX(R, roughness, intersection, mode);
 		}
+	}
+
+	virtual MaterialInfo MaterialProperties() const
+	{
+		if (roughness < 0.01f)
+			return MaterialInfo(R, -1, -1, -1, MaterialType::SpecularReflection);
+		else
+			return MaterialInfo(R, -1, -1, roughness, MaterialType::MicrofacetReflectionGGX);
 	}
 
 public:

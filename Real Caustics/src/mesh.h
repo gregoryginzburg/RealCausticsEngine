@@ -44,6 +44,7 @@ public:
 	Triangle *triangles;
 
 	BVH_mesh BVH;
+
 	aabb bounding_box;
 	Transform WorldTransformation;
 
