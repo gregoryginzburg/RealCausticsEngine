@@ -4,6 +4,7 @@
 #define DLLEXPORT extern "C" __declspec(dllexport)
 struct Debug_stuff;
 
+
 #ifdef  __cplusplus
 extern "C"
 {
