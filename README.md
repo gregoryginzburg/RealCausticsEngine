@@ -4,7 +4,7 @@
 Real Caustics Engine – это рендеринговый движок, специализирующийся на рендеринге исключительно каустики (caustics) с использованием слияния вершин (Vertex Merging). Он разработан для интеграции с Blender с помощью [плагина](https://github.com/gregoryginzburg/BlenderRealCaustics).
 
 # Пример работы
-![alt text](1)
+![alt text](https://github.com/gregoryginzburg/RealCausticsEngine/blob/Vertex_Merging/examples/example.png)
 
 
 ## Возможности
